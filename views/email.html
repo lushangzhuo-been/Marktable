@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Document</title>
+</head>
+<body class="body" style="margin: 0">
+<div
+        style="
+                display: flex;
+                justify-content: center;
+                width: 100%;
+                background-color: #fafafb;
+                height: 100%;
+                padding: 60px;
+            "
+>
+    <div>
+        <div
+                class="project-title"
+                style="
+                        font-family: DingTalk JinBuTi-Regular;
+                        font-size: 40px;
+                        line-height: 40px;
+                        display: flex;
+                        justify-content: center;
+                        margin-bottom: 34px;
+                    "
+        >
+            <img
+                    class="logo"
+                    style="width: 40px; height: 40px; margin-right: 10px"
+                    src="{{.LogoURL}}"
+            />
+            <div>项目管理</div>
+        </div>
+        <div
+                style="
+                        width: 580px;
+                        height: 340px;
+                        background: #ffffff;
+                        box-shadow: 0px 0px 16px 1px rgba(0, 0, 0, 0.1);
+                        border-radius: 8px 8px 8px 8px;
+                        border: 1px solid #e6e9f0;
+                        color: #171e31;
+                    "
+        >
+            <!-- 信息描述 -->
+
+            <div
+                    style="
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            margin: 24px;
+                        "
+            >
+                <!-- 头像 -->
+                <img
+                        style="
+                                display: inline-block;
+                                width: 52px;
+                                height: 52px;
+                                border-radius: 50%;
+                                margin-right: 20px;
+                            "
+                        src="{{.AvatarURL}}"
+                />
+                <!-- 名字 -->
+                <div>{{.Creator}}</div>
+                <!-- 描述 -->
+                <div>给您指派了任务</div>
+            </div>
+            <!-- 任务路径-标题-处理人 -->
+            <div
+                    style="
+                            height: 170px;
+                            background: #fafafb;
+                            border-radius: 0px 0px 0px 0px;
+                            text-align: center;
+                            padding: 0 20px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                        "
+            >
+                <div
+                        class="route"
+                        style="
+                                font-size: 14px;
+                                color: #66677c;
+                                line-height: 36px;
+                            "
+                >
+                    {{.WsName}} > {{.TmplName}}
+                </div>
+                <div
+                        class="title"
+                        style="
+                                font-weight: 500;
+                                font-size: 16px;
+                                color: #171e31;
+                                line-height: 64px;
+                                overflow: hidden;
+                                white-space: nowrap;
+                                text-overflow: ellipsis;
+                            "
+                >
+                    {{.Title}}
+                </div>
+            </div>
+            <!-- 跳转按钮 -->
+            <div
+                    style="
+                            height: 72px;
+                            line-height: 72px;
+                            text-align: center;
+                        "
+            >
+                <a
+                        style="
+                                display: inline-block;
+                                width: 88px;
+                                color: #ffffff;
+                                font-weight: 500;
+                                font-size: 14px;
+                                text-decoration: none;
+                            "
+                        href=" "
+                >
+                    <div
+                            id="jumpBtn"
+                            ref="jumpBtn"
+                            style="
+                                    height: 32px;
+                                    text-align: center;
+                                    background-color: #1890ff;
+                                    border-radius: 4px 4px 4px 4px;
+                                    cursor: pointer;
+                                    line-height: 32px;
+                                "
+                            onmouseenter="btnEnter()"
+                            onmouseleave="btnLeave()"
+                    >
+                        查看任务
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    function btnEnter() {
+        let btn = document.getElementById("jumpBtn");
+        btn.style.opacity = 0.9;
+    }
+
+    function btnLeave() {
+        let btn = document.getElementById("jumpBtn");
+        btn.style.opacity = 1;
+    }
+</script>
