@@ -1,0 +1,144 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    networks:
+      - app-network
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=mydb
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - app-network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:6.0
+    networks:
+      - app-network
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    hostname: rabbitmq
+    networks:
+      - app-network
+    ports:
+      - "5672:5672"   # AMQP协议端口
+      - "15672:15672" # 管理界面端口
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+
+  mailhog:
+    image: mailhog/mailhog
+    networks:
+      - app-network
+    ports:
+      - "1025:1025"  # SMTP端口
+      - "8025:8025"  # Web界面端口
+
+  marktable:
+    build:
+      context: ./mark3_server
+      dockerfile: Dockerfile
+    image: lushangzhuo/marktable:v1
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"    # 仅对前端容器暴露8080端口
+    volumes:
+      - ./documents:/app/documents  # 挂载文档目录
+    depends_on:
+      - mysql
+      - redis
+      - mongodb
+      - rabbitmq
+      - mailhog
+    networks:
+      - app-network
+    environment:
+      - APP_ENV=dev
+      - APP_NAME=dashboard
+      - APP_PORT=8000
+      - APP_HOST=0.0.0.0
+      - JWT_SECRET_KEY=hello musk
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRED=60
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=secret
+      - DB_DATABASE=mydb
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+      - MONGO_URI=mongodb://mongodb:27017
+      - MONGO_HOST=mongodb://mongodb
+      - MONGO_PORT=27017
+      - MONGO_USER=
+      - MONGO_PASSWORD=
+      - MONGO_DATABASE=myappdb
+      - MONGO_DB=myappdb
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - RABBITMQ_QUEUE=my_queue
+      - SMTP_HOST=smtp.qq.com
+      - SMTP_PORT=1025
+      - SMTP_USERNAME=fudemolusz@qq.com
+      - SMTP_PASSWORD=akcexppenobudffh
+      - SMTP_FROM=fudemolusz@qq.com
+      - SMTP_FROM_NAME="MarkTable"
+      - LIBREOFFICE_PATH=/usr/bin/libreoffice
+      - TEMP_DIR=/tmp
+    restart: unless-stopped
+
+  mark3_client:
+    build:
+      context: ./mark3_client
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=out
+    image: lushangzhuo/mark3_client:v1
+    networks:
+      - app-network
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=out
+      - VUE_APP_MARKTABLE_API_URL=http://marktable:8080/ # 添加环境变量
+    depends_on:
+      - dashboard
+      - marktable
+
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  mongo_data:
+  rabbitmq_data:
