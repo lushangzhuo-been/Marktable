@@ -11,7 +11,7 @@ http://47.109.66.52/#/login
 
 
 # MarkTable Docker化部署
-
+    
     1. 概述
     本文档描述如何使用 Docker Compose 部署 MarkTable 的完整环境。
        所有服务在容器化，通过 docker-compose.yml 一键部署。
@@ -24,6 +24,7 @@ http://47.109.66.52/#/login
       - 磁盘: 根据数据需求预留空间
 
     3. 部署步骤
+        3.0 前端代码地址 https://github.com/lushangzhuo-been/mark3_client
         3.1 将docker-compose.yml文件copy出项目
         3.2 启动服务 docker-compose up -d
         3.3 验证部署 docker-compose ps
