@@ -1,0 +1,110 @@
+.column-block {
+    box-sizing: border-box;
+    height: 32px;
+    line-height: 32px;
+    border: 1px solid rgba(0, 0, 0, 0);
+    border-radius: 4px;
+    position: relative;
+    &.input-area {
+        height: fit-content;
+        min-height: 32px;
+    }
+    &.select-single {
+        width: 148px;
+        &.empty {
+            width: 100%;
+        }
+    }
+    &.form-width {
+        width: 60%;
+        min-width: 220px;
+    }
+    &:before {
+        transition-duration: 0.3s;
+        content: "";
+        display: block;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 0px;
+        height: 0px;
+        background: linear-gradient(42deg, #cdd5e6 30%, rgba(0, 0, 0, 0) 40%);
+    }
+    &.editing-effect {
+        &:hover {
+            &:before {
+                transition-duration: 0.3s;
+                content: "";
+                display: block;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 12px;
+                height: 12px;
+                background: linear-gradient(
+                    42deg,
+                    #cdd5e6 30%,
+                    rgba(0, 0, 0, 0) 40%
+                );
+            }
+            &.col-required {
+                &:before {
+                    transition-duration: 0.3s;
+                    content: "";
+                    display: block;
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    width: 0px;
+                    height: 0px;
+                    background: linear-gradient(
+                        42deg,
+                        #fd5050 30%,
+                        rgba(0, 0, 0, 0) 40%
+                    );
+                    z-index: 10;
+                }
+            }
+        }
+        &.isEditing {
+            border: 1px solid var(--PRIMARY_COLOR) !important;
+            &:before {
+                transition-duration: 0.3s;
+                content: "";
+                display: block;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 12px;
+                height: 12px;
+                background: linear-gradient(
+                    42deg,
+                    #cdd5e6 30%,
+                    rgba(0, 0, 0, 0) 40%
+                );
+            }
+            &.col-required {
+                &:before {
+                    transition-duration: 0.3s;
+                    content: "";
+                    display: block;
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    width: 0px;
+                    height: 0px;
+                    background: linear-gradient(
+                        42deg,
+                        #fd5050 30%,
+                        rgba(0, 0, 0, 0) 40%
+                    );
+                    z-index: 10;
+                }
+            }
+        }
+    }
+}
+.list-content {
+    max-height: 200px;
+    overflow-y: auto;
+}

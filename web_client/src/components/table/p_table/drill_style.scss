@@ -1,0 +1,165 @@
+// 直接挂载在body下样式 影响全局
+.el-popper.progress-popover {
+    box-sizing: border-box;
+    margin-top: 4px;
+    padding: 0;
+    &.padding12 {
+        padding: 12px;
+    }
+    &[x-placement^="top"] {
+        margin-bottom: 4px;
+    }
+    &[x-placement^="bottom"] {
+        margin-top: 4px;
+    }
+    .popover-content {
+        .list {
+            .list-item {
+                height: 40px;
+                line-height: 40px;
+            }
+        }
+    }
+    .popper__arrow {
+        display: none;
+    }
+}
+
+.progress-date-picker-popover.el-popper {
+    margin-top: 4px;
+    &[x-placement^="top"] {
+        margin-bottom: 4px;
+    }
+    &[x-placement^="bottom"] {
+        margin-top: 4px;
+    }
+    .popper__arrow {
+        display: none;
+    }
+}
+
+.el-popover.rich-text-popover {
+    padding: 1px;
+}
+
+// 单选
+.el-radio.progress-radio {
+    height: 40px;
+    line-height: 40px;
+    &.is-checked {
+        .el-radio__label {
+            color: #606266;
+        }
+    }
+    .el-radio__label {
+        padding-left: 0px;
+        line-height: 40px;
+        width: calc(100% - 20px);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    .el-radio__input {
+        line-height: 40px;
+    }
+}
+// 多选
+.el-checkbox.progress-checkbox {
+    height: 40px;
+    line-height: 40px;
+    &.is-checked {
+        .el-checkbox__label {
+            color: #606266;
+        }
+    }
+    .el-checkbox__label {
+        padding-left: 0px;
+        line-height: 40px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    .el-checkbox__input {
+        line-height: 40px;
+    }
+}
+
+// 单人列
+.single-people-list {
+    padding: 8px 0;
+    .single-people-list-item {
+        padding: 0 12px;
+        &:hover {
+            background-color: #f1f9ff;
+        }
+        .el-radio-group {
+            width: 100%;
+
+            .el-radio {
+                width: 100%;
+                display: flex;
+                flex-direction: row-reverse;
+                justify-content: space-between;
+
+                .el-radio__label {
+                }
+
+                .el-radio__input {
+                    .el-radio__inner {
+                        margin-top: 5px;
+                    }
+                }
+            }
+        }
+    }
+}
+// 多人列
+.multiple-people-list {
+    padding: 8px 0;
+    .multiple-people-list-item {
+        padding: 0 12px;
+        &:hover {
+            background-color: #f1f9ff;
+        }
+        .el-checkbox {
+            width: 100%;
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: space-between;
+
+            .el-checkbox__input {
+                .el-checkbox__inner {
+                    margin-top: 5px;
+                }
+            }
+        }
+    }
+}
+// 输入框
+// #F0F1F5
+.search-input {
+    border-bottom: 1px solid #f0f1f5;
+    padding-bottom: 4px;
+    .basic-ui.progress-search-input {
+        .el-input__inner {
+            border: 1px solid rgba(0, 0, 0, 0);
+            &:focus {
+                border: 1px solid rgba(0, 0, 0, 0);
+            }
+        }
+    }
+}
+.list-no-data {
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    font-weight: 400;
+    font-size: 14px;
+    color: #a6abbc;
+}
+.progress-avatar.el-avatar {
+    width: 20px;
+    height: 20px;
+    line-height: 1;
+    vertical-align: middle;
+}

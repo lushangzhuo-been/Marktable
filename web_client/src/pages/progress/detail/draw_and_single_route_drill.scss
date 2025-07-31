@@ -1,0 +1,109 @@
+@import "@/components/table/p_table/drill_style.scss";
+.progress-detail-drawer.el-drawer {
+    overflow: visible;
+    min-width: 1000px;
+    .el-drawer__header {
+        margin-bottom: 0px;
+        position: relative;
+        .el-drawer__close-btn {
+            position: absolute;
+            top: 20px;
+            left: -40px;
+            .el-icon {
+                &::before {
+                    color: #ffffff;
+                }
+            }
+        }
+    }
+    .el-drawer__body {
+        padding: 0 8px 0px 24px;
+    }
+}
+.detail-tabs {
+    .el-tabs__nav-wrap::after {
+        height: 1px;
+    }
+    &.progress {
+        .el-tabs__nav-wrap::after {
+            height: 0px;
+        }
+        .el-tabs__item.is-top:nth-child(2) {
+            padding-left: 16px;
+        }
+    }
+}
+// popover下拉框
+.el-popover.col-multi-select-popover {
+    padding: 4px 0;
+    .progress-input.el-input {
+        .el-input__inner {
+            padding: 0 16px 0 32px;
+            border-radius: 0;
+            border: none;
+            border-bottom: 1px solid #f0f1f5;
+            height: 38px;
+            line-height: 38px;
+            background-color: rgba(0, 0, 0, 0);
+        }
+    }
+    .selected-popover {
+        padding: 8px 8px 2px;
+        .selected-item {
+            font-size: 12px;
+            display: inline-block;
+            padding: 0 4px;
+            border-radius: 3px;
+            box-sizing: border-box;
+            max-width: 100%;
+            background-color: rgb(245, 246, 248);
+            border: 1px solid rgb(205, 213, 230);
+            line-height: 1;
+            margin: 0px 4px 3px 0px;
+        }
+        .value {
+            display: inline-block;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            width: calc(100% - 18px);
+            height: 18px;
+            line-height: 21px;
+            position: relative;
+            top: -1px;
+        }
+        .el-icon-error {
+            position: relative;
+            top: -4px;
+            margin-left: 6px;
+            cursor: pointer;
+            color: #cdd5e6;
+        }
+    }
+
+    .options-box {
+        margin: 8px 0 4px 8px;
+        padding-right: 8px;
+        max-height: 210px;
+        overflow-y: auto;
+        .drapdown-item {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0 10px;
+            line-height: 32px;
+            height: 32px;
+            text-align: center;
+            border-radius: 4px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            cursor: pointer;
+            margin-bottom: 4px;
+        }
+    }
+    .no-data-text {
+        padding: 24px 0;
+        text-align: center;
+        color: #909399;
+    }
+}

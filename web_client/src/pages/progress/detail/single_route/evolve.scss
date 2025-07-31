@@ -1,0 +1,64 @@
+.page-head {
+    padding: 0 24px;
+    background-color: #fff;
+    &.single-detail {
+        box-sizing: border-box;
+        height: 158px;
+        border-bottom: 1px solid #e6e9f0;
+        padding: 20px 24px;
+    }
+}
+// 详情-单路由，进展左右布局的样式
+.page-body {
+    background-color: #fff;
+    margin: 0 auto;
+    display: flex;
+    border-top: 1px solid #e6e9f0;
+    // 减 头 padding
+    // height: calc(100vh - 112px);
+    height: calc(100vh - 156px);
+    // height: calc(100vh - 121px);
+    &.single-detail {
+        width: 70%;
+        // min-width: 1000px;
+        height: calc(100% - 158px);
+        border-top: none;
+        .body-left {
+            // padding-top: 0;
+            padding: 6px 0 0 24px;
+        }
+    }
+    .body-left {
+        width: 60%;
+        padding-top: 6px;
+        border-right: 1px solid #e6e9f0;
+        .block-content {
+            padding-right: 16px;
+            height: calc(100% - 54px);
+            overflow-y: auto;
+        }
+    }
+    .body-right {
+        width: 40%;
+        padding-top: 6px;
+        // overflow-y: auto;
+        .evolve-title {
+            padding: 0 16px;
+            // 吸顶
+            height: 40px;
+            line-height: 40px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #171e31;
+        }
+        .evolve-content {
+            padding: 4px 0px 20px;
+            // height: calc(100% - 64px);
+            height: calc(100% - 78px);
+            overflow: auto;
+        }
+        .log-content {
+            padding: 4px 16px 20px;
+        }
+    }
+}

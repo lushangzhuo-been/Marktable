@@ -1,0 +1,70 @@
+.column-block {
+    box-sizing: border-box;
+    height: 32px;
+    line-height: 32px;
+    border: none;
+    position: relative;
+    width: 160px;
+    .detail {
+        box-sizing: border-box;
+        white-space: nowrap;
+        border: 1px solid #dcdfe6;
+        padding: 0 10px;
+        height: 32px;
+        border-radius: 4px;
+        background-color: #fff;
+    }
+    // &:hover {
+    .triangle {
+        transform: rotate(0deg);
+        transition-duration: 0.3s;
+        position: absolute;
+        right: 5px;
+        top: 8px;
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background-size: 100% 100%;
+        background-image: url("~@/assets/image/common/triangle-down.png");
+    }
+    .time-box {
+        position: absolute;
+        right: 5px;
+        top: 9px;
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background-size: 100% 100%;
+        background-image: url("~@/assets/image/common/time.svg");
+    }
+    // }
+    &.isEditing {
+        .detail {
+            border: 1px solid var(--PRIMARY_COLOR);
+        }
+        .triangle {
+            transform: rotate(180deg);
+            transition-duration: 0.3s;
+            position: absolute;
+            right: 5px;
+            top: 8px;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-size: 100% 100%;
+            background-image: url("~@/assets/image/common/triangle-down-active.png");
+        }
+    }
+    .validate-desc {
+        color: #f56c6c;
+        font-size: 12px;
+        height: 12px;
+        line-height: 12px;
+        position: absolute;
+        bottom: -16px;
+    }
+}
+.list-content {
+    max-height: 200px;
+    overflow-y: auto;
+}

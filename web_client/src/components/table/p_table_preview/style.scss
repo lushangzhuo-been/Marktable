@@ -1,0 +1,179 @@
+::v-deep.el-table.progress-table {
+    th.el-table__cell {
+        background-color: #f5f6f8;
+    }
+    .el-table__cell {
+        padding: 0;
+        // 定37 实际为38
+        height: 37px;
+        line-height: 37px;
+    }
+}
+.type-box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-size: 100% 100%;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+}
+.tip-box {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background-image: url(@/assets/image/common/tip.png);
+    background-size: 100% 100%;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+    &:hover {
+        background-image: url(@/assets/image/common/tip.png);
+    }
+    &.num-column {
+        margin-left: 4px;
+    }
+}
+// 公共样式
+.column-block {
+    &:hover {
+        background-color: #e9f0f8;
+        .triangle {
+            transform: rotate(0deg);
+            transition-duration: 0.3s;
+            position: absolute;
+            right: 5px;
+            top: 13px;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-size: 100% 100%;
+            background-image: url("~@/assets/image/common/triangle-down.png");
+        }
+        .time-box {
+            position: absolute;
+            right: 5px;
+            top: 13px;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-size: 100% 100%;
+            background-image: url("~@/assets/image/common/time.svg");
+        }
+    }
+    &.editing-effect {
+        // 1.伪类
+        &:before {
+            transition-duration: 0.3s;
+            content: "";
+            display: block;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 0px;
+            height: 0px;
+            background: linear-gradient(
+                42deg,
+                #cdd5e6 30%,
+                rgba(0, 0, 0, 0) 40%
+            );
+        }
+        &.col-required {
+            &:before {
+                transition-duration: 0.3s;
+                content: "";
+                display: block;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 0px;
+                height: 0px;
+                background: linear-gradient(
+                    42deg,
+                    #fd5050 30%,
+                    rgba(0, 0, 0, 0) 40%
+                );
+            }
+        }
+        // 悬浮
+        &:hover {
+            &:before {
+                transition-duration: 0.3s;
+                content: "";
+                display: block;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 12px;
+                height: 12px;
+                background: linear-gradient(
+                    42deg,
+                    #cdd5e6 30%,
+                    rgba(0, 0, 0, 0) 40%
+                );
+            }
+        }
+        &.col-required {
+            &:hover {
+                &:before {
+                    transition-duration: 0.3s;
+                    content: "";
+                    display: block;
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    width: 12px;
+                    height: 12px;
+                    background: linear-gradient(
+                        42deg,
+                        #fd5050 30%,
+                        rgba(0, 0, 0, 0) 40%
+                    );
+                }
+            }
+        }
+        // 编辑中
+        &.isEditing {
+            border: 1px solid var(--PRIMARY_COLOR);
+            &:before {
+                transition-duration: 0.3s;
+                content: "";
+                display: block;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 12px;
+                height: 12px;
+                background: linear-gradient(
+                    42deg,
+                    #cdd5e6 30%,
+                    rgba(0, 0, 0, 0) 40%
+                );
+            }
+            &.col-required {
+                &:before {
+                    transition-duration: 0.3s;
+                    content: "";
+                    display: block;
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    width: 12px;
+                    height: 12px;
+                    background: linear-gradient(
+                        42deg,
+                        #fd5050 30%,
+                        rgba(0, 0, 0, 0) 40%
+                    );
+                }
+            }
+        }
+    }
+}
+.select-single {
+    .column-block {
+        &:hover {
+            background-color: rgba(0, 0, 0, 0);
+        }
+    }
+}

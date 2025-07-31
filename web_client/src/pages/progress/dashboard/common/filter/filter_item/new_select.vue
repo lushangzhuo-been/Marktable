@@ -1,0 +1,197 @@
+<template>
+    <div
+        class="column-block select-single"
+        ref="column-block"
+        :class="{
+            isEditing: isEditing,
+            empty: !frontArr.length
+        }"
+    >
+        <el-popover
+            ref="status-popover"
+            popper-class="progress-popover padding12"
+            placement="bottom"
+            :width="popoverWidth"
+            trigger="click"
+            @show="popoverShow"
+            @after-leave="afterLeave"
+        >
+            <div class="popover-content">
+                <div class="list">
+                    <div
+                        class="list-item"
+                        v-for="(listItem, listIndex) in option"
+                        :key="listIndex"
+                        @click="changStatus(listItem)"
+                    >
+                        {{ listItem.value }}
+                        <div
+                            class="status-background"
+                            :style="{
+                                backgroundColor: listItem.color,
+                                borderColor: listItem.color
+                            }"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+            <div slot="reference">
+                <div class="status-block" v-if="submitValue">
+                    <div v-overflow class="select-name">
+                        {{ submitValue }}
+                    </div>
+                </div>
+                <div class="status-block default-text" v-else>请选择</div>
+                <b class="triangle"></b>
+            </div>
+        </el-popover>
+    </div>
+</template>
+
+<script>
+import _ from "lodash";
+export default {
+    props: {
+        // value
+        // formItem: {
+        //     type: Object,
+        //     default: () => {},
+        // },
+        // formData: {
+        //     type: Object,
+        //     default: () => {},
+        // },
+        // validateOrder: {
+        //     type: Number,
+        //     default: 0,
+        // },
+        option: {
+            type: Array,
+            default: () => []
+        },
+        param: {
+            type: [Array, String],
+            default: () => []
+        }
+    },
+    data() {
+        return {
+            isEditing: false,
+            popoverWidth: 220,
+            frontArr: [],
+            submitArr: [],
+            selectArr: [],
+            submitValue: ""
+            // validateFailed: false,
+        };
+    },
+    watch: {
+        param: {
+            // 只有value 没有颜色
+            handler(value) {
+                // let selectArr = [];
+                // selectArr.push(value);
+                // this.selectArr = selectArr;
+                this.submitValue = value;
+            },
+            immediate: true
+        }
+    },
+    mounted() {},
+    methods: {
+        checkScope() {
+            this.isEditing = !this.isEditing;
+            this.popoverWidth = this.$refs["column-block"].clientWidth;
+            this.$nextTick(() => {
+                setTimeout(() => {
+                    this.$refs["status-popover"].doShow();
+                }, 20);
+            });
+        },
+        changStatus(listItem) {
+            this.submitValue = listItem.value;
+            this.$emit("input", this.submitValue);
+            this.$refs["status-popover"].doClose();
+        },
+        popoverShow() {
+            this.isEditing = true;
+            this.popoverWidth = this.$refs["column-block"].clientWidth;
+        },
+        afterLeave() {
+            this.isEditing = false;
+            // this.formData[this.formItem.field_key] = this.submitArr;
+            // this.doValidate();
+        },
+        getBorderColor(color) {
+            return {
+                "border-color": `rgba(${color},.2)`
+            };
+        },
+        getArrFront(arr) {
+            let deepClone = _.cloneDeep(arr);
+            let front = deepClone.splice(0, 1);
+            return front;
+        }
+    }
+};
+</script>
+
+<style lang="scss" scoped>
+@import "./style.scss";
+
+.status-block {
+    box-sizing: border-box;
+    position: relative;
+    padding: 0 20px 0 10px;
+    text-align: center;
+    height: 32px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    background-color: #fff;
+    .select-name {
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .status-background {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0.2;
+        border-radius: 4px;
+    }
+    &.default-text {
+        text-align: left;
+        color: #c0c4cc;
+    }
+}
+.list-item {
+    box-sizing: border-box;
+    position: relative;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 10px;
+    &:last-child {
+        margin-bottom: 0px;
+    }
+    &:hover {
+        opacity: 0.9;
+    }
+    .status-background {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0.2;
+        border-radius: 4px;
+    }
+}
+</style>

@@ -1,0 +1,86 @@
+.column-block {
+    box-sizing: border-box;
+    height: 32px;
+    line-height: 32px;
+    border: 1px solid rgba(0, 0, 0, 0);
+    padding: 0;
+    white-space: nowrap;
+    position: relative;
+    &.select-single {
+        // 单选列
+        width: 148px;
+        &.empty {
+            width: 100%;
+        }
+    }
+    .detail {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        height: 32px;
+        border: 1px solid #dcdfe6;
+        padding: 0 10px;
+        border-radius: 4px;
+        box-sizing: border-box;
+        &.validate-failed {
+            border: 1px solid #fd5050;
+        }
+    }
+    .validate-desc {
+        color: #f56c6c;
+        font-size: 12px;
+        height: 12px;
+        line-height: 12px;
+        position: absolute;
+        bottom: -16px;
+    }
+    .time-box {
+        position: absolute;
+        right: 5px;
+        top: 9px;
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background-size: 100% 100%;
+        background-image: url("~@/assets/image/common/time.svg");
+    }
+    .triangle {
+        transform: rotate(0deg);
+        transition-duration: 0.3s;
+        position: absolute;
+        right: 5px;
+        top: 8px;
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background-size: 100% 100%;
+        background-image: url("~@/assets/image/common/triangle-down.png");
+    }
+    &.isEditing {
+        .detail {
+            border: 1px solid var(--PRIMARY_COLOR);
+            &.validate-failed {
+                border: 1px solid #fd5050;
+            }
+        }
+        .triangle {
+            transform: rotate(180deg);
+            transition-duration: 0.3s;
+            position: absolute;
+            right: 5px;
+            top: 8px;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-size: 100% 100%;
+            background-image: url("~@/assets/image/common/triangle-down-active.png");
+        }
+    }
+}
+.list-content {
+    max-height: 200px;
+    overflow-y: auto;
+}
+.default-text {
+    color: #c0c4cc;
+}

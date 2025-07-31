@@ -1,0 +1,18 @@
+.operation-box {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background-size: 100% 100%;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+    &.add {
+        background-image: url(@/assets/image/progress/add.png);
+    }
+    &.clear {
+        background-image: url(@/assets/image/common/delete.svg);
+    }
+    &.save {
+        background-image: url(@/assets/image/progress/save.svg);
+    }
+}

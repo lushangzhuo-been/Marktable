@@ -58,11 +58,10 @@ services:
       - "1025:1025"  # SMTP端口
       - "8025:8025"  # Web界面端口
 
-  marktable:
+  markTableServer:
     build:
-      context: ./mark3_server
+      context: ./server
       dockerfile: Dockerfile
-    image: lushangzhuo/marktable:v1
     ports:
       - "8080:8080"
     expose:
@@ -113,13 +112,12 @@ services:
       - TEMP_DIR=/tmp
     restart: unless-stopped
 
-  mark3_client:
+  markTableClient:
     build:
-      context: ./mark3_client
+      context: ./web_client
       dockerfile: Dockerfile
       args:
         - NODE_ENV=out
-    image: lushangzhuo/mark3_client:v1
     networks:
       - app-network
     ports:

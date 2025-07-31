@@ -1,0 +1,278 @@
+@import "@/components/table/p_table/style.scss";
+.title-slot {
+    width: 100%;
+    height: 120px;
+    padding-bottom: 16px;
+}
+.drawer-title {
+    margin-bottom: 12px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    height: 34px;
+    line-height: 34px;
+    font-weight: 500;
+    font-size: 20px;
+    color: #171e31;
+    .left {
+        flex: 1;
+        padding-right: 120px;
+        overflow: hidden;
+        display: flex;
+    }
+    .right {
+        white-space: nowrap;
+    }
+}
+.head-btn {
+    vertical-align: top;
+}
+.share-block {
+    display: inline-block;
+    height: 32px;
+    border-left: 1px solid #e6e9f0;
+    padding: 0 12px;
+    margin-left: 16px;
+}
+.share-box {
+    cursor: pointer;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-size: 100% 100%;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+    background-image: url(@/assets/image/progress_column/copy.svg);
+    background-size: 100% 100%;
+    // &:hover {
+    //     background-image: url("~@/assets/image/common/share-active.svg");
+    // }
+}
+.delete-box {
+    cursor: pointer;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-size: 100% 100%;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+    background-image: url("~@/assets/image/common/delete.svg");
+    background-size: 100% 100%;
+}
+.basic-ui {
+    .urging {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background-size: 100% 100%;
+        vertical-align: middle;
+        position: relative;
+        top: -2px;
+        background-image: url("~@/assets/image/progress_detail/urging.png");
+        background-size: 100% 100%;
+    }
+    &:hover {
+        .urging {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-size: 100% 100%;
+            vertical-align: middle;
+            position: relative;
+            top: -2px;
+            background-image: url("~@/assets/image/progress_detail/urging-hover.png");
+            background-size: 100% 100%;
+        }
+    }
+    &:focus {
+        .urging {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-size: 100% 100%;
+            vertical-align: middle;
+            position: relative;
+            top: -2px;
+            background-image: url("~@/assets/image/progress_detail/urging-hover.png");
+            background-size: 100% 100%;
+        }
+    }
+    &.back-btn {
+        margin-right: 8px;
+        .back-box {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-size: 100% 100%;
+            vertical-align: middle;
+            position: relative;
+            top: -2px;
+            background-image: url("~@/assets/image/common/back.svg");
+            background-size: 100% 100%;
+        }
+        &:hover {
+            .back-box {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                background-size: 100% 100%;
+                vertical-align: middle;
+                position: relative;
+                top: -2px;
+                background-image: url("~@/assets/image/common/back-active.svg");
+                background-size: 100% 100%;
+            }
+        }
+        &:focus {
+            .back-box {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                background-size: 100% 100%;
+                vertical-align: middle;
+                position: relative;
+                top: -2px;
+                background-image: url("~@/assets/image/common/back-active.svg");
+                background-size: 100% 100%;
+            }
+        }
+    }
+}
+.back-box {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin: 4px 24px 4px 0;
+    background-size: 100% 100%;
+    vertical-align: middle;
+    background-image: url("~@/assets/image/common/back.svg");
+    background-size: 100% 100%;
+    cursor: pointer;
+    &:hover {
+        background-image: url("~@/assets/image/common/back-active.svg");
+    }
+}
+.mode-box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-size: 100% 100%;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+}
+.other-msg {
+    line-height: 32px;
+    font-size: 14px;
+    .row {
+        display: flex;
+        padding: 0 16px;
+        height: 32px;
+        align-items: center;
+        margin-top: 12px;
+        background-color: #f5f6f8;
+        border-radius: 6px;
+        &.first {
+            color: #171e31;
+        }
+    }
+}
+.msg-item {
+    white-space: nowrap;
+    margin-right: 32px;
+    height: 32px;
+    &.handler {
+        white-space: wrap;
+    }
+    &.creator {
+        max-width: 220px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    &.status-item {
+        display: flex;
+        align-items: center;
+    }
+    // .column-block {
+    //     border: 1px solid #e6e9f0;
+    // }
+    .msg-item-title {
+        color: #82889e;
+        display: inline-block;
+        height: 32px;
+        line-height: 32px;
+        vertical-align: top;
+    }
+    .msg-item-content {
+        color: #2a3048;
+    }
+}
+.handler-title {
+    display: inline-block;
+    height: 32px;
+    line-height: 32px;
+    vertical-align: top;
+    // color: #82889e;
+}
+.title-handler {
+    display: inline-block;
+    min-width: 160px !important;
+    max-width: 280px !important;
+    width: unset !important;
+}
+.progress-detail-form {
+    padding-left: 8px;
+    .form-item-label.required {
+        position: relative;
+        &::before {
+            content: "*";
+            color: #f56c6c;
+            position: absolute;
+            // top: -8px;
+            left: -8px;
+        }
+    }
+}
+
+// 抽屉详情下人的的宽度
+.detail-content-person {
+    min-width: 220px !important;
+    max-width: 60% !important;
+    width: unset !important;
+}
+::v-deep.title {
+    box-sizing: border-box;
+    flex: 1;
+    overflow: hidden;
+    .progress-input.el-input {
+        display: block;
+        width: 100%;
+        &.detail-title {
+            .el-input__inner {
+                padding: 0;
+            }
+        }
+        .el-input__inner {
+            width: 100%;
+            padding: 0 10px;
+            border: none;
+            height: 32px;
+            line-height: 32px;
+            background-color: rgba(0, 0, 0, 0);
+            font-weight: 400;
+            font-size: 20px;
+            color: #171e31;
+            font-family: MiSans, MiSans;
+        }
+    }
+}
+.draw-body {
+    position: relative;
+    .block-content {
+        position: absolute;
+        width: 100%;
+    }
+}
