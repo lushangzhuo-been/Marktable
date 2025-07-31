@@ -109,11 +109,6 @@ MarkTable 是一款高度灵活的项目管理平台，通过多维自定义配�
       - 内存: 至少 8GB
       - 磁盘: 根据数据需求预留空间
 
-**3. 部署步骤**:[README.en.md](README.en.md)
+**3. 部署步骤**:
   - 3.1 启动服务 docker-compose up -d
   - 3.2 验证部署 docker-compose ps
-    
-        
-        
-        
-        
