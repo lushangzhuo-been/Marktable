@@ -157,5 +157,11 @@ Marktable 是一款高度灵活的项目管理平台，通过多维自定义配�
 
 # License
 本仓库遵循 [Marktable Open Source License](LICENSE) 开源协议，该许可证本质上是 GNU AFFERO GENERAL PUBLIC LICENSE Version 3。
+主要义务:
+  - 分发软件时：必须提供源代码和许可证文本。
+
+  - 作为网络服务运行时：需向用户提供下载对应修改版源代码的途径。
+
+  - 修改代码后：衍生作品必须保持AGPLv3授权。
 
     
