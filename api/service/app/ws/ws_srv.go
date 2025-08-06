@@ -31,8 +31,8 @@ func (s *WsSrv) GetWsInfo(userid int, req wsTypes.WsInfoReq) (resp interface{}, 
 	global.GVA_DB.Raw(sql, req.WsId, enum.WsStatusOk).Scan(&memberList)
 
 	//获取用户权限
-	var isAdmin string = "no"
-	var isMember string = "no"
+	var isAdmin = "no"
+	var isMember = "no"
 	//获取空间管理员
 	var adminList []types.MemberVo
 	for _, member := range memberList {
