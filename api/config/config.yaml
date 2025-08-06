@@ -41,11 +41,9 @@ upload:
 smtp:
   host: "smtp.qq.com" # smtp的邮箱服务类型
   port: 465 # 邮箱端口
-  #username: "mark20240627@163.com" # 发送邮件的邮箱账户
-  #password: "ERUUqL7RH9Tqqphq" # 发送邮件的邮箱密码
-  username: "fudemolusz@qq.com" # 发送邮件的邮箱账户
-  password: "akcexppenobudffh" # 发送邮件的邮箱密码
-  from: "fudemolusz@qq.com" # 发件人邮箱
+  username: "" # 发送邮件的邮箱账户
+  password: "" # 发送邮件的邮箱密码
+  from: "" # 发件人邮箱
   isOpen: "yes" # 是否开通由服务触发发送
 
 rabbit:
