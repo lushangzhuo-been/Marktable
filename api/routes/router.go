@@ -2,7 +2,7 @@ package routes
 
 import (
 	"mark3/api/v1/app"
-	dashboard "mark3/api/v1/app/dashboard"
+	"mark3/api/v1/app/dashboard"
 	appTmpl "mark3/api/v1/app/tmpl"
 	ws2 "mark3/api/v1/app/ws"
 	"mark3/api/v1/message"

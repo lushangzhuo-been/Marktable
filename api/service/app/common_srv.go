@@ -167,7 +167,7 @@ func (s *CommonSrv) GetWsUserList(req types.CommonGetWsUserListReq, userid int) 
 
 	var users []UserInfo
 	db.Scan(&users)
-	var commonlyUsedListLen int = 0
+	var commonlyUsedListLen = 0
 	if commonlyUsedList != nil {
 		commonlyUsedListLen = len(commonlyUsedList)
 	}

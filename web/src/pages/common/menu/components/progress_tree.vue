@@ -729,7 +729,7 @@ export default {
                     if (item == id) {
                         // 判断当前节点是否存在， 存在不做处理
                         flag = true;
-                        return;
+
                     }
                 });
                 if (!flag) {

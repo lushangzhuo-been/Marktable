@@ -46,7 +46,7 @@ func (s *ViewSrv) GetUserViews(userid int, req types.GetUserViewsReq) (resp inte
 	}
 	sortViews = append(sortViews, views...)
 
-	var isPinSign string = "yes"
+	var isPinSign = "yes"
 	for _, v := range sortViews {
 		if v.Pin == "yes" {
 			isPinSign = "no"
