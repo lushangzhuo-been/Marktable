@@ -12,7 +12,7 @@ import (
 	//"strconv"
 )
 
-var cn *cron.Cron = cron.New(cron.WithSeconds())
+var cn = cron.New(cron.WithSeconds())
 var IsStarted = 0
 var CronMap map[string]CronItem
 
