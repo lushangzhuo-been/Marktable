@@ -11,4 +11,4 @@ other = "Hello, {{.Name}}"
 other = "Default process"
 
 [defaultWsName]
-other = "默认空间"
+other = "Default space"
