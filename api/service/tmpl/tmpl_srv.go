@@ -232,7 +232,7 @@ func (s *TmplSrv) Create(userid int, req types.TmplCreateReq) (resp interface{},
 		UpdatedUserId: userid,
 		Name:          req.Name,
 		Desc:          req.Desc,
-		Mode:          req.Mode,
+		Mode:          enum.TmplModePublic,
 		CreatedAt:     common.GetCurrentTime(),
 		UpdatedAt:     common.GetCurrentTime(),
 	}
@@ -374,36 +374,6 @@ func (s *TmplSrv) Create(userid int, req types.TmplCreateReq) (resp interface{},
 		return
 	}
 
-	//私有模板初始化角色、成员
-	if req.Mode == enum.TmplModePrivate {
-		var role = model.RoleModel{
-			WsId:      req.WsId,
-			TmplId:    tmpl.Id,
-			Name:      "管理员",
-			Desc:      "管理员",
-			Sign:      enum.RoleSignAdmin,
-			CreatedAt: common.GetCurrentTime(),
-			UpdatedAt: common.GetCurrentTime(),
-		}
-		if err = tx.Create(&role).Error; err != nil {
-			tx.Rollback()
-			global.GVA_LOG.Error(err.Error())
-			return nil, errors.New("操作失败")
-		}
-		if err = tx.Create(&model.MemberModel{
-			WsId:      req.WsId,
-			TmplId:    tmpl.Id,
-			Userid:    userid,
-			RoleId:    role.Id,
-			Status:    enum.TmplStatusOk,
-			CreatedAt: common.GetCurrentTime(),
-			UpdatedAt: common.GetCurrentTime(),
-		}).Error; err != nil {
-			tx.Rollback()
-			global.GVA_LOG.Error(err.Error())
-			return nil, errors.New("操作失败")
-		}
-	}
 	tx.Commit()
 	return
 }
@@ -415,47 +385,6 @@ func (s *TmplSrv) Update(userid int, req types.TmplUpdateReq) (resp interface{},
 	if err = tx.Where("id=? and ws_id=?", req.Id, req.WsId).First(&tmpl).Error; err != nil {
 		tx.Rollback()
 		return
-	}
-
-	if tmpl.Mode == enum.TmplModePublic && req.Mode == enum.TmplModePrivate {
-		var role = model.RoleModel{
-			WsId:      req.WsId,
-			TmplId:    tmpl.Id,
-			Name:      "管理员",
-			Desc:      "管理员",
-			Sign:      enum.RoleSignAdmin,
-			CreatedAt: common.GetCurrentTime(),
-			UpdatedAt: common.GetCurrentTime(),
-		}
-		if err = tx.Create(&role).Error; err != nil {
-			tx.Rollback()
-			global.GVA_LOG.Error(err.Error())
-			return nil, errors.New("操作失败")
-		}
-		if err = tx.Create(&model.MemberModel{
-			WsId:      req.WsId,
-			TmplId:    tmpl.Id,
-			Userid:    userid,
-			RoleId:    role.Id,
-			Status:    enum.TmplStatusOk,
-			CreatedAt: common.GetCurrentTime(),
-			UpdatedAt: common.GetCurrentTime(),
-		}).Error; err != nil {
-			tx.Rollback()
-			global.GVA_LOG.Error(err.Error())
-			return nil, errors.New("操作失败")
-		}
-	} else if tmpl.Mode == enum.TmplModePrivate && req.Mode == enum.TmplModePublic {
-		if err = tx.Where("ws_id=? and tmpl_id=?", req.WsId, req.Id).Delete(&model.RoleModel{}).Error; err != nil {
-			tx.Rollback()
-			global.GVA_LOG.Error(err.Error())
-			return nil, errors.New("操作失败")
-		}
-		if err = tx.Where("ws_id=? and tmpl_id=?", req.WsId, req.Id).Delete(&model.MemberModel{}).Error; err != nil {
-			tx.Rollback()
-			global.GVA_LOG.Error(err.Error())
-			return nil, errors.New("操作失败")
-		}
 	}
 
 	tmpl.Name = req.Name

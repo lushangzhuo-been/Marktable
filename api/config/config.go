@@ -56,7 +56,8 @@ type Mysql struct {
 }
 
 type Mongo struct {
-	MongoUrl string `yaml:"mongoUrl"`
+	MongoHost string `yaml:"mongoHost"`
+	MongoPort string `yaml:"mongoPort"`
 }
 
 type Redis struct {
