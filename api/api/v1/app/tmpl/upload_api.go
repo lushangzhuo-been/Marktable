@@ -40,13 +40,9 @@ func (a *UploadApi) UploadImageForHtml(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err = right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -67,13 +63,9 @@ func (a *UploadApi) GetFileList(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -106,10 +98,6 @@ func (a *UploadApi) UploadFile(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
 
 	l := new(tmpl.UploadSrv)
 	resp, err := l.UploadFile(userid.(int), req, file, userTmplRight)
@@ -131,10 +119,6 @@ func (a *UploadApi) DownloadFile(ctx *gin.Context) {
 	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -179,10 +163,7 @@ func (a *UploadApi) DeleteFile(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
+
 	l := new(tmpl.UploadSrv)
 	resp, err := l.DeleteFile(userid.(int), req, userTmplRight)
 	if err != nil {
@@ -205,10 +186,7 @@ func (a *UploadApi) UpdateFileIsCurrentVersion(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
+
 	var needUpdateFileReq types.DownloadFile
 	needUpdateFileReq.Id = req.Id
 	needUpdateFileReq.WsId = req.WsId

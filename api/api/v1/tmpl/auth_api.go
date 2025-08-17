@@ -8,15 +8,14 @@ import (
 	types "mark3/types/tmpl"
 )
 
-type TmplSubConfigApi struct{}
+type AuthApi struct{}
 
-func (a *TmplSubConfigApi) TmplSubConfigCheck(ctx *gin.Context) {
-	var req types.TmplSubConfigCheckReq
+func (a *AuthApi) Config(ctx *gin.Context) {
+	var req types.AuthConfigReq
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-
 	userid, _ := ctx.Get("userid")
 	//判断是否为模板管理员
 	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
@@ -29,8 +28,8 @@ func (a *TmplSubConfigApi) TmplSubConfigCheck(ctx *gin.Context) {
 		return
 	}
 
-	l := new(srv.TmplSubConfigSrv)
-	resp, err := l.TmplSubConfigCheck(req)
+	l := new(srv.AuthSrv)
+	resp, err := l.Config()
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
@@ -38,8 +37,8 @@ func (a *TmplSubConfigApi) TmplSubConfigCheck(ctx *gin.Context) {
 	ctl.OkWithData(resp, ctx)
 }
 
-func (a *TmplSubConfigApi) TmplSubConfigList(ctx *gin.Context) {
-	var req types.TmplSubConfigListReq
+func (a *AuthApi) Update(ctx *gin.Context) {
+	var req types.AuthUpdateReq
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
@@ -57,67 +56,39 @@ func (a *TmplSubConfigApi) TmplSubConfigList(ctx *gin.Context) {
 		return
 	}
 
-	l := new(srv.TmplSubConfigSrv)
-	resp, err := l.TmplSubConfigList(req)
+	l := new(srv.AuthSrv)
+	_, err = l.Update(req)
+	if err != nil {
+		ctl.FailWithMessage(err.Error(), ctx)
+		return
+	}
+	ctl.Ok(ctx)
+}
+
+func (a *AuthApi) Detail(ctx *gin.Context) {
+	var req types.AuthDetailReq
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctl.FailWithMessage(err.Error(), ctx)
+		return
+	}
+
+	userid, _ := ctx.Get("userid")
+	//判断是否为模板管理员
+	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	if err != nil {
+		ctl.FailWithMessage(err.Error(), ctx)
+		return
+	}
+	if err := userTmplRight.CanManage(); err != nil {
+		ctl.UnPermission(err.Error(), ctx)
+		return
+	}
+
+	l := new(srv.AuthSrv)
+	resp, err := l.Detail(req)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
 	ctl.OkWithData(resp, ctx)
-}
-
-func (a *TmplSubConfigApi) TmplSubConfigCreate(ctx *gin.Context) {
-	var req types.TmplSubConfigCreateReq
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-
-	userid, _ := ctx.Get("userid")
-	//判断是否为模板管理员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
-	if err != nil {
-		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanManage(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
-
-	l := new(srv.TmplSubConfigSrv)
-	_, err = l.TmplSubConfigCreate(req)
-	if err != nil {
-		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	ctl.Ok(ctx)
-}
-
-func (a *TmplSubConfigApi) TmplSubConfigDelete(ctx *gin.Context) {
-	var req types.TmplSubConfigDeleteReq
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-
-	userid, _ := ctx.Get("userid")
-	//判断是否为模板管理员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
-	if err != nil {
-		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanManage(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
-
-	l := new(srv.TmplSubConfigSrv)
-	_, err = l.TmplSubConfigDelete(req)
-	if err != nil {
-		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	ctl.Ok(ctx)
 }

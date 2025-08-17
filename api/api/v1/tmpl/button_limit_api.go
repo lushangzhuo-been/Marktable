@@ -25,7 +25,7 @@ func (a *ButtonLimitApi) List(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -53,7 +53,7 @@ func (a *ButtonLimitApi) Info(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -81,7 +81,7 @@ func (a *ButtonLimitApi) Create(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -109,7 +109,7 @@ func (a *ButtonLimitApi) Update(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -137,7 +137,7 @@ func (a *ButtonLimitApi) Delete(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}

@@ -70,7 +70,7 @@ func InitMysql() *gorm.DB {
 		if userInit.Id == 0 {
 			db.Exec(
 				"INSERT INTO user(`username`, `password`, `full_name`, `email`, `phone`, `avatar`, `created_at`, " +
-					"`updated_at`) VALUES('MarkAdmin', '$2a$10$Sg8GNW.hRKIChSUI1SaHR.lZJwGz3Ij7zye4GaRuKkbQdsZAGtUWq', '平台管理员', '', '', '', '', '')",
+					"`updated_at`) VALUES('MarkAdmin', 'MarkAdminPassword', '平台管理员', '', '', '', '', '')",
 			)
 		}
 	}

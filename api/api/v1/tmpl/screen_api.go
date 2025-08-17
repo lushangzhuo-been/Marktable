@@ -34,7 +34,7 @@ func (a *ScreenApi) Surplus(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -62,7 +62,7 @@ func (a *ScreenApi) List(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -90,7 +90,7 @@ func (a *ScreenApi) Create(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -118,7 +118,7 @@ func (a *ScreenApi) Set(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -146,7 +146,7 @@ func (a *ScreenApi) Move(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -174,7 +174,7 @@ func (a *ScreenApi) Delete(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}

@@ -1,35 +1,35 @@
 server:
-  host: "0.0.0.0" # 服务器IP
+  host: "47.109.66.52" # 服务器IP
   port: "8080" # 项目端口
 
 url:
-  logo: "http://127.0.0.1/logo.png" # 项目图标
-  issue: "http://127.0.0.1:8082/#/task/detail/%d/%d/%s" # 发送邮件的具体资源访问连接
-  avatar: "http://127.0.0.1:8081/%s" # 用户头像
+  logo: "http://47.109.66.52/logo.png" # 项目图标
+  issue: "http://marktable.cn:8082/#/task/detail/%d/%d/%s" # 发送邮件的具体资源访问连接
+  avatar: "http://47.109.66.52:8081/%s" # 用户头像
 
 mysql:
-  dbHost: "mysql" # 数据库所在服务器IP
+  dbHost: "47.109.66.52" # 数据库所在服务器IP
   dbPort: "3306" # 数据库端口
-  dbName: "mydb" # 数据库DB名称
-  userName: "root" # 数据库用户名称
-  password: "secret" # 数据库用户密码
+  dbName: "mark3" # 数据库DB名称
+  userName: "mark3" # 数据库用户名称
+  password: "Huawei@123" # 数据库用户密码
   charset: "utf8mb4" # 数据编码格式
-  autoMigrate: "yes" # AutoMigrate功能用于是否自动迁移ORM模式
+  autoMigrate: "no" # AutoMigrate功能用于是否自动迁移ORM模式
 
 mongo:
-  mongoUrl: "mongodb://root:example@mongodb:27017/mark3?authSource=admin"
-
+  mongoHost: "47.109.66.52" # mongo所在服务器IP
+  mongoPort: "28028" # mongo端口
 
 redis:
   redisDbName: 0 # redisDb名称
-  redisHost: "redis" # redisDb所在服务器IP
+  redisHost: "127.0.0.1" # redisDb所在服务器IP
   redisPort: "6379" # redisDb端口
   redisPassword: "" # redisDb密码
   redisNetwork: "tcp" # redisDb连接方式
 
 
 upload:
-  host: "127.0.0.1" # 上传文件服务器IP
+  host: "47.109.66.52" # 上传文件服务器IP
   port: "8081" # 文件上传端口
   size: 50000000000 # 上传文件大小限制
   path: "/www/mark3_server_upload" # 文件存储地址
@@ -41,16 +41,18 @@ upload:
 smtp:
   host: "smtp.qq.com" # smtp的邮箱服务类型
   port: 465 # 邮箱端口
-  username: "" # 发送邮件的邮箱账户
-  password: "" # 发送邮件的邮箱密码
-  from: "" # 发件人邮箱
+  #username: "mark20240627@163.com" # 发送邮件的邮箱账户
+  #password: "ERUUqL7RH9Tqqphq" # 发送邮件的邮箱密码
+  username: "fudemolusz@qq.com" # 发送邮件的邮箱账户
+  password: "akcexppenobudffh" # 发送邮件的邮箱密码
+  from: "fudemolusz@qq.com" # 发件人邮箱
   isOpen: "yes" # 是否开通由服务触发发送
 
 rabbit:
-  host: "rabbitmq" # rabbit 服务部署的IP
+  host: "47.109.66.52" # rabbit 服务部署的IP
   port: "5672" # rabbit 服务端口
-  username: "guest" # 账号
-  password: "guest" # 密码
+  username: "mark" # 账号
+  password: "Huawei123" # 密码
 
 libreoffice:
   version: "libreoffice24.8" # libreoffice linux安装版本号

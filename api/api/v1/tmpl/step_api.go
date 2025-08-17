@@ -25,7 +25,7 @@ func (a *StepApi) Info(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -53,7 +53,7 @@ func (a *StepApi) Create(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -81,7 +81,7 @@ func (a *StepApi) Delete(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
