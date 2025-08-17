@@ -232,6 +232,11 @@ export default {
         let url = "message/get_un_read_count";
         return http.get(url, params);
     },
+    // 用户侧获取查看、编辑、导出、进展、新增等权限
+    getUserAuth(params) {
+        let url = "tmpl/app/get_user_auth";
+        return http.get(url, params);
+    },
     // 卡片看板分组列表
     getCardGroupByList(params) {
         let url = "tmpl/field/enumeration";

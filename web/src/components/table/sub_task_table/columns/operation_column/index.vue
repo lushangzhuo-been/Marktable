@@ -22,7 +22,6 @@
                 placement="bottom"
                 trigger="click"
                 popper-class="progress-operate-col"
-                class="aaaaa"
                 :visible-arrow="false"
                 @show="(val) => poppoverShow(scope.row, val)"
                 @hide="(val) => poppoverHide(scope.row, val)"
@@ -38,7 +37,11 @@
                     />
                     复制链接
                 </div>
-                <div class="pop-item" @click="deleteRow(scope.row)">
+                <div
+                    class="pop-item"
+                    :class="subTmplAuth ? '' : 'disabled'"
+                    @click="deleteRow(scope.row)"
+                >
                     <img
                         :src="require(`@/assets/image/common/delete.svg`)"
                         alt=""
@@ -70,6 +73,10 @@ export default {
         item: {
             type: Object,
             default: () => {}
+        },
+        subTmplAuth: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -109,6 +116,7 @@ export default {
         },
         // 删除行
         deleteRow(row) {
+            if (!this.subTmplAuth) return;
             this.$emit("delete-row", row);
         }
     }
@@ -137,38 +145,6 @@ export default {
     }
     &:hover {
         background-image: url(@/assets/image/common/operation_more_active.png);
-    }
-}
-</style>
-<style lang="scss">
-.el-popover.el-popper.progress-operate-col[x-placement^="bottom"] {
-    margin-top: 2px;
-}
-.el-popover.el-popper.progress-operate-col[x-placement^="top"] {
-    margin-bottom: 2px;
-}
-.el-popover.el-popper.progress-operate-col {
-    min-width: 20px;
-    padding: 8px;
-    border-radius: 4px;
-    background-color: #fff;
-    box-shadow: 2px 2px 8px 1px rgba(47, 56, 76, 0.3);
-    .pop-item {
-        display: flex;
-        align-items: center;
-        height: 32px;
-        padding: 0 8px;
-        border-radius: 4px;
-        cursor: pointer;
-        &.his {
-            width: 106px;
-        }
-        img {
-            margin-right: 4px;
-        }
-        &:hover {
-            background-color: #ecf5ff;
-        }
     }
 }
 </style>

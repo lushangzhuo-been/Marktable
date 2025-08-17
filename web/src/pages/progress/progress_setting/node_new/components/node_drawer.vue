@@ -10,7 +10,7 @@
             <div slot="title" class="title-name">
                 <!-- <tip-one :text="curBtnName"> -->
                 <div class="name">
-                    步骤流转:&nbsp;&nbsp;
+                    步骤流转:&nbsp;&nbsp;&nbsp;
                     <tip-one :text="curNodeRow.name">
                         <span
                             class="label-name"
@@ -48,7 +48,7 @@
                     </tip-one>
                 </div>
                 <!-- </tip-one> -->
-                <el-tabs v-model="tabName">
+                <el-tabs class="basic-ui" v-model="tabName">
                     <el-tab-pane
                         v-for="(item, index) in btnsList"
                         :key="index"
@@ -633,6 +633,7 @@ export default {
 .field-suggest {
     display: flex;
     justify-content: space-between;
+    font-size: 14px;
 }
 .trigger-condition {
     display: flex;
@@ -656,7 +657,7 @@ export default {
     overflow: visible;
 
     .el-drawer__header {
-        margin-bottom: 16px;
+        margin-bottom: 2px;
         position: relative;
         .el-drawer__close-btn {
             position: absolute;
@@ -683,7 +684,7 @@ export default {
                 box-sizing: border-box;
                 display: inline-block;
                 height: 24px;
-                line-height: 24px;
+                line-height: 23px;
                 border-radius: 4px;
                 padding: 0 10px;
                 font-size: 14px;

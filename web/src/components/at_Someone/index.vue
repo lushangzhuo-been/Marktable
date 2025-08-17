@@ -213,7 +213,6 @@ export default {
                     e.keyCode === 50) &&
                 e.shiftKey
             ) {
-                // setTimeout(() => {
                 e.preventDefault ? e.preventDefault() : (e.returnValue = false);
                 this.position = {
                     range: selection.getRangeAt(0),
@@ -241,7 +240,6 @@ export default {
                     console.log(e);
                 }
                 //根据输入@的位置定位下拉框的位置
-                // this.getPosition();
                 this.showFlag = "visible";
                 //下拉框搜索框自动获取焦点
                 this.$nextTick(() => {
@@ -249,11 +247,8 @@ export default {
                     this.$refs.searchInput.focus();
                 });
                 this.handlerSearchInput();
-                // }, 200);
                 // 兼容
             } else if (e.code === "Backspace" || e.key === "Backspace") {
-                // e.preventDefault()
-                //  let selection = getSelection()
                 let range = selection.getRangeAt(0);
                 let removeNode = null;
                 if (this.browserType === "Firefox") {
@@ -307,7 +302,6 @@ export default {
                     }
                 }
                 if (removeNode) {
-                    // ele.removeChild(removeNode)
                     ele.firstChild.removeChild(removeNode);
                 }
                 this.showFlag = "hidden";

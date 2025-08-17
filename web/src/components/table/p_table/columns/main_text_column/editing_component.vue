@@ -46,6 +46,7 @@
 </template>
 
 <script>
+import api from "@/common/api/module/progress";
 export default {
     components: {},
     props: {
@@ -64,6 +65,14 @@ export default {
             text: ""
         };
     },
+    computed: {
+        curSpace() {
+            return this.$store.state.curSpace || {};
+        },
+        curProgress() {
+            return this.$route.params.id;
+        }
+    },
     watch: {
         scope: {
             handler(scope) {
@@ -75,12 +84,30 @@ export default {
     mounted() {},
     methods: {
         checkScope() {
-            if (this.item.can_modify === "no") {
-                return;
-            }
-            this.isEditing = true;
-            this.$nextTick(() => {
-                this.$refs["main-text-input"].focus();
+            this.fetAuthEdit();
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.scope.row._id,
+                auth_mode: "edit",
+                field_key: this.item.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    if (res.data) {
+                        this.isEditing = true;
+                        this.$nextTick(() => {
+                            this.$refs["main-text-input"].focus();
+                        });
+                    } else {
+                        this.isEditing = false;
+                    }
+                } else {
+                    this.isEditing = false;
+                }
             });
         },
         blur() {

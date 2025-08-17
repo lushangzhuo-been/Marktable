@@ -5,7 +5,7 @@
         :class="{
             isEditing: isEditing,
             'editing-effect': formItem.can_modify === 'yes',
-            'col-required': formItem.required === 'yes',
+            'col-required': formItem.required === 'yes'
         }"
     >
         <div v-if="!isEditing" class="detail" @click="checkScope">
@@ -85,16 +85,17 @@
 <script>
 import _ from "lodash";
 import { emptySpace } from "@/assets/tool/func";
+import api from "@/common/api/module/progress";
 export default {
     props: {
         formItem: {
             type: Object,
-            default: () => {},
+            default: () => {}
         },
         formData: {
             type: Object,
-            default: () => {},
-        },
+            default: () => {}
+        }
     },
     data() {
         return {
@@ -103,9 +104,17 @@ export default {
             popoverWidth: 220,
             linkObj: {
                 name: "",
-                url: "",
-            },
+                url: ""
+            }
         };
+    },
+    computed: {
+        curSpace() {
+            return this.$store.state.curSpace || {};
+        },
+        curProgress() {
+            return this.$route.params.id;
+        }
     },
     watch: {
         formData: {
@@ -121,11 +130,11 @@ export default {
                 } else {
                     this.linkObj = {
                         name: "",
-                        url: "",
+                        url: ""
                     };
                 }
-            },
-        },
+            }
+        }
     },
     mounted() {},
     methods: {
@@ -133,23 +142,40 @@ export default {
             return emptySpace(param);
         },
         checkScope() {
-            if (this.formItem.can_modify === "no") {
-                return;
-            }
-            // this.isEditing = true;
-            this.isEditing = !this.isEditing;
-            this.$set(this.formItem, "isEditing", this.isEditing);
-            if (this.isEditing) {
-                // this.popoverWidth = this.$refs.ColumnBlock.clientWidth;
-                this.popoverWidth = 220;
-                this.$nextTick(() => {
-                    setTimeout(() => {
-                        this.$refs.DropPopover.doShow();
-                    }, 20);
-                });
-            } else {
-                this.afterLeave();
-            }
+            this.fetAuthEdit();
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.formData._id,
+                auth_mode: "edit",
+                field_key: this.formItem.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    if (res.data) {
+                        this.isEditing = !this.isEditing;
+                        this.$set(this.formItem, "isEditing", this.isEditing);
+                        if (this.isEditing) {
+                            // this.popoverWidth = this.$refs.ColumnBlock.clientWidth;
+                            this.popoverWidth = 220;
+                            this.$nextTick(() => {
+                                setTimeout(() => {
+                                    this.$refs.DropPopover.doShow();
+                                }, 20);
+                            });
+                        } else {
+                            this.afterLeave();
+                        }
+                    } else {
+                        this.isEditing = false;
+                    }
+                } else {
+                    this.isEditing = false;
+                }
+            });
         },
         afterLeave() {
             this.edit = false;
@@ -167,7 +193,7 @@ export default {
                 this.$message({
                     showClose: true,
                     message: "此为必填项",
-                    type: "warning",
+                    type: "warning"
                 });
                 this.linkObj = _.cloneDeep(
                     this.formData[this.formItem.field_key]
@@ -210,14 +236,14 @@ export default {
                 this.$message({
                     showClose: true,
                     message: "复制成功",
-                    type: "success",
+                    type: "success"
                 });
                 this.$refs.DropPopover.doClose();
             } else {
                 this.$message({
                     showClose: true,
                     message: "无链接可以复制",
-                    type: "warning",
+                    type: "warning"
                 });
             }
         },
@@ -247,7 +273,7 @@ export default {
                 this.$message({
                     showClose: true,
                     message: "复制成功",
-                    type: "warning",
+                    type: "warning"
                 });
             }
         },
@@ -266,11 +292,11 @@ export default {
                 this.$message({
                     showClose: true,
                     message: "链接地址未填写",
-                    type: "warning",
+                    type: "warning"
                 });
             }
-        },
-    },
+        }
+    }
 };
 </script>
 

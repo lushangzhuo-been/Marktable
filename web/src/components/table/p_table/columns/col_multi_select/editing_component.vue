@@ -39,7 +39,7 @@
                     popper-class="col-mutil-select-tooltip"
                 >
                     <div slot="content">
-                        <div v-for="(item, index) in behandArr" :key="index">
+                        <div v-for="(item, index) in selectArr" :key="index">
                             <span
                                 class="tip-item"
                                 :style="{
@@ -139,7 +139,7 @@
                         >
                             <div slot="content">
                                 <div
-                                    v-for="(item, index) in behandArr"
+                                    v-for="(item, index) in selectArr"
                                     :key="index"
                                 >
                                     <span
@@ -169,6 +169,7 @@
 import _ from "lodash";
 import TipOne from "@/pages/common/tooltip_one_line.vue";
 import { emptySpace } from "@/assets/tool/func";
+import api from "@/common/api/module/progress";
 export default {
     props: {
         item: {
@@ -196,6 +197,14 @@ export default {
             labelIndex: 0,
             showNum: true
         };
+    },
+    computed: {
+        curSpace() {
+            return this.$store.state.curSpace || {};
+        },
+        curProgress() {
+            return this.$route.params.id;
+        }
     },
     watch: {
         searchValue(str) {
@@ -241,6 +250,12 @@ export default {
                         });
                     }
                     this.selectArr = selectArr;
+                    // this.frontArr = this.getArrFront(this.selectArr);
+                    // if (this.selectArr.length > 1) {
+                    //     this.behandArr = this.getArrBehand(this.selectArr);
+                    // } else {
+                    //     this.behandArr = [];
+                    // }
                     this.frontArr = this.selectArr;
                     this.$nextTick(() => {
                         this.getTagInit();
@@ -381,23 +396,38 @@ export default {
         },
         checkScope() {
             this.searchValue = "";
-            if (this.item.can_modify === "no") {
-                return;
-            }
-            this.isEditing = !this.isEditing;
-            if (this.isEditing) {
-                this.popoverWidth = this.$refs.ColumnBlock.clientWidth;
-                setTimeout(() => {
-                    this.$refs.DropPopover.doShow();
-                    this.$nextTick(() => {
-                        if (this.$refs.SearchInput) {
-                            this.$refs.SearchInput.focus();
+            this.fetAuthEdit();
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.scope.row._id,
+                auth_mode: "edit",
+                field_key: this.item.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    if (res.data) {
+                        this.isEditing = !this.isEditing;
+                        if (this.isEditing) {
+                            this.popoverWidth =
+                                this.$refs.ColumnBlock.clientWidth;
+                            setTimeout(() => {
+                                this.$refs.DropPopover.doShow();
+                                this.$nextTick(() => {
+                                    if (this.$refs.SearchInput) {
+                                        this.$refs.SearchInput.focus();
+                                    }
+                                });
+                            }, 20);
+                        } else {
+                            this.afterLeave();
                         }
-                    });
-                }, 20);
-            } else {
-                this.afterLeave();
-            }
+                    }
+                }
+            });
         },
         afterLeave() {
             this.isEditing = false;

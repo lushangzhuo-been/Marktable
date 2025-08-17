@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import api from "@/common/api/module/progress";
 export default {
     props: {
         item: {
@@ -38,6 +39,14 @@ export default {
             slider: 0
         };
     },
+    computed: {
+        curSpace() {
+            return this.$store.state.curSpace || {};
+        },
+        curProgress() {
+            return this.$route.params.id;
+        }
+    },
     watch: {
         scope: {
             handler(scope) {
@@ -50,13 +59,39 @@ export default {
     mounted() {},
     methods: {
         sliderChange(slider) {
-            this.$emit(
-                "edit-form-item",
-                this.slider,
-                this.item.field_key,
-                this.scope.row._id,
-                this.item.mode
-            );
+            this.fetAuthEdit();
+        },
+        handleCheck(a, b, c) {
+            console.log(a, b, c);
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.scope.row._id,
+                auth_mode: "edit",
+                field_key: this.item.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    if (res.data) {
+                        this.$emit(
+                            "edit-form-item",
+                            this.slider,
+                            this.item.field_key,
+                            this.scope.row._id,
+                            this.item.mode
+                        );
+                    } else {
+                        this.$message({
+                            type: "warning",
+                            message: "暂无编辑权限"
+                        });
+                        this.slider = this.scope.row[this.item.field_key] || 0;
+                    }
+                }
+            });
         }
     }
 };

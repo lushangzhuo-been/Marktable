@@ -29,6 +29,7 @@
 <script>
 import _ from "lodash";
 import { emptySpace } from "@/assets/tool/func";
+import api from "@/common/api/module/progress";
 export default {
     props: {
         formItem: {
@@ -46,6 +47,14 @@ export default {
             text: ""
         };
     },
+    computed: {
+        curSpace() {
+            return this.$store.state.curSpace || {};
+        },
+        curProgress() {
+            return this.$route.params.id;
+        }
+    },
     watch: {
         formData: {
             handler(formData) {
@@ -59,13 +68,31 @@ export default {
             return emptySpace(param);
         },
         checkScope() {
-            if (this.formItem.can_modify === "no") {
-                return;
-            }
-            this.isEditing = true;
-            this.$set(this.formItem, "isEditing", this.isEditing);
-            this.$nextTick(() => {
-                this.$refs["DatePicker"].focus();
+            this.fetAuthEdit();
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.formData._id,
+                auth_mode: "edit",
+                field_key: this.formItem.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    if (res.data) {
+                        this.isEditing = true;
+                        this.$set(this.formItem, "isEditing", this.isEditing);
+                        this.$nextTick(() => {
+                            this.$refs["DatePicker"].focus();
+                        });
+                    } else {
+                        this.isEditing = false;
+                    }
+                } else {
+                    this.isEditing = false;
+                }
             });
         },
         blur() {

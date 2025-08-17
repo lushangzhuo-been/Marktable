@@ -8,73 +8,105 @@
             'col-required': item.required === 'yes'
         }"
     >
-        <el-popover
-            ref="DropPopover"
-            popper-class="status-col-popover progress-popover"
-            placement="bottom"
-            :width="popoverWidth"
-            trigger="click"
-            @after-leave="afterLeave"
-            @show="popperShow"
+        <!-- 标签化 -->
+        <div
+            v-if="!isEditing"
+            class="detail"
+            slot="reference"
+            @click="checkScope(scope)"
         >
-            <div class="popover-content multi-select-col">
-                <el-input
-                    ref="SearchInput"
-                    class="basic-ui progress-input"
-                    v-model="searchValue"
-                    placeholder="搜索"
-                    prefix-icon="el-icon-search"
-                ></el-input>
-                <div v-if="optionsList.length" class="options-box">
-                    <div
-                        class="drapdown-item"
-                        v-for="(item, index) in optionsList"
-                        :key="index"
-                        :style="{
-                            color: '#171e17',
-                            backgroundColor: rgbToRgba(
-                                `${item.end_status_color || '#fff'}`,
-                                0.3
-                            )
-                        }"
-                        @click="switchStatus(item)"
-                    >
-                        <tip-one :text="item.end_status_name">
-                            <div class="font">
-                                {{ item.end_status_name }}
-                            </div>
-                        </tip-one>
-                    </div>
-                </div>
-                <div v-else class="no-data-text">暂无数据</div>
-            </div>
-
-            <!-- 标签化 -->
-            <div class="detail" slot="reference">
-                <template
-                    v-if="
-                        scope.row.status && Object.keys(scope.row.status).length
-                    "
+            <template
+                v-if="scope.row.status && Object.keys(scope.row.status).length"
+            >
+                <div
+                    v-overflow
+                    class="status"
+                    :style="{
+                        backgroundColor: rgbToRgba(
+                            `${scope.row.status.color || '#fff'}`,
+                            0.3
+                        ),
+                        color: '#171e31'
+                    }"
                 >
-                    <div
-                        v-overflow
-                        class="status"
-                        :style="{
-                            backgroundColor: rgbToRgba(
-                                `${scope.row.status.color || '#fff'}`,
-                                0.3
-                            ),
-                            color: '#171e31'
-                        }"
-                    >
-                        {{ scope.row.status.name || emptySpace() }}
+                    {{ scope.row.status.name || emptySpace() }}
+                </div>
+            </template>
+            <span v-else style="padding: 0 10px">
+                {{ emptySpace() }}
+            </span>
+        </div>
+        <div v-if="isEditing">
+            <el-popover
+                ref="DropPopover"
+                popper-class="status-col-popover progress-popover"
+                placement="bottom"
+                :width="popoverWidth"
+                trigger="click"
+                @after-leave="afterLeave"
+                @show="popperShow"
+            >
+                <div class="popover-content multi-select-col">
+                    <el-input
+                        ref="SearchInput"
+                        class="basic-ui progress-input"
+                        v-model="searchValue"
+                        placeholder="搜索"
+                        prefix-icon="el-icon-search"
+                    ></el-input>
+                    <div v-if="optionsList.length" class="options-box">
+                        <div
+                            class="drapdown-item"
+                            :class="item.step_auth ? '' : 'disabled'"
+                            v-for="(item, index) in optionsList"
+                            :key="index"
+                            :style="{
+                                color: '#171e17',
+                                backgroundColor: rgbToRgba(
+                                    `${item.end_status_color || '#fff'}`,
+                                    0.3
+                                )
+                            }"
+                            @click="switchStatus(item)"
+                        >
+                            <tip-one :text="item.end_status_name">
+                                <div class="font">
+                                    {{ item.end_status_name }}
+                                </div>
+                            </tip-one>
+                        </div>
                     </div>
-                </template>
-                <span v-else style="padding: 0 10px">
-                    {{ emptySpace() }}
-                </span>
-            </div>
-        </el-popover>
+                    <div v-else class="no-data-text">暂无数据</div>
+                </div>
+
+                <!-- 标签化 -->
+                <div class="detail" slot="reference">
+                    <template
+                        v-if="
+                            scope.row.status &&
+                            Object.keys(scope.row.status).length
+                        "
+                    >
+                        <div
+                            v-overflow
+                            class="status"
+                            :style="{
+                                backgroundColor: rgbToRgba(
+                                    `${scope.row.status.color || '#fff'}`,
+                                    0.3
+                                ),
+                                color: '#171e31'
+                            }"
+                        >
+                            {{ scope.row.status.name || emptySpace() }}
+                        </div>
+                    </template>
+                    <span v-else style="padding: 0 10px">
+                        {{ emptySpace() }}
+                    </span>
+                </div>
+            </el-popover>
+        </div>
         <!-- 切换状态时有必填字段，显示弹窗 -->
         <node-operation-dialog
             ref="NodeOperationDialog"
@@ -182,7 +214,7 @@ export default {
         },
         // 打开popover时调用状态下拉选项
         popperShow() {
-            this.checkScope();
+            // this.checkScope();
             this.getStatusList();
         },
         getStatusList() {
@@ -241,23 +273,42 @@ export default {
         },
         checkScope() {
             this.searchValue = "";
-            if (this.item.can_modify === "no") {
-                return;
-            }
-            this.isEditing = !this.isEditing;
-            if (this.isEditing) {
-                this.popoverWidth = this.$refs.ColumnBlock.clientWidth;
-                setTimeout(() => {
-                    this.$refs.DropPopover.doShow();
-                    this.$nextTick(() => {
-                        if (this.$refs.SearchInput) {
-                            this.$refs.SearchInput.focus();
+            this.fetAuthEdit();
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.wsId,
+                tmpl_id: this.tempId,
+                id: this.scope.row._id,
+                auth_mode: "edit",
+                field_key: this.item.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    if (res.data) {
+                        this.isEditing = !this.isEditing;
+                        if (this.isEditing) {
+                            this.popoverWidth =
+                                this.$refs.ColumnBlock.clientWidth;
+                            setTimeout(() => {
+                                this.$refs.DropPopover.doShow();
+                                this.$nextTick(() => {
+                                    if (this.$refs.SearchInput) {
+                                        this.$refs.SearchInput.focus();
+                                    }
+                                });
+                            }, 20);
+                        } else {
+                            this.afterLeave();
                         }
-                    });
-                }, 20);
-            } else {
-                this.afterLeave();
-            }
+                    } else {
+                        this.isEditing = false;
+                    }
+                } else {
+                    this.isEditing = false;
+                }
+            });
         },
         afterLeave() {
             this.isEditing = false;
@@ -331,6 +382,7 @@ export default {
             return behand;
         },
         switchStatus(item) {
+            if (!item.step_auth) return;
             // this.selectArr = [item];
             // this.optionsList = this.getOptionsList();
             // 点击状态选项后，调如下接口，判断是否有限制字段需要填写
@@ -586,6 +638,10 @@ export default {
             white-space: nowrap;
             cursor: pointer;
             margin-bottom: 4px;
+            &.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
         }
     }
     .no-data-text {

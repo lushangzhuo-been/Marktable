@@ -199,26 +199,45 @@ export default {
         },
         // 点击时
         checkScope() {
-            if (this.item.can_modify === "no") {
-                return;
-            }
-            // 可编辑时执行以下
-            this.isEditing = !this.isEditing;
-            if (this.isEditing) {
-                this.popoverWidth = this.$refs.ColumnBlock.clientWidth;
-                setTimeout(() => {
-                    this.$refs.DropPopover.doShow();
-                    this.$nextTick(() => {
-                        if (this.$refs.SearchInput) {
-                            this.$refs.SearchInput.focus();
+            this.fetAuthEdit();
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.scope.row._id,
+                auth_mode: "edit",
+                field_key: this.item.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    if (res.data) {
+                        // 可编辑时执行以下
+                        this.isEditing = !this.isEditing;
+                        if (this.isEditing) {
+                            this.popoverWidth =
+                                this.$refs.ColumnBlock.clientWidth;
+                            setTimeout(() => {
+                                this.$refs.DropPopover.doShow();
+                                this.$nextTick(() => {
+                                    if (this.$refs.SearchInput) {
+                                        this.$refs.SearchInput.focus();
+                                    }
+                                });
+                            }, 20);
+                            this.getProgressDataList();
+                        } else {
+                            //
+                            this.afterLeave();
                         }
-                    });
-                }, 20);
-                this.getProgressDataList();
-            } else {
-                //
-                this.afterLeave();
-            }
+                    } else {
+                        this.isEditing = false;
+                    }
+                } else {
+                    this.isEditing = false;
+                }
+            });
         },
         // 关闭popover
         afterLeave() {
