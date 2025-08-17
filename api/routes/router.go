@@ -2,7 +2,7 @@ package routes
 
 import (
 	"mark3/api/v1/app"
-	"mark3/api/v1/app/dashboard"
+	dashboard "mark3/api/v1/app/dashboard"
 	appTmpl "mark3/api/v1/app/tmpl"
 	ws2 "mark3/api/v1/app/ws"
 	"mark3/api/v1/message"
@@ -97,6 +97,11 @@ func NewRouter() *gin.Engine {
 	r.POST("/tmpl/role/update", middleware.AuthMiddleware(), tmplRoleApi.Update)
 	r.POST("/tmpl/role/delete", middleware.AuthMiddleware(), tmplRoleApi.Delete)
 	r.GET("/tmpl/role/list", middleware.AuthMiddleware(), tmplRoleApi.List)
+
+	tmplAuthApi := new(tmpl.AuthApi)
+	r.GET("/tmpl/auth/config", middleware.AuthMiddleware(), tmplAuthApi.Config)
+	r.POST("/tmpl/auth/update", middleware.AuthMiddleware(), tmplAuthApi.Update)
+	r.GET("/tmpl/auth/Info", middleware.AuthMiddleware(), tmplAuthApi.Detail)
 
 	tmplCommonApi := new(tmpl.CommonApi)
 	r.GET("/tmpl/get_user_list", middleware.AuthMiddleware(), tmplCommonApi.GetUserList)
@@ -226,6 +231,7 @@ func NewRouter() *gin.Engine {
 	r.GET("/tmpl/app/get_screen", middleware.AuthMiddleware(), tmplAppApi.GetScreen)
 	r.POST("/tmpl/app/create_action", middleware.AuthMiddleware(), tmplAppApi.CreateAction)
 	r.POST("/tmpl/app/create_sub_action", middleware.AuthMiddleware(), tmplAppApi.CreateSubAction)
+	r.GET("/tmpl/app/get_user_auth", middleware.AuthMiddleware(), tmplAppApi.GetUserAuth)
 	r.GET("/tmpl/app/get_list_data", middleware.AuthMiddleware(), tmplAppApi.GetListData)
 	r.GET("/tmpl/app/get_list_data_select", middleware.AuthMiddleware(), tmplAppApi.GetListDataSelect)
 	r.GET("/tmpl/app/get_data", middleware.AuthMiddleware(), tmplAppApi.GetData)

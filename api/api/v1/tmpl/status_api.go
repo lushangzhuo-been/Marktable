@@ -25,7 +25,7 @@ func (a *StatusApi) OverallView(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -53,7 +53,7 @@ func (a *StatusApi) GetAll(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -81,7 +81,7 @@ func (a *StatusApi) Create(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -109,7 +109,7 @@ func (a *StatusApi) Rename(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -137,7 +137,7 @@ func (a *StatusApi) SetFirst(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -165,7 +165,7 @@ func (a *StatusApi) Move(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -193,7 +193,7 @@ func (a *StatusApi) Delete(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -221,7 +221,7 @@ func (a *StatusApi) StatusNext(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}

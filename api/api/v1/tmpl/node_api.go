@@ -35,7 +35,7 @@ func (a *NodeApi) List(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -63,7 +63,7 @@ func (a *NodeApi) Info(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -91,7 +91,7 @@ func (a *NodeApi) Create(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -119,7 +119,7 @@ func (a *NodeApi) Update(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -147,7 +147,7 @@ func (a *NodeApi) GetAllStatus(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
@@ -175,7 +175,7 @@ func (a *NodeApi) Delete(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanOperate(); err != nil {
+	if err := userTmplRight.CanManage(); err != nil {
 		ctl.UnPermission(err.Error(), ctx)
 		return
 	}

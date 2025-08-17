@@ -38,7 +38,7 @@ func (a *TaskApi) AddOrUpdateSchedule(ctx *gin.Context) {
 	//	ctl.FailWithMessage(err.Error(), ctx)
 	//	return
 	//}
-	//if err := userTmplRight.CanOperate(); err != nil {
+	//if err := userTmplRight.CanManage(); err != nil {
 	//	ctl.UnPermission(err.Error(), ctx)
 	//	return
 	//}
@@ -66,7 +66,7 @@ func (a *TaskApi) DoRuleCron(ctx *gin.Context) {
 	//	ctl.FailWithMessage(err.Error(), ctx)
 	//	return
 	//}
-	//if err := userTmplRight.CanOperate(); err != nil {
+	//if err := userTmplRight.CanManage(); err != nil {
 	//	ctl.UnPermission(err.Error(), ctx)
 	//	return
 	//}

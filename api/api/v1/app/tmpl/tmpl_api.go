@@ -95,13 +95,9 @@ func (a *TmplApi) GetConfig(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -122,13 +118,9 @@ func (a *TmplApi) GetStatusList(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -149,13 +141,9 @@ func (a *TmplApi) GetScreen(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -179,10 +167,6 @@ func (a *TmplApi) GetListData(ctx *gin.Context) {
 	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -211,8 +195,8 @@ func (a *TmplApi) GetListDataSelect(ctx *gin.Context) {
 	ctl.OkWithData(resp, ctx)
 }
 
-func (a *TmplApi) GetData(ctx *gin.Context) {
-	var req types.GetDataReq
+func (a *TmplApi) GetUserAuth(ctx *gin.Context) {
+	var req types.GetUserAuthReq
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
@@ -224,8 +208,23 @@ func (a *TmplApi) GetData(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
+
+	l := new(srv.TmplSrv)
+	resp, err := l.GetUserAuth(ctx, userid.(int), req, userTmplRight)
+	ctl.OkWithData(resp, ctx)
+}
+
+func (a *TmplApi) GetData(ctx *gin.Context) {
+	var req types.GetDataReq
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctl.FailWithMessage(err.Error(), ctx)
+		return
+	}
+	userid, _ := ctx.Get("userid")
+	//判断是否为模版成员
+	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	if err != nil {
+		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
 
@@ -249,10 +248,6 @@ func (a *TmplApi) GetFileRight(ctx *gin.Context) {
 	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -279,13 +274,9 @@ func (a *TmplApi) CreateAction(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
 
 	l := new(srv.TmplSrv)
-	_, err = l.Create(ctx, req, userTmplRight)
+	_, err = l.CreateAction(ctx, req, userTmplRight)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
@@ -304,10 +295,6 @@ func (a *TmplApi) CreateSubAction(ctx *gin.Context) {
 	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -333,10 +320,6 @@ func (a *TmplApi) UpdateAction(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
 
 	l := new(srv.TmplSrv)
 	_, err = l.Update(ctx, req, userTmplRight)
@@ -360,13 +343,9 @@ func (a *TmplApi) DeleteAction(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
 
 	l := new(srv.TmplSrv)
-	_, err = l.Delete(userid.(int), req, userTmplRight)
+	_, err = l.DeleteAction(userid.(int), req, userTmplRight)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
@@ -385,10 +364,6 @@ func (a *TmplApi) DeleteSubAction(ctx *gin.Context) {
 	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -414,13 +389,9 @@ func (a *TmplApi) GetStepList(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
 
 	l := new(srv.TmplSrv)
-	resp, err := l.GetStepList(req)
+	resp, err := l.GetStepList(req, userid.(int), userTmplRight)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
@@ -439,10 +410,6 @@ func (a *TmplApi) GetStepScreen(ctx *gin.Context) {
 	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -468,10 +435,6 @@ func (a *TmplApi) SwitchStepAction(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
 
 	l := new(srv.TmplSrv)
 	_, err = l.SwitchStep(ctx, req, userTmplRight)
@@ -490,13 +453,9 @@ func (a *TmplApi) AddProgress(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -517,13 +476,9 @@ func (a *TmplApi) UpdateProgress(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -544,13 +499,9 @@ func (a *TmplApi) DeleteProgress(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -571,13 +522,9 @@ func (a *TmplApi) GetProgressList(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -598,13 +545,9 @@ func (a *TmplApi) GetLogList(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -625,13 +568,9 @@ func (a *TmplApi) GetSubListCount(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 

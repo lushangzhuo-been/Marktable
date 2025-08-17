@@ -19,13 +19,9 @@ func (a *ProgressApi) AddProgress(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -46,13 +42,9 @@ func (a *ProgressApi) UpdateProgress(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -73,13 +65,9 @@ func (a *ProgressApi) DeleteProgress(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -100,13 +88,9 @@ func (a *ProgressApi) GetProgressList(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
