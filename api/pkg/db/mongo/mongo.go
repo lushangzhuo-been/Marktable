@@ -10,7 +10,7 @@ import (
 
 func InitMongo() *mongo.Client {
 	// 设置客户端连接配置
-	clientOptions := options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s", global.GVA_CONFIG.Mongo.MongoHost, global.GVA_CONFIG.Mongo.MongoPort))
+	clientOptions := options.Client().ApplyURI(fmt.Sprint(global.GVA_CONFIG.Mongo.MongoUrl))
 	// 连接到MongoDB
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
