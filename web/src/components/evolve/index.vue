@@ -46,17 +46,19 @@
                             >
                                 <el-dropdown-menu slot="dropdown">
                                     <el-dropdown-item
-                                        class="basic-ui height32"
+                                        class="basic-ui height32 progrese-more"
                                         command="edit"
                                         :disabled="
-                                            evolveItem.permission !== 'yes'
+                                            evolveItem.creator &&
+                                            evolveItem.creator.id !== userId
                                         "
                                     >
                                         <div
                                             :class="{
                                                 disabled:
-                                                    evolveItem.permission !==
-                                                    'yes'
+                                                    evolveItem.creator &&
+                                                    evolveItem.creator.id !==
+                                                        userId
                                             }"
                                         >
                                             <b
@@ -66,17 +68,19 @@
                                         </div>
                                     </el-dropdown-item>
                                     <el-dropdown-item
-                                        class="basic-ui height32"
+                                        class="basic-ui height32 progrese-more"
                                         command="delete"
                                         :disabled="
-                                            evolveItem.permission !== 'yes'
+                                            evolveItem.creator &&
+                                            evolveItem.creator.id !== userId
                                         "
                                     >
                                         <div
                                             :class="{
                                                 disabled:
-                                                    evolveItem.permission !==
-                                                    'yes'
+                                                    evolveItem.creator &&
+                                                    evolveItem.creator.id !==
+                                                        userId
                                             }"
                                         >
                                             <b
@@ -103,6 +107,7 @@
                         placeholder="请输入进展或@责任人"
                         :msgObj="evolveItem"
                         v-model="evolveItem.content"
+                        :hasProgressAuth="hasProgressAuth"
                         @cancle-content="cancleUpdateEvolve"
                         @confirm-content="updateEvolve"
                     ></at-mention>
@@ -197,6 +202,7 @@
                     confirmBtn
                     mentionListPosition="top"
                     placeholder="请输入进展或@责任人"
+                    :hasProgressAuth="hasProgressAuth"
                     @confirm-content="addEvolve"
                     @get-propUp="getPropUp"
                     v-model="mainReplyText"
@@ -232,7 +238,8 @@ export default {
                 size: 10,
                 count: 0
             },
-            propUp: false
+            propUp: false,
+            hasProgressAuth: false
         };
     },
     computed: {
@@ -241,11 +248,33 @@ export default {
         },
         curProgress() {
             return this.$route.params.id;
+        },
+        userInfo() {
+            return this.$store.getters.userInfo;
+        },
+        userId() {
+            //当前登录的用户
+            return this.userInfo.id;
         }
     },
     watch: {},
-    mounted() {},
     methods: {
+        fetAuthProgress() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.detailId,
+                auth_mode: "progress"
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    this.hasProgressAuth = res.data;
+                } else {
+                    this.hasProgressAuth = false;
+                }
+            });
+        },
         loadMoreEvolve() {
             // 计算是否为最后一页
             let lastPage = Math.ceil(this.list.count / this.list.size);
@@ -315,7 +344,7 @@ export default {
         },
         // 编辑进展
         updateEvolve(inner, evolve) {
-            if (evolve.permission !== "yes") {
+            if (evolve.creator && evolve.creator.id !== this.userId) {
                 return;
             }
             let params = {
@@ -357,7 +386,7 @@ export default {
         },
         // 删除进展
         deleteEvolve(evolve) {
-            if (evolve.permission !== "yes") {
+            if (evolve.creator && evolve.creator.id !== this.userId) {
                 return;
             }
             let params = {
@@ -395,6 +424,7 @@ export default {
             this.evolve = [];
         },
         evolveOperation(command, evolve) {
+            if (evolve.creator && evolve.creator.id !== this.userId) return;
             if (command === "edit") {
                 this.$set(evolve, "editing", true);
                 this.$set(evolve, "content_backup", evolve.content);
@@ -576,5 +606,12 @@ export default {
     display: flex;
     justify-content: flex-end;
     margin-top: 12px;
+}
+</style>
+<style lang="scss">
+.basic-ui.progrese-more.el-dropdown-menu__item.is-disabled {
+    .operation-item-box {
+        cursor: not-allowed;
+    }
 }
 </style>

@@ -35,14 +35,14 @@
                     placeholder="请输入流程描述"
                 ></el-input>
             </el-form-item>
-            <el-form-item label="类型">
+            <!-- <el-form-item label="类型">
                 <el-radio v-model="newProgressForm.mode" label="public"
                     >公有流程</el-radio
                 >
                 <el-radio v-model="newProgressForm.mode" label="private"
                     >私有流程</el-radio
                 >
-            </el-form-item>
+            </el-form-item> -->
         </el-form>
         <span slot="footer" class="dialog-footer">
             <el-button class="basic-ui" size="small" @click="cancel"
@@ -68,8 +68,8 @@ export default {
             dialogVisible: false,
             newProgressForm: {
                 name: "",
-                desc: "",
-                mode: "public"
+                desc: ""
+                // mode: "public"
             },
             rule: {
                 name: [
@@ -104,8 +104,8 @@ export default {
             this.$refs.newProgressForm.clearValidate();
             this.newProgressForm = {
                 name: "",
-                desc: "",
-                mode: "public"
+                desc: ""
+                // mode: "public"
             };
             this.dialogVisible = false;
         },
@@ -167,6 +167,9 @@ export default {
         // }
         .el-form-item {
             margin-bottom: 24px;
+        }
+        .el-dialog__footer {
+            padding: 12px 32px 16px;
         }
     }
 }

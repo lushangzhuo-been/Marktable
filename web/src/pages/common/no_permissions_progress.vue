@@ -5,11 +5,11 @@
                 <!-- <span :class="['icon-type', this.progressInfo.tmpl.mode]">{{
                     tmplMode
                 }}</span> -->
-                <b :class="['icon-type', this.progressInfo.tmpl.mode]"></b>
+                <!-- <b :class="['icon-type', this.progressInfo.tmpl.mode]"></b> -->
                 <span class="tmpl-name">{{
                     progressInfo.tmpl.name || "--"
                 }}</span>
-                <div class="space-admin">
+                <!-- <div class="space-admin">
                     <span class="label">
                         <span class="flex">
                             <img
@@ -44,21 +44,13 @@
                                         <span>{{
                                             item.full_name || "--"
                                         }}</span>
-                                        <!-- <span
-                                            v-if="
-                                                index <
-                                                progressInfo.admin_list.length -
-                                                    1
-                                            "
-                                            >,</span
-                                        > -->
                                     </span>
                                 </user-message>
                             </span>
                         </template>
                         <template v-else>--</template>
                     </span>
-                </div>
+                </div> -->
             </div>
             <div class="desc">{{ this.progressInfo.tmpl.desc || "--" }}</div>
         </div>
@@ -68,7 +60,7 @@
                     :src="require(`@/assets/image/space/no_space_icon.png`)"
                     alt=""
                 />
-                <div class="no-data-text">暂无权限, 请联系超级管理员</div>
+                <div class="no-data-text">暂无权限, 请联系空间管理员</div>
             </div>
         </div>
     </div>
@@ -156,6 +148,7 @@ export default {
     },
     watch: {
         curProgress() {
+            console.log(666);
             this.getProgressInfo();
         }
     },

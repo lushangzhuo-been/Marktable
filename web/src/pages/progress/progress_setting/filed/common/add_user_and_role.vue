@@ -83,8 +83,8 @@
                     </div>
                 </div>
 
-                <!-- 任务角色 -->
-                <div v-show="activeName === '任务角色'">
+                <!-- 任务属性 -->
+                <div v-show="activeName === '任务属性'">
                     <el-checkbox-group v-model="checkArr">
                         <div
                             v-for="(roleItem, roleIndex) in roleListShow"
@@ -198,8 +198,8 @@ export default {
                     name: "成员"
                 },
                 {
-                    label: "任务角色",
-                    name: "任务角色"
+                    label: "任务属性",
+                    name: "任务属性"
                 }
             ],
             editing: false,
@@ -209,7 +209,7 @@ export default {
             peopleList: [], // 成员列表origin
             showList: [], // 成员列表show
             personList: [], // 已选择用户对象信息
-            // 任务角色相关数据
+            // 任务属性相关数据
             checkArr: [], // 已选择角色
             roleList: [], // 角色列表
             roleListShow: [] // 角色列表

@@ -168,6 +168,7 @@
 import _ from "lodash";
 import TipOne from "@/pages/common/tooltip_one_line.vue";
 import { emptySpace } from "@/assets/tool/func";
+import api from "@/common/api/module/progress";
 export default {
     props: {
         item: {
@@ -194,6 +195,14 @@ export default {
             optionsList: [],
             showNum: false
         };
+    },
+    computed: {
+        curSpace() {
+            return this.$store.state.curSpace || {};
+        },
+        curProgress() {
+            return this.$route.params.id;
+        }
     },
     watch: {
         searchValue(str) {
@@ -328,25 +337,43 @@ export default {
         },
         checkScope() {
             this.searchValue = "";
-            if (this.item.can_modify === "no") {
-                return;
-            }
-            this.isEditing = !this.isEditing;
-            this.$set(this.item, "isEditing", this.isEditing);
-            if (this.isEditing) {
-                // this.popoverWidth = this.$refs.ColumnBlock.clientWidth;
-                this.popoverWidth = 220;
-                setTimeout(() => {
-                    this.$refs.DropPopover.doShow();
-                    this.$nextTick(() => {
-                        if (this.$refs.SearchInput) {
-                            this.$refs.SearchInput.focus();
+            this.fetAuthEdit();
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.formData._id,
+                auth_mode: "edit",
+                field_key: this.item.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    if (res.data) {
+                        this.isEditing = !this.isEditing;
+                        this.$set(this.item, "isEditing", this.isEditing);
+                        if (this.isEditing) {
+                            // this.popoverWidth = this.$refs.ColumnBlock.clientWidth;
+                            this.popoverWidth = 220;
+                            setTimeout(() => {
+                                this.$refs.DropPopover.doShow();
+                                this.$nextTick(() => {
+                                    if (this.$refs.SearchInput) {
+                                        this.$refs.SearchInput.focus();
+                                    }
+                                });
+                            }, 20);
+                        } else {
+                            this.afterLeave();
                         }
-                    });
-                }, 20);
-            } else {
-                this.afterLeave();
-            }
+                    } else {
+                        this.isEditing = false;
+                    }
+                } else {
+                    this.isEditing = false;
+                }
+            });
         },
         afterLeave() {
             this.isEditing = false;

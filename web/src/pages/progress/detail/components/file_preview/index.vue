@@ -66,11 +66,7 @@
                     />
                     <span>版本</span>
                 </div>
-                <div
-                    class="item-btn"
-                    @click="deleteAllVerion"
-                    v-if="fileAuth.delete === 'yes'"
-                >
+                <div class="item-btn" @click="deleteAllVerion" v-if="fileAuth">
                     <img
                         :src="require(`@/assets/image/common/delete.svg`)"
                         alt=""
@@ -136,7 +132,7 @@ export default {
             versionSelected: false, // 版本操作展开与否
             curFileItem: {}, // 当前打开得文件
             detailId: "",
-            fileAuth: {},
+            fileAuth: false,
             deleteVisible: false,
             newCurVersion: {}, //每次设置完新的都传过来
             curPreviewFile: {} //预览得文件

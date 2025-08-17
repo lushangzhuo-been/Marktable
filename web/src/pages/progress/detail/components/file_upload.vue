@@ -4,15 +4,16 @@
         <el-upload
             class="progress-upload"
             :class="{
-                'disabled-permission': fileAuth.edit !== 'yes'
+                'disabled-permission': !fileAuth
             }"
             action=""
             drag
             :auto-upload="false"
             :show-file-list="false"
             :on-change="fileChange"
-            :disabled="fileAuth.edit !== 'yes'"
+            :disabled="!fileAuth"
         >
+            <!-- :disabled="fileAuth.edit !== 'yes'" -->
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">
                 将文件拖到此处，或<em>点击上传</em>
@@ -33,7 +34,15 @@
                 <div class="msg-content">
                     <div class="title-operation">
                         <div class="msg-content-item">
-                            <div v-overflow class="name" @click="preview(item)">
+                            <div
+                                v-if="fileAuth"
+                                v-overflow
+                                class="name"
+                                @click="preview(item)"
+                            >
+                                {{ currentUploadingFile.file_name }}
+                            </div>
+                            <div v-else v-overflow class="pre-name">
                                 {{ currentUploadingFile.file_name }}
                             </div>
                         </div>
@@ -61,16 +70,30 @@
                     :class="getFileTypeClass(item.fileType)"
                 ></b> -->
                 <img
+                    v-if="fileAuth"
                     class="file-box"
                     :src="getFileIcon(item)"
                     alt=""
                     @click="preview(item)"
                 />
+                <img
+                    v-else
+                    class="file-box not-allow"
+                    :src="getFileIcon(item)"
+                    alt=""
+                />
                 <div class="msg-content">
                     <div class="title-operation">
                         <div class="msg-content-item">
                             <tip-one :text="item.file_name" position="top">
-                                <div class="name" @click="preview(item)">
+                                <div
+                                    v-if="fileAuth"
+                                    class="name"
+                                    @click="preview(item)"
+                                >
+                                    {{ item.file_name }}
+                                </div>
+                                <div v-else class="pre-name">
                                     {{ item.file_name }}
                                 </div>
                             </tip-one>
@@ -81,16 +104,18 @@
 
                         <div class="operation">
                             <b
+                                v-if="fileAuth"
                                 class="operation-box pre-view"
                                 @click="preview(item)"
                             ></b>
                             <b
-                                v-if="fileAuth.edit === 'yes'"
+                                v-if="fileAuth"
                                 class="operation-box download"
                                 @click="downloadFile(item)"
                             ></b>
+                            <!-- v-if="fileAuth.delete === 'yes'" -->
                             <b
-                                v-if="fileAuth.delete === 'yes'"
+                                v-if="fileAuth"
                                 class="operation-box delete"
                                 @click="deleteFile(item)"
                             ></b>
@@ -160,7 +185,9 @@ export default {
     data() {
         return {
             fileList: [],
-            fileAuth: {},
+            // fileAuth: {},
+            fileAuth: false,
+            subTmplAuth: false,
             typeList: "",
             fileUrl: "",
             deleteVisible: false,
@@ -227,18 +254,34 @@ export default {
                 }
             });
         },
-        // 获取文件权限
+        // 获取文件权限 ---旧
+        // getFileAuth() {
+        //     let params = {
+        //         ws_id: this.curSpace.id,
+        //         tmpl_id: this.curProgress,
+        //         id: this.detailId
+        //     };
+        //     api.getFileAuth(params).then((res) => {
+        //         if (res && res.resultCode === 200) {
+        //             this.fileAuth = res.data;
+        //         } else {
+        //             this.fileAuth = {};
+        //         }
+        //     });
+        // },
+        // 获取文件权限 -- 新
         getFileAuth() {
             let params = {
                 ws_id: this.curSpace.id,
                 tmpl_id: this.curProgress,
-                id: this.detailId
+                id: this.detailId,
+                auth_mode: "file"
             };
-            api.getFileAuth(params).then((res) => {
+            api.getUserAuth(params).then((res) => {
                 if (res && res.resultCode === 200) {
                     this.fileAuth = res.data;
                 } else {
-                    this.fileAuth = {};
+                    this.fileAuth = false;
                 }
             });
         },
@@ -408,6 +451,9 @@ export default {
             margin: auto 8px auto 0;
             // background-size: 100% 100%;
             cursor: pointer;
+            &.not-allow {
+                cursor: default;
+            }
             // &.doc {
             //     background-image: url("~@/assets/image/file_type/doc.svg");
             // }
@@ -441,6 +487,13 @@ export default {
                     font-size: 12px;
                     display: flex;
                     align-items: center;
+                    .pre-name {
+                        color: #171e31;
+                        max-width: calc(100% - 95px);
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                    }
                     .name {
                         color: #171e31;
                         max-width: calc(100% - 95px);

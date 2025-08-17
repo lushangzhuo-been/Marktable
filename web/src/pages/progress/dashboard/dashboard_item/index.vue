@@ -625,6 +625,8 @@ export default {
     }
 }
 .dashboard-content {
+    position: relative;
+    height: calc(100vh - 226px);
     background-color: #ffffff;
 
     ::v-deep .vue-grid-layout {
@@ -735,8 +737,10 @@ export default {
     .no-dashboard-data {
         box-sizing: border-box;
         text-align: center;
-        height: 570px;
-        padding: 150px 0 100px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         .empty-box {
             margin: auto;
             width: 558px;

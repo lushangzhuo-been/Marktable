@@ -166,6 +166,9 @@ export default {
             max-height: 2300px !important;
             padding: 0 32px;
         }
+        .el-dialog__footer {
+            padding: 16px 32px 32px;
+        }
         .el-dialog__headerbtn {
             top: 24px;
             right: 32px;

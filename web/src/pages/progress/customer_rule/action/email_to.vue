@@ -88,8 +88,8 @@
                     </div>
                 </div>
 
-                <!-- 任务角色 -->
-                <div v-show="activeName === '任务角色'" class="role-content">
+                <!-- 任务属性 -->
+                <div v-show="activeName === '任务属性'" class="role-content">
                     <el-checkbox-group
                         v-if="roleListShow.length"
                         v-model="checkArr"
@@ -220,8 +220,8 @@ export default {
                     name: "成员"
                 },
                 {
-                    label: "任务角色",
-                    name: "任务角色"
+                    label: "任务属性",
+                    name: "任务属性"
                 }
             ],
             searchInput: "", // 关键词
@@ -230,7 +230,7 @@ export default {
             peopleList: [], // 成员列表origin
             showList: [], // 成员列表show
             personList: [], // 已选择用户对象信息
-            // 任务角色相关数据
+            // 任务属性相关数据
             checkArr: [], // 已选择角色
             roleList: [], // 角色列表
             roleListShow: [], // 角色列表
