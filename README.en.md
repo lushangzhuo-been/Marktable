@@ -102,23 +102,15 @@ marktable 是一款高度灵活的项目管理平台，通过多维自定义配�
 **2. 前提条件**:
 - 已安装 Docker（版本 ≥ 20.10.0）
 - 已安装 Docker Compose（版本 ≥ 2.0.0）
-    - 服务器资源：
-        - CPU: 至少 4 核
-        - 内存: 至少 8GB
-        - 磁盘: 根据数据需求预留空间
+- 服务器资源：
+  - CPU: 至少 4 核
+  - 内存: 至少 8GB
+  - 磁盘: 根据数据需求预留空间
 
 **3. 部署步骤**:
 - 3.1 执行命令构建服务
   ```
   docker-compose build
-  
-  执行结果
-  ...
-  [+] Building 2/2
-  ✔ mark_table_client  Built                                                                                        0.0s
-  ✔ mark_table_server  Built                                                                                        0.0s
-  
-  说明构建成功
   ```
 - 3.2 启动服务
   ```

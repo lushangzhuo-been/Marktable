@@ -1,0 +1,14 @@
+[title]
+other = "My Web Application"
+
+[welcomeMessage]
+other = "Welcome to our website"
+
+[greeting]
+other = "Hello, {{.Name}}"
+
+[defaultTmplName]
+other = "Default process"
+
+[defaultWsName]
+other = "默认空间"

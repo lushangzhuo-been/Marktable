@@ -1,9 +1,12 @@
 package main
 
 import (
+	"embed"
 	"flag"
+	"golang.org/x/text/language"
 	"mark3/config"
 	"mark3/global"
+	"mark3/internal/i18n"
 	"mark3/pkg/db/mongo"
 	"mark3/pkg/db/mysql"
 	"mark3/pkg/log"
@@ -13,8 +16,21 @@ import (
 	"mark3/schedule"
 )
 
+//go:embed ../../locales/*.toml
+var localeFS embed.FS
+
 func main() {
 	loading()
+
+	// 初始化i18n
+	i18nInstance, err := i18n.New(i18n.Config{
+		DefaultLanguage: language.English,
+		Format:          "toml",
+		EmbedFiles:      &localeFS,
+	})
+	if err != nil {
+		log.InitLog().Fatal(err)
+	}
 
 	//启动mq消费者
 	mq.ConsumeSimple()
@@ -23,7 +39,7 @@ func main() {
 	isStop := flag.Int("s", 0, "stop")
 	schedule.InitScheduleAll(*isStop)
 
-	r := routes.NewRouter()
+	r := routes.NewRouter(i18nInstance)
 	r.Run(":" + global.GVA_CONFIG.Server.Port)
 }
 

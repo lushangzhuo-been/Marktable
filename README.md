@@ -96,39 +96,31 @@ marktable 是一款高度灵活的项目管理平台，通过多维自定义配�
   我们提供额外的面向企业的功能。[给我们发送电子邮件](mailto:360826018@qq.com)讨论企业需求。 </br>
 
 # 安装社区版
-**1. 概述**: 
-  - 使用 Docker Compose 部署 marktable 的完整环境。所有服务在容器化，通过 docker-compose.yml 一键部署。
+**1. 概述**:
+- 使用 Docker Compose 部署 marktable 的完整环境。所有服务在容器化，通过 docker-compose.yml 一键部署。
 
 **2. 前提条件**:
-  - 已安装 Docker（版本 ≥ 20.10.0）
-  - 已安装 Docker Compose（版本 ≥ 2.0.0）
-    - 服务器资源：
-      - CPU: 至少 4 核
-      - 内存: 至少 8GB
-      - 磁盘: 根据数据需求预留空间
+- 已安装 Docker（版本 ≥ 20.10.0）
+- 已安装 Docker Compose（版本 ≥ 2.0.0）
+- 服务器资源：
+    - CPU: 至少 4 核
+    - 内存: 至少 8GB
+    - 磁盘: 根据数据需求预留空间
 
 **3. 部署步骤**:
-  - 3.1 执行命令构建服务
-    ```
-    docker-compose build
-    
-    执行结果
-    ...
-    [+] Building 2/2
-    ✔ mark_table_client  Built                                                                                        0.0s
-    ✔ mark_table_server  Built                                                                                        0.0s
-    
-    说明构建成功
-    ```
-  - 3.2 启动服务 
-    ```
-      docker-compose up -d
-    ```
-    
-  - 3.3 验证部署
-    ```
-    docker-compose ps
-    ```
+- 3.1 执行命令构建服务
+  ```
+  docker-compose build
+  ```
+- 3.2 启动服务
+  ```
+    docker-compose up -d
+  ```
+
+- 3.3 验证部署
+  ```
+  docker-compose ps
+  ```
 # 社区与支持
 我们欢迎您为 marktable 做出贡献，以帮助改善 marktable。包括：提交代码、问题、新想法，或分享您基于 marktable 创建的有趣且有用的 AI 应用程序。同时，我们也欢迎您在不同的活动、会议和社交媒体上分享 marktable。
 
@@ -141,10 +133,8 @@ marktable 是一款高度灵活的项目管理平台，通过多维自定义配�
 # License
 本仓库遵循 [marktable Open Source License](LICENSE) 开源协议，该许可证本质上是 GNU AFFERO GENERAL PUBLIC LICENSE Version 3。
 主要义务:
-  - 分发软件时：必须提供源代码和许可证文本。
+- 分发软件时：必须提供源代码和许可证文本。
 
-  - 作为网络服务运行时：需向用户提供下载对应修改版源代码的途径。
+- 作为网络服务运行时：需向用户提供下载对应修改版源代码的途径。
 
-  - 修改代码后：衍生作品必须保持AGPLv3授权。
-
-    
+- 修改代码后：衍生作品必须保持AGPLv3授权。
