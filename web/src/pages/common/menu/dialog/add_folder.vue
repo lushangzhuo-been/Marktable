@@ -125,8 +125,8 @@ export default {
             top: 24px;
             right: 32px;
         }
-        .el-form-item {
-            margin-bottom: 24px;
+        .el-dialog__footer {
+            padding: 12px 32px 16px;
         }
     }
 }

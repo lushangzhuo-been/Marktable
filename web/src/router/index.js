@@ -35,8 +35,11 @@ const progressInfo = () => import("@/pages/progress/progress_info/index");
 const customerRule = () => import("@/pages/progress/customer_rule/index");
 const progressSetting = () => import("@/pages/progress/progress_setting/index");
 // 私有流程-角色&成员
-const progressMember = () =>
-    import("@/pages/progress/progress_private_member_role/index");
+const progressMember = () => import("@/pages/progress/progress_private_member_role/index");
+// 权限配置
+const progressAuth = () => import("@/pages/progress/progress_auth/index");
+// const progressMember = () =>
+// import("@/pages/progress/progress_private_member_role/index");
 // 我的首页
 const myHomePage = () => import("@/pages/my_homepage/index");
 // 我的待办
@@ -243,6 +246,16 @@ const routes = [
                 }
             },
             {
+                // 私有流程更多-角色&成员
+                path: "progress/:wsId/:id/auth",
+                component: progressAuth,
+                name: "progress",
+                meta: {
+                    requireAuth: true,
+                    module: "progressAuth"
+                }
+            },
+            {
                 // 文件夹更多-基本信息修改
                 path: "progress/:wsId/:id/group/basicinfo/update",
                 component: progressGroupInfo,
@@ -262,7 +275,10 @@ const routes = [
     {
         path: "/task/detail/:wsid/:id/:taskid",
         component: TaskDetail,
-        name: "TaskDetail"
+        name: "TaskDetail",
+        meta: {
+            requireAuth: true,
+        }
     },
     // demo
     // cardBoard

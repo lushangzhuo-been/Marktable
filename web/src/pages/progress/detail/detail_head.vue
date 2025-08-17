@@ -54,7 +54,8 @@
                             </el-dropdown-item>
                             <el-dropdown-item
                                 class="basic-ui height32"
-                                command="copy"
+                                :class="hasDeleteAuth ? '' : 'disabled'"
+                                command="delete"
                             >
                                 <div>
                                     <b class="delete-box"></b>
@@ -276,7 +277,8 @@ export default {
             moreOperating: false,
             searchValue: "",
             optionsList: [],
-            tmpOptionsList: []
+            tmpOptionsList: [],
+            hasDeleteAuth: false
         };
     },
     watch: {
@@ -453,7 +455,8 @@ export default {
         moreOperationAction(command) {
             if (command === "share") {
                 this.shareTaskDetail();
-            } else if (command === "copy") {
+            } else if (command === "delete") {
+                if (!this.hasDeleteAuth) return;
                 this.deleteItem();
             }
         },
@@ -487,10 +490,28 @@ export default {
         },
         moreDropShow(boolean) {
             if (boolean) {
+                this.fetAuthDelete();
                 this.moreOperating = true;
             } else {
                 this.moreOperating = false;
             }
+        },
+        fetAuthDelete(row) {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: row._id,
+                auth_mode: "delete"
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    this.hasDeleteAuth = res.data;
+                } else {
+                    this.hasDeleteAuth = false;
+                }
+                this.$set(row, "isActived", true);
+            });
         }
     }
 };

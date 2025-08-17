@@ -40,6 +40,7 @@
                     v-if="item.field_key === 'operation'"
                     :key="index"
                     :item="item"
+                    :subTmplAuth="subTmplAuth"
                     @delete-row="deleteSubTask"
                 ></operation-column>
             </template>
@@ -70,6 +71,10 @@ export default {
         tableName: {
             type: String,
             default: ""
+        },
+        subTmplAuth: {
+            type: Boolean,
+            default: false
         }
     },
 

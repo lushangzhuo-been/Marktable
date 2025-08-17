@@ -5,7 +5,7 @@
         <div class="cur-title flex-between">
             <span>当前版本</span>
             <el-upload
-                v-if="fileAuth.edit === 'yes'"
+                v-if="fileAuth"
                 class="upload-demo"
                 action=""
                 :auto-upload="false"
@@ -62,7 +62,7 @@
                                 下载
                             </div>
                             <!-- 阻止外层冒泡得写法 -->
-                            <template #reference v-if="fileAuth.edit === 'yes'">
+                            <template #reference v-if="fileAuth">
                                 <b class="more-icon" @click.stop></b>
                             </template>
                         </el-popover>
@@ -123,7 +123,7 @@
                                     :visible-arrow="false"
                                 >
                                     <div
-                                        v-if="fileAuth.edit === 'yes'"
+                                        v-if="fileAuth"
                                         class="pop-item his"
                                         @click="
                                             operatHisVersion(item, 'setting')
@@ -140,7 +140,7 @@
                                         设置当前版本
                                     </div>
                                     <div
-                                        v-if="fileAuth.edit === 'yes'"
+                                        v-if="fileAuth"
                                         class="pop-item his"
                                         @click="
                                             operatHisVersion(item, 'download')
@@ -157,7 +157,7 @@
                                         下载
                                     </div>
                                     <div
-                                        v-if="fileAuth.delete === 'yes'"
+                                        v-if="fileAuth"
                                         class="pop-item his"
                                         @click="
                                             operatHisVersion(item, 'delete')
@@ -174,10 +174,7 @@
                                         删除
                                     </div>
                                     <b
-                                        v-if="
-                                            fileAuth.edit === 'yes' ||
-                                            fileAuth.delete === 'yes'
-                                        "
+                                        v-if="fileAuth"
                                         slot="reference"
                                         class="more-icon"
                                         @click.stop

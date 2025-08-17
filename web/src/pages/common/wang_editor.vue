@@ -37,6 +37,10 @@ export default {
         rowObj: {
             type: Object,
             default: () => {}
+        },
+        auth: {
+            type: Boolean,
+            default: false
         }
     },
     computed: {
@@ -67,7 +71,15 @@ export default {
             mode: "default" // 'default' or 'simple'
         };
     },
-
+    watch: {
+        auth(val) {
+            if (val) {
+                this.editorConfig.readOnly = true;
+            } else {
+                this.editorConfig.readOnly = false;
+            }
+        }
+    },
     methods: {
         onChange() {
             this.$emit("changeData", this.html);

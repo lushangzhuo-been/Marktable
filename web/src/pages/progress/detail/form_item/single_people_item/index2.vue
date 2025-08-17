@@ -5,7 +5,7 @@
         :class="{
             isEditing: isEditing,
             'editing-effect': formItem.can_modify === 'yes',
-            'col-required': formItem.required === 'yes',
+            'col-required': formItem.required === 'yes'
         }"
     >
         <div class="detail" v-if="!isEditing" @click="checkScope">
@@ -229,17 +229,17 @@ import { emptySpace } from "@/assets/tool/func";
 import UserMessage from "@/components/user_message_tip";
 export default {
     components: {
-        UserMessage,
+        UserMessage
     },
     props: {
         formItem: {
             type: Object,
-            default: () => {},
+            default: () => {}
         },
         formData: {
             type: Object,
-            default: () => {},
-        },
+            default: () => {}
+        }
     },
     data() {
         return {
@@ -252,7 +252,7 @@ export default {
             personList: [],
             showList: [],
             labelIndex: 0,
-            showNum: true,
+            showNum: true
         };
     },
     computed: {
@@ -261,7 +261,7 @@ export default {
         },
         curProgress() {
             return this.$route.params.id;
-        },
+        }
     },
     watch: {
         formData: {
@@ -292,11 +292,11 @@ export default {
                     this.getTagInit();
                 });
             },
-            deep: true,
+            deep: true
         },
         searchInput: _.debounce(function () {
             this.getPeopleList();
-        }, 500),
+        }, 500)
     },
     mounted() {},
     methods: {
@@ -340,7 +340,7 @@ export default {
                 ex: this.selectArr.join(","),
                 key: this.searchInput,
                 page_size: 50,
-                page: 1,
+                page: 1
             };
             api.getPeopleList(params).then((res) => {
                 if (res && res.resultCode === 200 && res.data) {
@@ -362,13 +362,13 @@ export default {
         getAvatarStack(src, index) {
             return {
                 position: "relative",
-                top: "-2px",
+                top: "-2px"
             };
         },
         getPopoverTagListAvatar() {
             return {
                 position: "relative",
-                top: "-7px",
+                top: "-7px"
             };
         },
         getArrFront(arr) {
@@ -382,26 +382,44 @@ export default {
             return behand;
         },
         checkScope() {
-            if (this.formItem.can_modify === "no") {
-                return;
-            }
-            this.isEditing = !this.isEditing;
-            this.$set(this.formItem, "isEditing", this.isEditing);
-            if (this.isEditing) {
-                // this.popoverWidth = this.$refs.ColumnBlock.clientWidth;
-                this.popoverWidth = 220;
-                setTimeout(() => {
-                    this.$refs.DropPopover.doShow();
-                    this.$nextTick(() => {
-                        if (this.$refs.SearchInput) {
-                            this.$refs.SearchInput.focus();
+            this.fetAuthEdit();
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.formData._id,
+                auth_mode: "edit",
+                field_key: this.formItem.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    if (res.data) {
+                        this.isEditing = !this.isEditing;
+                        this.$set(this.formItem, "isEditing", this.isEditing);
+                        if (this.isEditing) {
+                            // this.popoverWidth = this.$refs.ColumnBlock.clientWidth;
+                            this.popoverWidth = 220;
+                            setTimeout(() => {
+                                this.$refs.DropPopover.doShow();
+                                this.$nextTick(() => {
+                                    if (this.$refs.SearchInput) {
+                                        this.$refs.SearchInput.focus();
+                                    }
+                                });
+                                this.getPeopleList();
+                            }, 20);
+                        } else {
+                            this.afterLeave();
                         }
-                    });
-                    this.getPeopleList();
-                }, 20);
-            } else {
-                this.afterLeave();
-            }
+                    } else {
+                        this.isEditing = false;
+                    }
+                } else {
+                    this.isEditing = false;
+                }
+            });
         },
         afterLeave() {
             this.isEditing = false;
@@ -416,7 +434,7 @@ export default {
                 this.$message({
                     showClose: true,
                     message: "此为必填项",
-                    type: "warning",
+                    type: "warning"
                 });
                 let selectArr = []; // 双向绑定id数组
                 this.personList = _.cloneDeep(
@@ -461,7 +479,7 @@ export default {
                 this.$message({
                     showClose: true,
                     message: "此为必填项",
-                    type: "warning",
+                    type: "warning"
                 });
                 return;
             }
@@ -500,8 +518,8 @@ export default {
                     _.remove(this.showList, { id: id });
                 }
             });
-        },
-    },
+        }
+    }
 };
 </script>
 

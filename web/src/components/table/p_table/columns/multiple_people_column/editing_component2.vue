@@ -5,7 +5,7 @@
         :class="{
             isEditing: isEditing,
             'editing-effect': item.can_modify === 'yes',
-            'col-required': item.required === 'yes',
+            'col-required': item.required === 'yes'
         }"
     >
         <div class="detail" v-if="!isEditing" @click="checkScope(scope)">
@@ -223,17 +223,17 @@ import UserMessage from "@/components/user_message_tip";
 import { setTimeout } from "core-js";
 export default {
     components: {
-        UserMessage,
+        UserMessage
     },
     props: {
         item: {
             type: Object,
-            default: () => {},
+            default: () => {}
         },
         scope: {
             type: Object,
-            default: () => {},
-        },
+            default: () => {}
+        }
     },
     data() {
         return {
@@ -248,7 +248,7 @@ export default {
             // 过滤关键词
             searchInput: "",
             labelIndex: 0,
-            showNum: true,
+            showNum: true
         };
     },
     computed: {
@@ -257,7 +257,7 @@ export default {
         },
         curProgress() {
             return this.$route.params.id;
-        },
+        }
     },
     watch: {
         scope: {
@@ -278,11 +278,11 @@ export default {
                 this.getTagInit();
             },
             immediate: true,
-            deep: true,
+            deep: true
         },
         searchInput: _.debounce(function () {
             this.getPeopleList();
-        }, 500),
+        }, 500)
     },
     mounted() {},
     updated() {},
@@ -332,7 +332,7 @@ export default {
                 ex: this.selectArr.join(","),
                 key: this.searchInput,
                 page_size: 50,
-                page: 1,
+                page: 1
             };
             api.getPeopleList(params).then((res) => {
                 if (res && res.resultCode === 200 && res.data) {
@@ -353,24 +353,39 @@ export default {
             });
         },
         checkScope() {
-            if (this.item.can_modify === "no") {
-                return;
-            }
-            this.isEditing = !this.isEditing;
-            if (this.isEditing) {
-                this.popoverWidth = this.$refs.ColumnBlock.clientWidth;
-                setTimeout(() => {
-                    this.$refs.DropPopover.doShow();
-                    this.$nextTick(() => {
-                        if (this.$refs.SearchInput) {
-                            this.$refs.SearchInput.focus();
+            this.fetAuthEdit();
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.scope.row._id,
+                auth_mode: "edit",
+                field_key: this.item.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    if (res.data) {
+                        this.isEditing = !this.isEditing;
+                        if (this.isEditing) {
+                            this.popoverWidth =
+                                this.$refs.ColumnBlock.clientWidth;
+                            setTimeout(() => {
+                                this.$refs.DropPopover.doShow();
+                                this.$nextTick(() => {
+                                    if (this.$refs.SearchInput) {
+                                        this.$refs.SearchInput.focus();
+                                    }
+                                });
+                            }, 20);
+                            this.getPeopleList();
+                        } else {
+                            this.afterLeave();
                         }
-                    });
-                }, 20);
-                this.getPeopleList();
-            } else {
-                this.afterLeave();
-            }
+                    }
+                }
+            });
         },
         afterLeave() {
             this.isEditing = false;
@@ -384,7 +399,7 @@ export default {
                 this.$message({
                     showClose: true,
                     message: "此为必填项",
-                    type: "warning",
+                    type: "warning"
                 });
                 let selectArr = []; // 双向绑定id数组
                 if (this.scope.row[this.item.field_key]) {
@@ -441,7 +456,7 @@ export default {
                 this.$message({
                     showClose: true,
                     message: "此为必填项",
-                    type: "warning",
+                    type: "warning"
                 });
                 return;
             }
@@ -466,16 +481,16 @@ export default {
         getAvatarStack() {
             return {
                 position: "relative",
-                top: "-2px",
+                top: "-2px"
             };
         },
         getPopoverTagListAvatar() {
             return {
                 position: "relative",
-                top: "-6px",
+                top: "-6px"
             };
-        },
-    },
+        }
+    }
 };
 </script>
 

@@ -40,7 +40,6 @@
                 placement="bottom-end"
                 trigger="click"
                 popper-class="progress-operate-col"
-                class="aaaaa"
                 :visible-arrow="false"
                 @show="(val) => poppoverShow(scope.row, val)"
                 @hide="(val) => poppoverHide(scope.row, val)"

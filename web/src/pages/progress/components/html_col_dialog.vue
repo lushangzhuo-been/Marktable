@@ -24,6 +24,7 @@
                     :height="editorHeight"
                     :content="htmlColForm.content"
                     :rowObj="rowObj"
+                    :auth="isBtnDisabled"
                     @changeData="onChange"
                     @fullScreen="fullScreen"
                     @unFullScreen="unFullScreen"
@@ -34,7 +35,7 @@
             <el-button
                 size="small"
                 class="basic-ui"
-                :disabled="isBtnDisabled"
+                :disabled="!isBtnDisabled"
                 @click="cancel"
                 >取 消</el-button
             >
@@ -42,7 +43,7 @@
                 size="small"
                 type="primary"
                 class="basic-ui"
-                :disabled="isBtnDisabled"
+                :disabled="!isBtnDisabled"
                 @click="onConfirm"
                 >确 定</el-button
             >
@@ -52,6 +53,7 @@
 
 <script>
 import Editor from "@/pages/common/wang_editor.vue";
+import api from "@/common/api/module/progress";
 export default {
     components: {
         Editor
@@ -68,20 +70,27 @@ export default {
             rule: {},
             isFullScreen: false,
             screenHeight: document.body.clientHeight,
-            editorHeight: document.body.clientHeight - 260
+            editorHeight: document.body.clientHeight - 260,
+            isBtnDisabled: false
         };
     },
     computed: {
         title() {
             return this.colObj.name;
         },
-        isBtnDisabled() {
-            return this.colObj.can_modify === "yes" ? false : true;
-            // return this.colObj.can_modify === "yes" &&
-            // this.rowObj.permission &&
-            // this.rowObj.permission.edit === "yes"
-            // ? false
-            // : true;
+        // isBtnDisabled() {
+        //     return this.colObj.can_modify === "yes" ? false : true;
+        //     // return this.colObj.can_modify === "yes" &&
+        //     // this.rowObj.permission &&
+        //     // this.rowObj.permission.edit === "yes"
+        //     // ? false
+        //     // : true;
+        // },
+        curSpace() {
+            return this.$store.state.curSpace || {};
+        },
+        curProgress() {
+            return this.$route.params.id;
         }
     },
     watch: {
@@ -132,9 +141,27 @@ export default {
             } else {
                 this.rule = {};
             }
+            this.fetAuthEdit();
             this.dialogVisible = true;
             this.$nextTick(() => {
                 this.$refs.htmlColForm.clearValidate();
+            });
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.rowObj._id,
+                auth_mode: "edit",
+                field_key: this.colObj.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    this.isBtnDisabled = res.data;
+                } else {
+                    this.isBtnDisabled = false;
+                }
             });
         },
         cancel() {
@@ -177,6 +204,9 @@ export default {
         .el-dialog__body {
             padding: 0 32px;
             max-height: 2300px !important;
+        }
+        .el-dialog__footer {
+            padding: 16px 32px 24px;
         }
         .el-dialog__headerbtn {
             top: 24px;

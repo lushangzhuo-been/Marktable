@@ -59,7 +59,7 @@
                 <div class="label" :class="{ expand: expand, close: !expand }">
                     {{ item.name }}
                 </div>
-                <div class="num" v-if="expand">
+                <div class="num" v-if="expand && item.filed_mode !== 'all'">
                     {{ "（" + item.value + "）" }}
                 </div>
             </div>
@@ -118,33 +118,60 @@ export default {
             handler(arr) {
                 this.groupByInfo = _.cloneDeep(arr);
                 if (arr && arr.length) {
-                    if (this.cardFilterDown) {
-                        // 人取user_id , 其他取name
-                        if (this.groupByFieldInfo.mode === "person_com") {
+                    // 优先处理this.curEffectEnum，再this.cardFilterDown
+                    if (Object.keys(this.curEffectEnum).length) {
+                        // 当前选中的枚举值  需要确认列表中枚举值是否仍然存在
+                        if (
+                            this.groupByFieldInfo.mode === "person_com" &&
+                            _.find(arr, {
+                                user_id: this.curEffectEnum.user_id
+                            })
+                        ) {
+                            // 当前人类型值仍有效
+                        } else if (
+                            this.groupByFieldInfo.mode !== "person_com" &&
+                            _.find(arr, {
+                                name: this.curEffectEnum.name
+                            })
+                        ) {
+                            // 当前非人类型值仍有效
+                        } else {
+                            // 默认第一个
+                            this.curEffectEnum = arr[0];
+                            this.$emit(
+                                "check-field-search",
+                                this.curEffectEnum
+                            );
+                        }
+                    } else if (this.cardFilterDown) {
+                        // 视图存储的值
+                        if (
+                            this.groupByFieldInfo.mode === "person_com" &&
+                            _.find(arr, {
+                                user_id: this.cardFilterDown.group_value
+                            })
+                        ) {
+                            // 优先取视图保存的group_value信息
                             this.curEffectEnum = _.find(arr, {
                                 user_id: this.cardFilterDown.group_value
                             });
-                        } else {
+                        } else if (
+                            this.groupByFieldInfo.mode !== "person_com" &&
+                            _.find(arr, {
+                                user_id: this.cardFilterDown.group_value
+                            })
+                        ) {
                             this.curEffectEnum = _.find(arr, {
                                 name: this.cardFilterDown.group_value
                             });
+                        } else {
+                            // 默认第一个
+                            this.curEffectEnum = arr[0];
                         }
                         this.$emit("check-field-search", this.curEffectEnum);
                     } else {
-                        // 如果当前生效枚举 在列表中则不修改， 否则改为列表的第一个
-                        if (
-                            !Object.keys(this.curEffectEnum).length ||
-                            !(
-                                _.find(arr, {
-                                    user_id: this.curEffectEnum.user_id
-                                }) ||
-                                _.find(arr, {
-                                    name: this.curEffectEnum.name
-                                })
-                            )
-                        ) {
-                            this.curEffectEnum = arr[0];
-                        }
+                        // 空值
+                        this.curEffectEnum = arr[0];
                         this.$emit("check-field-search", this.curEffectEnum);
                     }
                 }

@@ -184,10 +184,10 @@ export default {
             this.emailContents = commentBox.innerHTML;
         },
         inputFocus() {
-
+            return;
         },
         inputBlur() {
-
+            return;
         },
         // 粘贴事件
         optimizePasteEvent(e) {

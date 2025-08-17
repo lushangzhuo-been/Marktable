@@ -1,14 +1,6 @@
 <template>
-    <div
-        class="column-block"
-        ref="ColumnBlock"
-        :class="{
-            isEditing: isEditing,
-            'editing-effect': item.can_modify === 'yes',
-            'col-required': item.required === 'yes',
-        }"
-    >
-        <div class="detail" v-if="!isEditing" @click="checkScope(scope)">
+    <div class="column-block" ref="ColumnBlock">
+        <div class="detail">
             <div
                 ref="listCon"
                 class="tag-list"
@@ -19,198 +11,21 @@
                     v-for="(tagItem, tagIndex) in frontArr"
                     :key="tagIndex"
                 >
-                    <user-message :userMessage="tagItem">
-                        <span>
-                            <el-avatar
-                                class="progress-avatar"
-                                icon="el-icon-user-solid"
-                                size="small"
-                                :src="getAvatar(tagItem.avatar)"
-                                :style="
-                                    getAvatarStack(tagItem.avatar, tagIndex)
-                                "
-                            ></el-avatar>
-                            {{ tagItem.full_name }}
-                        </span>
-                    </user-message>
-                </div>
-            </div>
-            <!-- 数字气泡 -->
-            <el-tooltip
-                v-show="showNum"
-                class="item"
-                effect="dark"
-                placement="top"
-            >
-                <div slot="content">
-                    <div
-                        v-for="(tagItem, tagIndex) in behandArr"
-                        :key="tagIndex"
-                        class="member-list"
-                    >
-                        <user-message :userMessage="tagItem" position="left">
-                            <span>
-                                <el-avatar
-                                    class="progress-avatar"
-                                    icon="el-icon-user-solid"
-                                    size="small"
-                                    :src="getAvatar(tagItem.avatar)"
-                                    :style="
-                                        getAvatarStack(tagItem.avatar, tagIndex)
-                                    "
-                                ></el-avatar>
-                                {{ tagItem.full_name }}
-                            </span>
-                        </user-message>
-                    </div>
-                </div>
-                <b class="num-box" ref="num-box">+{{ behandArr.length }}</b>
-            </el-tooltip>
-            <div v-if="!selectArr.length">
-                {{ emptySpace() }}
-            </div>
-        </div>
-        <div v-if="isEditing">
-            <el-popover
-                ref="DropPopover"
-                popper-class="progress-popover"
-                placement="bottom"
-                :width="popoverWidth"
-                trigger="click"
-                @after-leave="afterLeave"
-            >
-                <div>
-                    <!-- 搜索框 -->
-                    <div class="search-input">
-                        <el-input
-                            ref="SearchInput"
-                            class="basic-ui progress-search-input"
-                            v-model="searchInput"
+                    <span>
+                        <el-avatar
+                            class="progress-avatar"
+                            icon="el-icon-user-solid"
                             size="small"
-                            placeholder="搜索"
-                            prefix-icon="el-icon-search"
-                        ></el-input>
-                    </div>
-                    <!-- 所选tag -->
-                    <div class="had-select-tag">
-                        <!-- 遍历personList -->
-                        <div
-                            class="popover-tag-item"
-                            v-for="(tagItem, tagIndex) in personList"
-                            :key="tagIndex"
-                        >
-                            <el-avatar
-                                class="progress-avatar"
-                                icon="el-icon-user-solid"
-                                size="small"
-                                :src="getAvatar(tagItem.avatar)"
-                                :style="getPopoverTagListAvatar(tagItem.avatar)"
-                            ></el-avatar>
-                            <div class="name-content">
-                                {{ tagItem.full_name }}
-                            </div>
-                            <i
-                                @click="removeTagItem(tagItem)"
-                                class="el-tag__close el-icon-close tag-delete"
-                            ></i>
-                        </div>
-                    </div>
-                    <!-- 列表 -->
-                    <div class="list-content">
-                        <div
-                            class="list-item multiple-people-list-item"
-                            v-for="(listItem, listIndex) in showList"
-                            :key="listIndex"
-                            @click="confirmPeople(listItem)"
-                        >
-                            <el-avatar
-                                class="progress-avatar"
-                                icon="el-icon-user-solid"
-                                size="small"
-                                :src="getAvatar(listItem.avatar)"
-                            ></el-avatar>
-                            {{ listItem.full_name }}
-                        </div>
-                        <div v-show="!showList.length" class="list-no-data">
-                            暂无数据
-                        </div>
-                    </div>
+                            :src="getAvatar(tagItem.avatar)"
+                            :style="getAvatarStack(tagItem.avatar, tagIndex)"
+                        ></el-avatar>
+                        {{ tagItem.full_name }}
+                    </span>
                 </div>
-                <!-- 标签化 -->
-                <div class="detail" slot="reference">
-                    <!-- 名字列表 -->
-                    <div
-                        ref="listCon"
-                        class="tag-list"
-                        :class="{ 'show-num': showNum }"
-                    >
-                        <div
-                            class="tag-item"
-                            v-for="(tagItem, tagIndex) in frontArr"
-                            :key="tagIndex"
-                        >
-                            <user-message :userMessage="tagItem">
-                                <span>
-                                    <el-avatar
-                                        class="progress-avatar"
-                                        icon="el-icon-user-solid"
-                                        size="small"
-                                        :src="getAvatar(tagItem.avatar)"
-                                        :style="
-                                            getAvatarStack(
-                                                tagItem.avatar,
-                                                tagIndex
-                                            )
-                                        "
-                                    ></el-avatar>
-                                    {{ tagItem.full_name }}
-                                </span>
-                            </user-message>
-                        </div>
-                    </div>
-                    <!-- 数字气泡 -->
-                    <el-tooltip
-                        v-show="showNum"
-                        class="item"
-                        effect="dark"
-                        placement="top"
-                    >
-                        <div slot="content">
-                            <div
-                                v-for="(tagItem, tagIndex) in behandArr"
-                                :key="tagIndex"
-                                class="member-list"
-                            >
-                                <user-message
-                                    :userMessage="tagItem"
-                                    position="left"
-                                >
-                                    <span>
-                                        <el-avatar
-                                            class="progress-avatar"
-                                            icon="el-icon-user-solid"
-                                            size="small"
-                                            :src="getAvatar(tagItem.avatar)"
-                                            :style="
-                                                getAvatarStack(
-                                                    tagItem.avatar,
-                                                    tagIndex
-                                                )
-                                            "
-                                        ></el-avatar>
-                                        {{ tagItem.full_name }}
-                                    </span>
-                                </user-message>
-                            </div>
-                        </div>
-                        <b class="num-box" ref="num-box"
-                            >+{{ behandArr.length }}</b
-                        >
-                    </el-tooltip>
-                    <div v-if="!selectArr.length"></div>
-                </div>
-            </el-popover>
+            </div>
         </div>
+
+        <!-- 三角动画 -->
     </div>
 </template>
 
@@ -220,20 +35,19 @@ import api from "@/common/api/module/progress";
 import { imgHost } from "@/assets/tool/const";
 import { emptySpace } from "@/assets/tool/func";
 import UserMessage from "@/components/user_message_tip";
-import { setTimeout } from "core-js";
 export default {
     components: {
-        UserMessage,
+        UserMessage
     },
     props: {
         item: {
             type: Object,
-            default: () => {},
+            default: () => {}
         },
         scope: {
             type: Object,
-            default: () => {},
-        },
+            default: () => {}
+        }
     },
     data() {
         return {
@@ -248,7 +62,7 @@ export default {
             // 过滤关键词
             searchInput: "",
             labelIndex: 0,
-            showNum: true,
+            showNum: true
         };
     },
     computed: {
@@ -257,7 +71,7 @@ export default {
         },
         curProgress() {
             return this.$route.params.id;
-        },
+        }
     },
     watch: {
         scope: {
@@ -278,14 +92,13 @@ export default {
                 this.getTagInit();
             },
             immediate: true,
-            deep: true,
+            deep: true
         },
         searchInput: _.debounce(function () {
             this.getPeopleList();
-        }, 500),
+        }, 500)
     },
     mounted() {},
-    updated() {},
     methods: {
         getShowLabel(labelIndex) {
             this.$nextTick(() => {
@@ -332,7 +145,7 @@ export default {
                 ex: this.selectArr.join(","),
                 key: this.searchInput,
                 page_size: 50,
-                page: 1,
+                page: 1
             };
             api.getPeopleList(params).then((res) => {
                 if (res && res.resultCode === 200 && res.data) {
@@ -384,7 +197,7 @@ export default {
                 this.$message({
                     showClose: true,
                     message: "此为必填项",
-                    type: "warning",
+                    type: "warning"
                 });
                 let selectArr = []; // 双向绑定id数组
                 if (this.scope.row[this.item.field_key]) {
@@ -429,8 +242,8 @@ export default {
         },
         confirmPeople(people) {
             // 列表选择
-            this.personList.push(people);
-            this.selectArr.push(people.id);
+            this.personList = [people];
+            this.selectArr = [people.id];
             this.removeHadSelect();
             this.getPeopleList();
             this.frontArr = this.personList;
@@ -441,17 +254,18 @@ export default {
                 this.$message({
                     showClose: true,
                     message: "此为必填项",
-                    type: "warning",
+                    type: "warning"
                 });
                 return;
             }
-            // 移除页面绑定
-            _.remove(this.personList, function (persion) {
-                return persion.id === people.id;
-            });
+            // 标签移除
             // 移除提交参数
             _.remove(this.selectArr, function (id) {
                 return id === people.id;
+            });
+            // 移除页面绑定
+            _.remove(this.personList, function (persion) {
+                return persion.id === people.id;
             });
             this.frontArr = this.personList;
             this.getTagInit();
@@ -466,16 +280,16 @@ export default {
         getAvatarStack() {
             return {
                 position: "relative",
-                top: "-2px",
+                top: "-2px"
             };
         },
         getPopoverTagListAvatar() {
             return {
                 position: "relative",
-                top: "-6px",
+                top: "-6px"
             };
-        },
-    },
+        }
+    }
 };
 </script>
 
@@ -492,24 +306,21 @@ export default {
             white-space: nowrap;
             // overflow: hidden;
         }
-        .tag-item {
-            display: inline-block;
-            padding-right: 8px;
-            overflow: hidden;
-            text-wrap: nowrap;
-            text-overflow: ellipsis;
-            max-width: 148px;
-        }
     }
 }
-
+.tag-item {
+    display: inline-block;
+    padding-right: 8px;
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    max-width: 148px;
+}
 .column-block {
     box-sizing: border-box;
     height: 40px;
     line-height: 40px;
     border: 1px solid rgba(0, 0, 0, 0);
-    // padding: 0 10px;
-    // white-space: nowrap;
     position: relative;
     &:hover {
         .triangle {
@@ -541,10 +352,7 @@ export default {
         }
     }
 }
-.list-content {
-    max-height: 200px;
-    overflow-y: auto;
-}
+
 ::v-deep .progress-input.el-input {
     .el-input__inner {
         padding: 0;
@@ -555,8 +363,19 @@ export default {
     }
 }
 
+.tag-item {
+    display: inline-block;
+    margin-right: 8px;
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    &.had-num {
+        max-width: calc(100% - 40px);
+    }
+}
+
 .num-box {
-    // box-sizing: border-box;
     display: inline-block;
     min-width: 22px;
     height: 22px;
@@ -584,7 +403,6 @@ export default {
     }
 }
 .popover-tag-item {
-    box-sizing: border-box;
     display: inline-block;
     padding: 0 6px 0 0;
     height: 20px;
@@ -620,13 +438,8 @@ export default {
         background-color: #82889e;
     }
 }
-.member-list {
-    margin: 6px 0;
-    &:first-child {
-        margin-top: 0;
-    }
-    &:last-child {
-        margin-bottom: 0;
-    }
+.list-content {
+    max-height: 200px;
+    overflow-y: auto;
 }
 </style>

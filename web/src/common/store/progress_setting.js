@@ -1,11 +1,14 @@
 import api_progress_setting from "@/common/api/module/progress_setting";
+import _ from 'lodash'
 const userModule = {
     namespaced: true, // 启用命名空间
     state: {
         createPageFiled: [],
         detailPageFiled: [],
         detailTabFiled: [],
-        detailSubFiled: []
+        detailSubFiled: [],
+        authList: [],
+        roleList: []
     },
     mutations: {
         setCreatePageFiled(state, arr) {  // 创建页面字段
@@ -19,6 +22,10 @@ const userModule = {
         },
         setDetailSubFiled(state, arr) {  // 详情页面，，子任务字段
             state.detailSubFiled = arr;
+        },
+        setAuthConfig(state, obj) {
+            state.authList = _.cloneDeep(obj.auth_config || []);
+            state.roleList = _.cloneDeep(obj.role_config || []);
         },
     },
     actions: {
@@ -99,6 +106,27 @@ const userModule = {
                         }
                     } else {
                         context.commit("setDetailSubFiled", []);
+                        resolve([]);
+                    }
+                }).catch((err) => {
+                    reject(err);
+                });
+            });
+        },
+        // 获取权限配置信息
+        fetchAuthConfig(context, params) {
+            return new Promise((resolve, reject) => {
+                api_progress_setting.fetchAuthConfig(params).then((res) => {
+                    if (res && res.resultCode === 200) {
+                        if (res.data && Object.keys(res.data).length) {
+                            context.commit("setAuthConfig", res.data);
+                            resolve(res.data);
+                        } else {
+                            context.commit("setAuthConfig", {});
+                            resolve([]);
+                        }
+                    } else {
+                        context.commit("setAuthConfig", {});
                         resolve([]);
                     }
                 }).catch((err) => {

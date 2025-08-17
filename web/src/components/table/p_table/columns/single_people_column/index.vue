@@ -22,7 +22,14 @@
             </div>
         </template>
         <template slot-scope="scope">
+            <editing-component-edit
+                v-if="item.field_key !== 'creator'"
+                :item="item"
+                :scope="scope"
+                @edit-form-item="editFormItem"
+            ></editing-component-edit>
             <editing-component
+                v-else
                 :item="item"
                 :scope="scope"
                 @edit-form-item="editFormItem"
@@ -32,12 +39,14 @@
 </template>
 
 <script>
-import EditingComponent from "./editing_component2";
+import EditingComponentEdit from "./editing_component_edit";
+import EditingComponent from "./editing_component"; // 可编辑
 import { FieldType, FieldColumnWidth } from "@/assets/tool/const";
 import { baseMixin } from "@/mixin.js";
 export default {
     mixins: [baseMixin],
     components: {
+        EditingComponentEdit,
         EditingComponent
     },
     props: {

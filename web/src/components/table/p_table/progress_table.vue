@@ -19,13 +19,6 @@
                     width="40"
                 >
                 </el-table-column>
-                <!-- 子任务插槽 -->
-                <!-- <sub-task-slot
-                    :key="index"
-                    v-if="item.mode === 'subTask'"
-                    :item="item"
-                    @open-html-col="openHtmlCol"
-                ></sub-task-slot> -->
                 <!-- 操作列 -->
                 <operation-column
                     :key="index"
@@ -102,10 +95,14 @@
                     :item="item"
                     @edit-form-item="editFormItem"
                 ></date-column>
-                <!-- 时间列 -->
+                <!-- 可编辑的时间列 -->
                 <date-time-column
                     :key="index"
-                    v-if="item.mode === 'time_com'"
+                    v-if="
+                        item.mode === 'time_com' &&
+                        item.field_key !== 'created_at' &&
+                        item.field_key !== 'updated_at'
+                    "
                     :item="item"
                     @edit-form-item="editFormItem"
                 ></date-time-column>
@@ -134,15 +131,13 @@
                     :item="item"
                     @edit-form-item="editFormItem"
                 ></link-column>
-                <!-- <time-column
-                    :key="index"
-                    v-if="item.mode === 'time_com'"
-                    :item="item"
-                ></time-column> -->
-                <!-- blank列 -->
+                <!-- blank列-不可编辑列 -->
                 <blank-column
                     :key="index"
-                    v-if="item.mode === 'blank_com'"
+                    v-if="
+                        item.field_key === 'created_at' ||
+                        item.field_key === 'updated_at'
+                    "
                     :item="item"
                 ></blank-column>
                 <!-- 状态列，单独一列可编辑，以前为blank列 -->
@@ -159,7 +154,6 @@
 </template>
 
 <script>
-import SubTaskSlot from "./columns/sub_task_slot/index";
 import MainTextColumn from "./columns/main_text_column/index";
 import RelationProgressColumn from "./columns/relation_progress_column/index"; // 关联关系
 import TextColumn from "./columns/text_column/index";
@@ -199,8 +193,7 @@ export default {
         BlankColumn,
         StatusColumn,
         TimeColumn,
-        OperationColumn,
-        SubTaskSlot
+        OperationColumn
     },
     props: {
         col: {

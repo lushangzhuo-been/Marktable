@@ -122,6 +122,9 @@ export default {
         .el-dialog__body {
             padding: 0 32px;
         }
+        .el-dialog__footer {
+            padding: 16px 32px 32px;
+        }
         .el-dialog__headerbtn {
             top: 24px;
             right: 32px;

@@ -52,8 +52,9 @@
                     v-model="progressInfoForm.desc"
                 ></el-input>
             </el-form-item>
-            <el-form-item label="类型" prop="mode">
-                <!-- <span v-if="!isEdit">{{ getPrivate(progressInfoForm.mode) }}</span> -->
+            <!-- <span v-if="!isEdit">{{ getPrivate(progressInfoForm.mode) }}</span> -->
+            <!-- <el-form-item label="类型" prop="mode">
+               
                 <el-radio-group
                     class="basic-ui"
                     v-model="progressInfoForm.mode"
@@ -61,7 +62,7 @@
                     <el-radio label="private">私有流程</el-radio>
                     <el-radio label="public">公有流程</el-radio>
                 </el-radio-group>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item>
                 <el-button size="small" @click="cancelEdit">取 消</el-button>
                 <el-button

@@ -69,49 +69,6 @@
                             ></sub-task-content>
                         </div>
                     </div>
-                    <!-- <el-tabs class="tabs detail-tabs" v-model="activeName">
-                        <el-tab-pane
-                            v-for="(item, index) in tabsList"
-                            :label="item.label"
-                            :name="item.name"
-                            :key="index"
-                        >
-                            <span slot="label">
-                                {{ item.label
-                                }}<span v-show="item.name === 'file'">{{
-                                    "(" + fileCount + ")"
-                                }}</span>
-                            </span>
-                        </el-tab-pane>
-                    </el-tabs>
-                    <div class="block-content">
-                        <div v-show="activeName === 'detail'">
-                            <DetailForm
-                                :wsId="wsId"
-                                :tempId="tempId"
-                                :detailId="detailId"
-                                :formLabelShow="formLabelShow"
-                                :formDataShow="formDataShow"
-                                @edit-form-item="editFormItem"
-                            ></DetailForm>
-                        </div>
-                        <div v-show="activeName === 'file'">
-                            <file-upload
-                                ref="FileUpload"
-                                :detailId="detailId"
-                                :permissionEdit="permissionEdit"
-                                @transmit-file-count="transmitFileCount"
-                            ></file-upload>
-                        </div>
-                        <div v-show="activeName === 'log'" class="logs-content">
-                            <log
-                                ref="Logs"
-                                :logs="logs"
-                                :count="logsCount"
-                                :detailId="detailId"
-                            ></log>
-                        </div>
-                    </div> -->
                 </div>
                 <!-- 右进展 -->
                 <div class="body-right">
@@ -153,17 +110,6 @@
                         ></log>
                     </div>
                 </div>
-                <!-- <div class="body-right">
-
-                    <div class="evolve-title">进展({{ evolveCount }})</div>
-                    <div class="evolve-content">
-                        <evolve
-                            ref="Evolve"
-                            :detailId="detailId"
-                            @transmit-evolve-count="transmitEvolveCount"
-                        ></evolve>
-                    </div>
-                </div> -->
             </div>
         </div>
         <!-- 失效 -->
@@ -223,7 +169,7 @@ export default {
                     name: "log"
                 }
             ],
-            rightActiveName: "", // 右侧 进展/日志
+            rightActiveName: "progress", // 右侧 进展/日志
             formLabelShow: [],
             formDataShow: {},
             nodeOperationConfig: [],
@@ -330,6 +276,7 @@ export default {
             });
         },
         loadView() {
+            // 无权限处理
             this.wsId = this.$route.params.wsid;
             this.tempId = this.$route.params.id;
             this.detailId = this.$route.params.taskid;
@@ -339,17 +286,16 @@ export default {
                         id: this.wsId
                     };
                     this.$store.commit("setCurSpace", obj);
+                    this.$refs.Evolve.getEvolveDetail(); // 获取进展数量
+                    this.$refs.FileUpload.getFileList(); // 获取文件数量
                     // 调接口
                     this.getLeftTabMenu();
                     this.getFormConfig();
-                    // this.$refs.Evolve.getEvolveDetail();
-                    // this.$refs.FileUpload.getFileList();
                 } else {
                     this.linkEffective = false;
                 }
             });
         },
-
         jumpToHome() {
             this.$router.push({
                 name: "home"

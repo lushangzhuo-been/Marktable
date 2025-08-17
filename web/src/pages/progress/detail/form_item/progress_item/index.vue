@@ -23,6 +23,7 @@
 <script>
 import _ from "lodash";
 import { kSeq } from "@/assets/tool/func";
+import api from "@/common/api/module/progress";
 export default {
     props: {
         formItem: {
@@ -40,6 +41,14 @@ export default {
             slider: 0
         };
     },
+    computed: {
+        curSpace() {
+            return this.$store.state.curSpace || {};
+        },
+        curProgress() {
+            return this.$route.params.id;
+        }
+    },
     watch: {
         formData: {
             handler(formData) {
@@ -51,12 +60,36 @@ export default {
     mounted() {},
     methods: {
         sliderChange() {
-            this.$emit(
-                "edit-form-item",
-                this.slider,
-                this.formItem.field_key,
-                this.formItem.mode
-            );
+            this.fetAuthEdit();
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.formData._id,
+                auth_mode: "edit",
+                field_key: this.formItem.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    if (res.data) {
+                        this.$emit(
+                            "edit-form-item",
+                            this.slider,
+                            this.formItem.field_key,
+                            this.formItem.mode
+                        );
+                    } else {
+                        this.$message({
+                            type: "warning",
+                            message: "暂无编辑权限"
+                        });
+                        this.slider =
+                            this.formData[this.formItem.field_key] || 0;
+                    }
+                }
+            });
         }
     }
 };

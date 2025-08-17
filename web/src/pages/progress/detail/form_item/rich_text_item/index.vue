@@ -56,6 +56,7 @@
 import _ from "lodash";
 import { emptySpace } from "@/assets/tool/func";
 import TipMore from "@/pages/common/tooltip_more_line.vue";
+import api from "@/common/api/module/progress";
 export default {
     components: {
         TipMore
@@ -77,6 +78,14 @@ export default {
             text: ""
         };
     },
+    computed: {
+        curSpace() {
+            return this.$store.state.curSpace || {};
+        },
+        curProgress() {
+            return this.$route.params.id;
+        }
+    },
     watch: {
         formData: {
             handler(formData) {
@@ -91,36 +100,32 @@ export default {
             return emptySpace(param);
         },
         checkScope() {
-            if (this.formItem.can_modify === "no") {
-                return;
-            }
-            this.isEditing = !this.isEditing;
-            this.$set(this.formItem, "isEditing", this.isEditing);
-            this.$nextTick(() => {
-                this.$refs["main-text-input"].focus();
+            this.fetAuthEdit();
+        },
+        fetAuthEdit() {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: this.formData._id,
+                auth_mode: "edit",
+                field_key: this.formItem.field_key
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    if (res.data) {
+                        this.isEditing = !this.isEditing;
+                        this.$set(this.formItem, "isEditing", this.isEditing);
+                        this.$nextTick(() => {
+                            this.$refs["main-text-input"].focus();
+                        });
+                    } else {
+                        this.isEditing = false;
+                    }
+                } else {
+                    this.isEditing = false;
+                }
             });
-            // if (
-            //     this.formItem.can_modify === "no" ||
-            //     (this.formData.permission &&
-            //         this.formData.permission.edit === "no")
-            // ) {
-            //     return;
-            // }
-            // this.isEditing = !this.isEditing;
-            // this.$set(this.formItem, "isEditing", this.isEditing);
-            // if (this.isEditing) {
-            //     this.popoverWidth = this.$refs["column-block"].clientWidth;
-            //     this.$nextTick(() => {
-            //         setTimeout(() => {
-            //             this.$refs["rich-text-popover"].doShow();
-            //             this.$nextTick(() => {
-            //                 this.$refs.RichInput.focus();
-            //             });
-            //         }, 20);
-            //     });
-            // } else {
-            //     this.afterLeave();
-            // }
         },
         blur() {
             this.isEditing = false;
