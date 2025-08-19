@@ -51,7 +51,7 @@
                             :key="tagIndex"
                         >
                             <el-avatar
-                                class="progress-avatar"
+                                class="email-to-avatar"
                                 icon="el-icon-user-solid"
                                 size="small"
                                 :src="getAvatar(tagItem.avatar)"
@@ -75,7 +75,7 @@
                             @click="confirmPeople(listItem)"
                         >
                             <el-avatar
-                                class="progress-avatar"
+                                class="email-to-avatar"
                                 icon="el-icon-user-solid"
                                 size="small"
                                 :src="getAvatar(listItem.avatar)"
@@ -121,6 +121,9 @@
             <!-- 标签化 -->
             <div class="detail" slot="reference">
                 <!-- 名字列表 -->
+                <div class="default-text" v-if="!frontArr.length">
+                    {{ placeholder }}
+                </div>
                 <div class="mem-list-content">
                     <div
                         ref="listCon"
@@ -134,7 +137,7 @@
                         >
                             <el-avatar
                                 v-show="tagItem.avatar !== 'role'"
-                                class="progress-avatar"
+                                class="email-to-avatar"
                                 icon="el-icon-user-solid"
                                 size="small"
                                 :src="getAvatar(tagItem.avatar)"
@@ -160,7 +163,7 @@
                             >
                                 <el-avatar
                                     v-show="tagItem.avatar !== 'role'"
-                                    class="progress-avatar"
+                                    class="email-to-avatar"
                                     icon="el-icon-user-solid"
                                     size="small"
                                     :src="getAvatar(tagItem.avatar)"
@@ -176,9 +179,6 @@
                         >
                     </el-tooltip>
                 </div>
-                <div class="default-text" v-if="!frontArr.length">
-                    {{ placeholder }}
-                </div>
                 <b class="triangle"></b>
             </div>
         </el-popover>
@@ -191,6 +191,7 @@ import api from "@/common/api/module/progress";
 import apiSetting from "@/common/api/module/progress_setting";
 import { imgHost } from "@/assets/tool/const";
 import { FieldType } from "@/assets/tool/const";
+import { setTimeout } from "core-js";
 export default {
     props: {
         placeholder: {
@@ -267,7 +268,9 @@ export default {
         selectArr: {
             handler(arr) {
                 // 变形数据与checkArr整合回显
-                this.inputShow();
+                this.$nextTick(() => {
+                    this.inputShow();
+                });
                 this.$emit("userlist-change", arr);
             },
             deep: true
@@ -275,7 +278,9 @@ export default {
         checkArr: {
             handler(arr) {
                 // 变形数据与selectArr整合回显
-                this.inputShow();
+                this.$nextTick(() => {
+                    this.inputShow();
+                });
                 this.$emit("rolelist-change", arr);
             },
             deep: true
@@ -284,7 +289,9 @@ export default {
             handler(arr) {
                 if (arr && arr.length) {
                     this.personList = _.cloneDeep(arr);
-                    this.inputShow();
+                    this.$nextTick(() => {
+                        this.inputShow();
+                    });
                 }
             },
             deep: true,
@@ -293,7 +300,9 @@ export default {
         roleCheckList: {
             handler(str) {
                 this.checkArr = str.split(",");
-                this.inputShow();
+                this.$nextTick(() => {
+                    this.inputShow();
+                });
             },
             deep: true
         }
@@ -340,13 +349,16 @@ export default {
         removeTagItem(people) {
             // 移除页面绑定
             _.remove(this.personList, function (persion) {
-                return persion.id === people.id;
+                return persion.id == people.id;
             });
             // 移除提交参数
             _.remove(this.selectArr, function (id) {
-                return id === people.id;
+                return id == people.id;
             });
             this.getPeopleList();
+            this.$nextTick(() => {
+                this.inputShow();
+            });
         },
         popoverShow() {
             this.isEditing = true;
@@ -514,13 +526,19 @@ export default {
         white-space: wrap;
         .mem-list-content {
             display: flex;
-            // white-space: nowrap;
+            width: 100%;
             .tag-list {
                 display: inline-block;
                 height: 32px;
+                width: 100%;
                 &.show-num {
-                    // width: calc(100% - 32px);
+                    width: calc(100% - 32px);
                     // white-space: nowrap;
+                    .tag-item {
+                        &:last-child {
+                            margin-right: 0;
+                        }
+                    }
                 }
             }
         }
@@ -528,6 +546,7 @@ export default {
 }
 .default-text {
     color: #c0c4cc;
+    white-space: nowrap;
 }
 
 .tag-item {
@@ -656,6 +675,13 @@ export default {
                 }
             }
         }
+    }
+}
+.email-to-avatar.el-avatar {
+    vertical-align: middle;
+    &.el-avatar--small {
+        width: 20px;
+        height: 20px;
     }
 }
 </style>

@@ -383,7 +383,6 @@ export default {
             api.getUserAuth(params).then((res) => {
                 if (this.$route.name !== "progress") return;
                 if (res && res.resultCode === 200) {
-                    console.log(9999, res.data);
                     this.noProgressAuth = !res.data;
                     if (!this.noProgressAuth) {
                         // 有权限才重置
@@ -591,7 +590,6 @@ export default {
                 this.$nextTick(() => {
                     this.getDescConfig();
                 });
-                console.log(88888, this.progressInfo);
                 // 检查路由中是否有指定任务_id,直接打开详情
                 // if (this.$route.query && this.$route.query._id) {
                 //     this.openShareTask();
@@ -785,6 +783,7 @@ export default {
                 this.table.page_num = 1;
                 if (this.groupByFieldInfo) {
                     this.refreshEnumInfo(); // 是否有分组信息等 调刷新接口
+                    this.getListData();
                 } else {
                     this.getListData();
                 }
