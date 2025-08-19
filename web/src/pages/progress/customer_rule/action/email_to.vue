@@ -191,7 +191,6 @@ import api from "@/common/api/module/progress";
 import apiSetting from "@/common/api/module/progress_setting";
 import { imgHost } from "@/assets/tool/const";
 import { FieldType } from "@/assets/tool/const";
-import { setTimeout } from "core-js";
 export default {
     props: {
         placeholder: {
@@ -299,12 +298,17 @@ export default {
         },
         roleCheckList: {
             handler(str) {
-                this.checkArr = str.split(",");
+                if (str) {
+                    this.checkArr = str.split(",");
+                } else {
+                    this.checkArr = [];
+                }
                 this.$nextTick(() => {
                     this.inputShow();
                 });
             },
-            deep: true
+            deep: true,
+            immediate: true
         }
     },
     mounted() {
@@ -479,8 +483,10 @@ export default {
                 this.$nextTick(() => {
                     for (let i = 0; i < labels.length; i++) {
                         const _top = labels[i].getBoundingClientRect().top;
+                        console.log("_top", _top);
                         if (_top >= listConBottom) {
                             // 如果有标签顶部距离超过容器底部则表示超出容器隐藏
+                            console.log("_top---", _top);
                             this.showNum = true;
                             labelIndex = i;
                             this.getShowLabel(labelIndex);
@@ -494,9 +500,11 @@ export default {
             }
         },
         getShowLabel(labelIndex) {
+            console.log("labelIndex", labelIndex);
             this.labelIndex = labelIndex;
             this.frontArr = this.getArrFront(this.integratedArr);
             this.behandArr = this.getArrBehand(this.integratedArr);
+            console.log("labelIndex", labelIndex);
         },
         getAllLabel() {
             this.frontArr = this.integratedArr;
@@ -526,20 +534,10 @@ export default {
         white-space: wrap;
         .mem-list-content {
             display: flex;
-            width: 100%;
+            max-width: calc(100% - 32px);
             .tag-list {
                 display: inline-block;
                 height: 32px;
-                width: 100%;
-                &.show-num {
-                    width: calc(100% - 32px);
-                    // white-space: nowrap;
-                    .tag-item {
-                        &:last-child {
-                            margin-right: 0;
-                        }
-                    }
-                }
             }
         }
     }

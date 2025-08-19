@@ -258,9 +258,6 @@ export default {
         }
     },
     watch: {},
-    mounted() {
-        this.fetAuthProgress()
-    },
     methods: {
         fetAuthProgress() {
             // 获取进展权限

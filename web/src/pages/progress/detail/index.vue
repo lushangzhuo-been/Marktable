@@ -234,6 +234,7 @@ export default {
             handler(type) {
                 if (type === "progress") {
                     this.$nextTick(() => {
+                        this.$refs.Evolve.fetAuthProgress();
                         this.$refs.Evolve.getEvolveDetail();
                     });
                 }

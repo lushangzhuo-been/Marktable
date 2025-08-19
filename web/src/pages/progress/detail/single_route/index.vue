@@ -210,6 +210,7 @@ export default {
             handler(type) {
                 if (type === "progress") {
                     this.$nextTick(() => {
+                        this.$refs.Evolve.fetAuthProgress();
                         this.$refs.Evolve.getEvolveDetail();
                     });
                 }
@@ -286,6 +287,7 @@ export default {
                         id: this.wsId
                     };
                     this.$store.commit("setCurSpace", obj);
+                    this.$refs.Evolve.fetAuthProgress();
                     this.$refs.Evolve.getEvolveDetail(); // 获取进展数量
                     this.$refs.FileUpload.getFileList(); // 获取文件数量
                     // 调接口
