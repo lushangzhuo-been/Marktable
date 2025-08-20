@@ -1,11 +1,11 @@
 server:
   host: "0.0.0.0" # 服务器IP
-  port: "8080" # 项目端口
+  port: "8075" # 项目端口
 
 url:
   logo: "http://127.0.0.1/logo.png" # 项目图标
-  issue: "http://127.0.0.1:8082/#/task/detail/%d/%d/%s" # 发送邮件的具体资源访问连接
-  avatar: "http://127.0.0.1:8081/%s" # 用户头像
+  issue: "http://127.0.0.1:8075/#/task/detail/%d/%d/%s" # 发送邮件的具体资源访问连接
+  avatar: "http://127.0.0.1:8076/%s" # 用户头像
 
 mysql:
   dbHost: "mysql" # 数据库所在服务器IP
@@ -17,7 +17,7 @@ mysql:
   autoMigrate: "yes" # AutoMigrate功能用于是否自动迁移ORM模式
 
 mongo:
-  mongoUrl: "mongodb://root:example@mongodb:27017/mark3?authSource=admin"
+  mongoUrl: "mongodb://root:example@mongodb:27017/mark3"
 
 
 redis:
@@ -53,4 +53,4 @@ rabbit:
   password: "guest" # 密码
 
 libreoffice:
-  version: "libreoffice24.8" # libreoffice linux安装版本号
+  version: "libreoffice" # libreoffice linux安装版本号
