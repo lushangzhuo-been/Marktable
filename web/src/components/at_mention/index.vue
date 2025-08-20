@@ -306,11 +306,9 @@ export default {
             this.$emit("confirm-content", this.value, this.msgObj);
         },
         inputFocus() {
-            console.log(9999, this.hasProgressAuth);
             if (!this.hasProgressAuth) return;
             // 聚焦
             this.focus = true;
-            console.log(23456, this.focus);
         },
         inputBlur() {
             this.focus = false;
