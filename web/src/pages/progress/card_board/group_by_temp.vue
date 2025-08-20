@@ -192,6 +192,10 @@ export default {
             });
             this.groupByInfo = filterArr;
         },
+        // 只刷新左侧枚举信息
+        justRefreshEnumInfoNum(arr) {
+            this.groupByInfo = _.cloneDeep(arr);
+        },
         checkField(info) {
             this.curEffectEnum = info;
             this.$emit("check-field-search", info);
