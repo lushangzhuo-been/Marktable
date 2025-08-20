@@ -496,12 +496,12 @@ export default {
                 this.moreOperating = false;
             }
         },
-        fetAuthDelete(row) {
+        fetAuthDelete() {
             // 获取进展权限
             let params = {
-                ws_id: this.curSpace.id,
-                tmpl_id: this.curProgress,
-                id: row._id,
+                ws_id: this.wsId,
+                tmpl_id: this.tempId,
+                id: this.detailId,
                 auth_mode: "delete"
             };
             api.getUserAuth(params).then((res) => {
@@ -510,7 +510,6 @@ export default {
                 } else {
                     this.hasDeleteAuth = false;
                 }
-                this.$set(row, "isActived", true);
             });
         }
     }

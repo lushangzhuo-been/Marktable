@@ -153,6 +153,7 @@
                 >
                     <group-by-temp
                         v-if="groupByFieldInfo && groupByFieldInfo.field_key"
+                        ref="GroupByTemp"
                         :groupByFieldInfo="groupByFieldInfo"
                         :groupByList="groupByList"
                         :cardFilterDown="cardFilterDown"
@@ -383,7 +384,6 @@ export default {
             api.getUserAuth(params).then((res) => {
                 if (this.$route.name !== "progress") return;
                 if (res && res.resultCode === 200) {
-                    console.log(9999, res.data);
                     this.noProgressAuth = !res.data;
                     if (!this.noProgressAuth) {
                         // 有权限才重置
@@ -591,7 +591,6 @@ export default {
                 this.$nextTick(() => {
                     this.getDescConfig();
                 });
-                console.log(88888, this.progressInfo);
                 // 检查路由中是否有指定任务_id,直接打开详情
                 // if (this.$route.query && this.$route.query._id) {
                 //     this.openShareTask();
@@ -701,6 +700,7 @@ export default {
                     this.table.page_num = 1;
                     this.getListData();
                     this.backupParams = _.cloneDeep(params);
+                    this.justRefreshEnumInfoNum(this.groupByFieldInfo);
                 }
             }
         },
@@ -774,7 +774,8 @@ export default {
         }),
         refreshCurrentPage() {
             if (this.groupByFieldInfo) {
-                this.refreshEnumInfo(); // 是否有分组信息等 调刷新接口
+                // 刷新当前页。并刷新枚举数量
+                this.justRefreshEnumInfoNum(this.groupByFieldInfo);
             } else {
                 this.getListData();
             }
@@ -785,6 +786,7 @@ export default {
                 this.table.page_num = 1;
                 if (this.groupByFieldInfo) {
                     this.refreshEnumInfo(); // 是否有分组信息等 调刷新接口
+                    this.getListData();
                 } else {
                     this.getListData();
                 }
@@ -1246,6 +1248,50 @@ export default {
                     }
                     this.$refs.KanBan.confimGroupBy(groupInfo, order);
                 });
+            }
+        },
+        // 之刷新数量
+        justRefreshEnumInfoNum(groupInfo) {
+            if (this.currentTabType === "list") {
+                this.groupByFieldInfo = groupInfo;
+                this.getListData();
+                // 获取分组字段信息
+                // 如果是无分组 需要直接调卡片列表 否则调枚举值列表
+                if (groupInfo.id) {
+                    let param = {
+                        filter: this.filterParams.length
+                            ? JSON.stringify(this.filterParams)
+                            : "",
+                        lor: "filter_and",
+                        mode: "base_histogram",
+                        order: "desc",
+                        title: "title",
+                        tmpl_id: parseInt(this.curProgress),
+                        userid: this.userInfo.id,
+                        view_id: parseInt(this.currentTab),
+                        ws_id: this.curSpace.id,
+                        show_empty: "yes", //枚举值中返回空值
+                        xMode: groupInfo.mode, // 分组字段类型
+                        x_axis: groupInfo.field_key, // 分组字段
+                        y_axis: "count" //  写死
+                    };
+                    let selectAll = {
+                        filed_mode: "all",
+                        name: "全部"
+                    };
+                    dashApi.getPrviewChart(param).then((res) => {
+                        let arr = [];
+                        // 刷新枚举，但不能
+                        if (res.resultCode === 200) {
+                            arr = res.data.board_statistics;
+                            arr.unshift(selectAll);
+                        } else {
+                            arr = [];
+                            arr.unshift(selectAll);
+                        }
+                        this.$refs.GroupByTemp.justRefreshEnumInfoNum(arr);
+                    });
+                }
             }
         },
         groupBySaveView() {
