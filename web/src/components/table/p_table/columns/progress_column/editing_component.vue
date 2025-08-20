@@ -61,9 +61,7 @@ export default {
         sliderChange(slider) {
             this.fetAuthEdit();
         },
-        handleCheck(a, b, c) {
-            console.log(a, b, c);
-        },
+        handleCheck(a, b, c) {},
         fetAuthEdit() {
             // 获取进展权限
             let params = {
