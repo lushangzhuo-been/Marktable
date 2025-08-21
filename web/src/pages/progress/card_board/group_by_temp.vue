@@ -138,11 +138,8 @@ export default {
                         } else {
                             // 默认第一个
                             this.curEffectEnum = arr[0];
-                            this.$emit(
-                                "check-field-search",
-                                this.curEffectEnum
-                            );
                         }
+                        this.$emit("check-field-search", this.curEffectEnum);
                     } else if (this.cardFilterDown) {
                         // 视图存储的值
                         if (

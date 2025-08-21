@@ -48,13 +48,9 @@ func (a *StatusApi) GetAll(ctx *gin.Context) {
 
 	userid, _ := ctx.Get("userid")
 	//判断是否为模板管理员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanManage(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -216,13 +212,9 @@ func (a *StatusApi) StatusNext(ctx *gin.Context) {
 
 	userid, _ := ctx.Get("userid")
 	//判断是否为模板管理员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanManage(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
