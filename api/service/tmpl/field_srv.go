@@ -317,8 +317,8 @@ func (s *FieldSrv) Delete(req types.FieldDeleteReq) (resp interface{}, err error
 
 func (s *FieldSrv) Enumeration(req types.FieldListReq) (resp interface{}, err error) {
 	var fields []model.FieldModel
-	//人员、单选、多选
-	global.GVA_DB.Where("tmpl_id=? and mode in ('person_com', 'select_com', 'multi_select_com')", req.TmplId).Find(&fields)
+	//状态、人员、单选、多选
+	global.GVA_DB.Where("tmpl_id=? and mode in ('status_com', 'person_com', 'select_com', 'multi_select_com')", req.TmplId).Find(&fields)
 	for i, field := range fields {
 		if field.Mode == enum.FieldStatusCom {
 			var statusList []model.StatusModel

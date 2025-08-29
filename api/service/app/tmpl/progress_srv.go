@@ -14,7 +14,7 @@ import (
 type ProgressSrv struct{}
 
 func (s *ProgressSrv) getProgressCount(wsId int, tmplId int, issueId string) int64 {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 	filter := bson.M{
 		"$and": []bson.M{
 			{"ws_id": wsId},
@@ -35,7 +35,7 @@ func (s *ProgressSrv) AddProgress(userid int, req types.AddProgress) (resp inter
 	document["creator"] = userid
 	document["created_at"] = common.GetCurrentTime()
 	document["updated_at"] = common.GetCurrentTime()
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 	_, err = collection.InsertOne(context.TODO(), &document)
 	if err != nil {
 		return
@@ -45,7 +45,7 @@ func (s *ProgressSrv) AddProgress(userid int, req types.AddProgress) (resp inter
 }
 
 func (s *ProgressSrv) UpdateProgress(userid int, req types.UpdateProgress) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (s *ProgressSrv) UpdateProgress(userid int, req types.UpdateProgress) (resp
 }
 
 func (s *ProgressSrv) DeleteProgress(userid int, req types.DeleteProgress) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return nil, err

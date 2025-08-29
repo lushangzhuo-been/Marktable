@@ -335,7 +335,7 @@ export default {
                 top: 4px;
             }
             &:hover {
-                background-color: #f1f9ff;
+                background-color: #f5f5f5;
             }
             &.active {
                 background-color: #f1f9ff;
