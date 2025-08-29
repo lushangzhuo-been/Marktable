@@ -11,8 +11,6 @@ import (
 	types "mark3/types/app/tmpl"
 	"net/url"
 	"os"
-	"path"
-	"strings"
 )
 
 type UploadApi struct{}
@@ -98,29 +96,6 @@ func (a *UploadApi) GetFileOne(ctx *gin.Context) {
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
-	}
-
-	file := resp.(fileModel.FileModel)
-	filePath := file.RelativePath
-
-	if file.TransformedStatus == fileModel.Transforming {
-		ctl.FailWithMessage("文件正在转换中，请稍后", ctx)
-		return
-	}
-
-	if file.TransformedStatus == fileModel.Failed {
-		ctl.FailWithMessage("文件转换失败，请重新上传", ctx)
-		return
-	}
-
-	if req.DownloadFileType == "transformed_original_name" {
-		filePath = file.TransformedRelativePath
-		exists, _ := global.GVA_RDB.Get(strings.Split(path.Base(filePath), ".")[0]).Result()
-
-		if exists == "awaiting" {
-			ctl.FailWithMessage("文件正在转换中，请稍后", ctx)
-			return
-		}
 	}
 	ctl.OkWithData(resp, ctx)
 }
