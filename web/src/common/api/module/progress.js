@@ -211,6 +211,11 @@ export default {
         let url = "tmpl/app/download_file";
         return http.previewFile(url, params);
     },
+    // 附件预览前判断是否已经转为pdf
+    getFileStatus(params) {
+        let url = "/tmpl/app/get_file_one";
+        return http.get(url, params);
+    },
     // 消息通知
     // 最新
     getMessageList(params) {

@@ -116,11 +116,13 @@
         :isTextShow="false"
         :loading="loading"
         :imgShow="imgShow"
+        :text="showMessage"
+        :loadingMessage="message"
     ></no-data>
 </template>
 <script>
 import _ from "lodash";
-import NoData from "@/pages/common/no_data.vue";
+import NoData from "@/pages/common/no_data_preview.vue";
 // docx插件
 import VueOfficeDocx from "@vue-office/docx";
 import "@vue-office/docx/lib/index.css";
@@ -167,6 +169,8 @@ export default {
     },
     data() {
         return {
+            showMessage: "暂无数据",
+            message: "加载中",
             imgShow: false,
             loading: true,
             curFile: {},
@@ -236,7 +240,7 @@ export default {
                             `${imgHost}${this.curFile.relative_path}`
                         );
                     } else {
-                        this.preview();
+                        this.getFile();
                     }
                 } else {
                     this.curFile = {};
@@ -246,6 +250,41 @@ export default {
         }
     },
     methods: {
+        getFile() {
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                issue_id: this.detailId,
+                id: this.curPreviewFile.id,
+                download_file_type: "transformed_original_name"
+            };
+            api.getFileStatus(params).then((res) => {
+                if (
+                    res &&
+                    res.resultCode === 200 &&
+                    res.data &&
+                    Object.keys(res.data).length
+                ) {
+                    let status = res.data.transformed_status;
+                    if (status === "succeed" || status === "no-transform") {
+                        // 成功 或者不需要转义直接预览
+                        this.preview();
+                    } else if (status === "transforming") {
+                        this.message = "文件正在转化中，请稍等...";
+                        setTimeout(() => {
+                            this.getFile();
+                        }, 500);
+                    } else {
+                        this.showMessage = "加载失败，请重新上传";
+                        this.loading = false;
+                        this.imgShow = true;
+                    }
+                } else {
+                    this.loading = false;
+                    this.imgShow = true;
+                }
+            });
+        },
         rendered() {},
         error(err) {},
         splitAndGetLast(str, separator) {

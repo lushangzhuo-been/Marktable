@@ -34,15 +34,7 @@
                 <div class="msg-content">
                     <div class="title-operation">
                         <div class="msg-content-item">
-                            <div
-                                v-if="fileAuth"
-                                v-overflow
-                                class="name"
-                                @click="preview(item)"
-                            >
-                                {{ currentUploadingFile.file_name }}
-                            </div>
-                            <div v-else v-overflow class="pre-name">
+                            <div v-overflow class="pre-name">
                                 {{ currentUploadingFile.file_name }}
                             </div>
                         </div>
