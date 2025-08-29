@@ -27,7 +27,7 @@ func GetStatusInfo(id int) tmpl.StatusModel {
 }
 
 func GetDocument(wsId int, tmplId int, issueId string) (resp bson.M, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(issueId)
 	if err != nil {
 		return

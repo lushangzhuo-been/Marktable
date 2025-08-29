@@ -8,12 +8,7 @@
             'col-required': formItem.required === 'yes'
         }"
     >
-        <div
-            v-if="!isEditing"
-            class="detail"
-            slot="reference"
-            @click="checkScope()"
-        >
+        <div v-if="!isEditing" slot="reference" @click="checkScope()">
             <div class="detail" slot="reference">
                 <template
                     v-if="

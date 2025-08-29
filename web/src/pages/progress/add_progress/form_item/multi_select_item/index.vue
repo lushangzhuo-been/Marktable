@@ -66,46 +66,28 @@
                     slot="reference"
                 >
                     <!-- 名字列表 -->
-                    <template v-if="selectArr.length">
-                        <tip-one
-                            :text="selectArr[0].value"
-                            v-show="!behandArr.length"
+                    <template>
+                        <div
+                            ref="listCon"
+                            class="tag-list"
+                            :class="{ 'show-num': showNum }"
                         >
-                            <span
-                                class="first-tag"
+                            <div
+                                v-overflow
+                                class="tag-item"
+                                v-for="(tagItem, tagIndex) in frontArr"
+                                :key="tagIndex"
                                 :style="{
                                     color: '#fff',
-                                    backgroundColor: selectArr[0].color,
-                                    maxWidth:
-                                        selectArr.length === 1
-                                            ? 'calc(100% - 24px)'
-                                            : 'calc(100% - 30px - 24px)',
-                                    marginRight:
-                                        selectArr.length === 1 ? 0 : '8px'
+                                    backgroundColor: tagItem.color
                                 }"
                             >
-                                <span class="value">{{
-                                    selectArr[0].value
-                                }}</span>
-                            </span>
-                        </tip-one>
-                        <span
-                            v-show="behandArr.length"
-                            class="first-tag"
-                            :style="{
-                                color: '#fff',
-                                backgroundColor: selectArr[0].color,
-                                maxWidth:
-                                    selectArr.length === 1
-                                        ? 'calc(100% - 24px)'
-                                        : 'calc(100% - 30px - 24px)',
-                                marginRight: selectArr.length === 1 ? 0 : '8px'
-                            }"
-                        >
-                            <span class="value">{{ selectArr[0].value }}</span>
-                        </span>
+                                {{ tagItem.value }}
+                            </div>
+                        </div>
                         <!-- 数字气泡 -->
                         <el-tooltip
+                            v-show="behandArr.length"
                             class="item"
                             effect="dark"
                             placement="top"
@@ -127,12 +109,14 @@
                                     </span>
                                 </div>
                             </div>
-                            <b v-if="behandArr.length" class="num-box"
+                            <b ref="num-box" class="num-box"
                                 >+{{ behandArr.length }}</b
                             >
                         </el-tooltip>
                     </template>
-                    <div v-else style="color: #c0c4cc">请选择</div>
+                    <div v-if="!selectArr.length" style="color: #c0c4cc">
+                        请选择
+                    </div>
                     <b class="triangle" @click="checkScope"></b>
                 </div>
             </el-popover>
@@ -144,7 +128,6 @@
 
 <script>
 import _ from "lodash";
-import TipOne from "@/pages/common/tooltip_one_line.vue";
 export default {
     props: {
         formItem: {
@@ -160,9 +143,7 @@ export default {
             default: 0
         }
     },
-    components: {
-        TipOne
-    },
+    components: {},
     data() {
         return {
             validateFailed: false,
@@ -173,7 +154,9 @@ export default {
             frontArr: [],
             behandArr: [],
             popoverWidth: 300,
-            optionsList: []
+            optionsList: [],
+            labelIndex: 0,
+            showNum: true
         };
     },
     watch: {
@@ -207,6 +190,38 @@ export default {
     },
     mounted() {},
     methods: {
+        getShowLabel(labelIndex) {
+            this.labelIndex = labelIndex;
+            this.frontArr = this.getArrFront(this.selectArr);
+            this.behandArr = this.getArrBehand(this.selectArr);
+        },
+        getAllLabel() {
+            this.frontArr = this.selectArr;
+            this.behandArr = [];
+        },
+        getTagInit() {
+            // 会因为突然显示的数字球  导致换行
+            const listCon = this.$refs.listCon;
+            if (listCon) {
+                const labels = listCon.querySelectorAll(".tag-item");
+                let labelIndex = 0; // 渲染到第几个
+                const listConBottom = listCon.getBoundingClientRect().bottom; // 容器底部距视口顶部距离
+                this.showNum = false;
+                for (let i = 0; i < labels.length; i++) {
+                    const _top = labels[i].getBoundingClientRect().top;
+                    if (_top >= listConBottom) {
+                        // 如果有标签顶部距离超过容器底部则表示超出容器隐藏
+                        this.showNum = true;
+                        labelIndex = i;
+                        this.getShowLabel(labelIndex);
+                        break;
+                    } else {
+                        this.getAllLabel();
+                        this.showNum = false;
+                    }
+                }
+            }
+        },
         doValidate() {
             this.curFormItem = this.formItem;
             if (this.curFormItem.required === "yes" && !this.selectArr.length) {
@@ -244,12 +259,16 @@ export default {
         removeItem(item, index) {
             this.selectArr.splice(index, 1);
             this.optionsList = this.getOptionsList();
-            if (this.selectArr.length > 1) {
-                this.behandArr = this.getArrBehand(this.selectArr);
-            } else {
-                this.behandArr = [];
-            }
-            this.behandArr = this.getArrBehand(this.selectArr);
+            // if (this.selectArr.length > 1) {
+            //     this.behandArr = this.getArrBehand(this.selectArr);
+            // } else {
+            //     this.behandArr = [];
+            // }
+            // this.behandArr = this.getArrBehand(this.selectArr);
+            this.frontArr = this.selectArr;
+            this.$nextTick(() => {
+                this.getTagInit();
+            });
             if (this.formItem.required === "yes" && !this.selectArr.length) {
                 this.validateFailed = true;
             } else {
@@ -325,22 +344,26 @@ export default {
         },
         getArrFront(arr) {
             let deepClone = _.cloneDeep(arr);
-            let front = deepClone.splice(0, 2);
+            let front = deepClone.splice(0, this.labelIndex);
             return front;
         },
         getArrBehand(arr) {
             let deepClone = _.cloneDeep(arr);
-            let behand = deepClone.splice(1);
+            let behand = deepClone.splice(this.labelIndex);
             return behand;
         },
         checkboxChange(item) {
             this.selectArr.push(item);
             this.optionsList = this.getOptionsList();
-            if (this.selectArr.length > 1) {
-                this.behandArr = this.getArrBehand(this.selectArr);
-            } else {
-                this.behandArr = [];
-            }
+            this.frontArr = this.selectArr;
+            this.$nextTick(() => {
+                this.getTagInit();
+            });
+            // if (this.selectArr.length > 1) {
+            //     this.behandArr = this.getArrBehand(this.selectArr);
+            // } else {
+            //     this.behandArr = [];
+            // }
         }
     }
 };
@@ -348,25 +371,33 @@ export default {
 
 <style lang="scss" scoped>
 @import "../../style.scss";
-.detail {
-    display: flex;
-    align-items: center;
-    padding: 0 10px;
-    white-space: nowrap;
-    height: 32px;
-    border-radius: 4px;
-    .first-tag {
-        display: inline-block;
-        height: 24px;
-        line-height: 24px;
-        text-align: center;
-        margin-right: 8px;
-        padding: 0 4px;
-        max-width: 62px;
-        border-radius: 4px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
+.column-block {
+    .detail {
+        display: flex;
+        height: 32px;
+        padding: 0 10px;
+        white-space: wrap;
+
+        .tag-list {
+            display: inline-block;
+            height: 32px;
+            &.show-num {
+            }
+            .tag-item {
+                box-sizing: border-box;
+                display: inline-block;
+                height: 24px;
+                line-height: 24px;
+                text-align: center;
+                margin: 4px 8px 4px 0;
+                padding: 0 4px;
+                border-radius: 4px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+                max-width: 100%;
+            }
+        }
     }
 }
 .num-box {
@@ -380,6 +411,7 @@ export default {
     background-color: #f8f8f8;
     text-align: center;
     position: relative;
+    top: 4px;
     vertical-align: middle;
     font-weight: 400;
     font-size: 12px;

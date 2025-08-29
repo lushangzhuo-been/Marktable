@@ -217,7 +217,7 @@ func (s *StatusSrv) Move(req types.StatusMoveReq) (resp interface{}, err error) 
 }
 
 func (s *StatusSrv) PreCheckDelete(req types.StatusPreCheckDeleteReq) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 
 	filter := bson.M{
 		"$and": []bson.M{
@@ -239,7 +239,7 @@ func (s *StatusSrv) PreCheckDelete(req types.StatusPreCheckDeleteReq) (resp inte
 // 方案2： 不提供删除状态功能，只有废弃该状态
 // 方案3： 直接可以删除，但任务中的涉及该状态的值会变为空
 func (s *StatusSrv) Delete(req types.StatusDeleteReq) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 
 	filter := bson.M{
 		"$and": []bson.M{

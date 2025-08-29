@@ -4,11 +4,10 @@
             <!-- @selection-change="handleSelectionChange" -->
             <!-- @header-dragend="headerDragend" -->
             <!-- #region -->
-            <template v-for="(item, index) in col">
+            <div v-for="(item, index) in col" :key="index">
                 <!-- 标题 创建时间 最后更新时间 -->
                 <main-text-column
                     v-if="item.field_key === 'title'"
-                    :key="index"
                     :item="item"
                     @open-detail="openDetail"
                 ></main-text-column>
@@ -17,13 +16,11 @@
                         item.field_key === 'created_at' ||
                         item.field_key === 'updated_at'
                     "
-                    :key="index"
                     :item="item"
                 ></default-column>
                 <!-- 状态 -->
                 <status-column
                     v-if="item.field_key === 'status'"
-                    :key="index"
                     :item="item"
                 ></status-column>
                 <!-- 处理人/多人 创建人/单人 -->
@@ -32,18 +29,16 @@
                         item.field_key === 'handler' ||
                         item.field_key === 'creator'
                     "
-                    :key="index"
                     :item="item"
                 ></multiple-people-column>
                 <!-- 操作列 -->
                 <operation-column
                     v-if="item.field_key === 'operation'"
-                    :key="index"
                     :item="item"
                     :subTmplAuth="subTmplAuth"
                     @delete-row="deleteSubTask"
                 ></operation-column>
-            </template>
+            </div>
         </el-table>
     </div>
 </template>

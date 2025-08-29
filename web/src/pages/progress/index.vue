@@ -670,15 +670,10 @@ export default {
                             };
                             apiCol.push(obj);
                         });
-                        this.tableCol = [];
-                        let unshiftCol = _.cloneDeep(
-                            HandleData.progressBasicUnshiftCol
-                        );
-                        let unshiftColBackup = unshiftCol.concat(apiCol);
-                        let backupCol = _.cloneDeep(
+                        let basicColCol = _.cloneDeep(
                             HandleData.progressBasicCol
                         );
-                        this.tableCol = unshiftColBackup.concat(backupCol);
+                        this.tableCol = apiCol.concat(basicColCol);
                     }
                 } else {
                     this.tableCol = [];
@@ -739,6 +734,7 @@ export default {
                     this.groupByFieldEnumInfo.filed_mode === "all"
                         ? ""
                         : parseInt(this.groupByFieldEnumInfo.user_id) ||
+                          parseInt(this.groupByFieldEnumInfo.status_id) ||
                           this.groupByFieldEnumInfo.name ||
                           "" // 维度值  角色取user_id
             };
@@ -768,7 +764,7 @@ export default {
         refreshPage: _.debounce(function () {
             if (this.currentTabType === "list") {
                 this.table.page_num = 1;
-                // 添加事件  不用乡下传
+                // 添加事件  不用下传
                 this.getListData();
             }
         }),
@@ -786,7 +782,6 @@ export default {
                 this.table.page_num = 1;
                 if (this.groupByFieldInfo) {
                     this.refreshEnumInfo(); // 是否有分组信息等 调刷新接口
-                    this.getListData();
                 } else {
                     this.getListData();
                 }
@@ -943,6 +938,10 @@ export default {
                             }
                             if (tab.mode === "card") {
                                 // 调配置类接口
+                                // 手动移除状态项
+                                _.remove(this.groupByOption, {
+                                    field_key: "status"
+                                });
                                 this.$nextTick(() => {
                                     this.$refs.KanBan.getConfigTypeInfo(
                                         paramsColumn
@@ -995,6 +994,7 @@ export default {
                     group_axis: this.groupByFieldInfo.field_key,
                     group_value:
                         parseInt(this.groupByFieldEnumInfo.user_id) ||
+                        parseInt(this.groupByFieldEnumInfo.status_id) ||
                         this.groupByFieldEnumInfo.name ||
                         "" // 维度值  角色取user_id
                 };
@@ -1250,7 +1250,7 @@ export default {
                 });
             }
         },
-        // 之刷新数量
+        // 只刷新数量
         justRefreshEnumInfoNum(groupInfo) {
             if (this.currentTabType === "list") {
                 this.groupByFieldInfo = groupInfo;
@@ -1289,6 +1289,7 @@ export default {
                             arr = [];
                             arr.unshift(selectAll);
                         }
+                        // 判断当前枚举值是否还有效果
                         this.$refs.GroupByTemp.justRefreshEnumInfoNum(arr);
                     });
                 }
@@ -1314,6 +1315,7 @@ export default {
                     group_axis: this.groupByFieldInfo.field_key,
                     group_value:
                         parseInt(this.groupByFieldEnumInfo.user_id) ||
+                        parseInt(this.groupByFieldEnumInfo.status_id) ||
                         this.groupByFieldEnumInfo.name ||
                         "" // 维度值  角色取user_id
                 };
@@ -1347,6 +1349,7 @@ export default {
 
 <style lang="scss" scoped>
 .table-loading {
+    min-height: calc(100vh - 400px);
     .gourp-by-with-table {
         &.had-group-by-temp {
             display: flex;
