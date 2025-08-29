@@ -373,6 +373,18 @@ func (s *TmplSrv) Create(userid int, req types.TmplCreateReq) (resp interface{},
 		global.GVA_LOG.Error(err.Error())
 		return
 	}
+	// 初始化权限
+	var defaultTmplAuth []model.TmplAuthModel
+	for _, auth := range enum.AuthList {
+		auth.WsId = req.WsId
+		auth.TmplId = tmpl.Id
+		defaultTmplAuth = append(defaultTmplAuth, auth)
+	}
+	if err = tx.Create(&defaultTmplAuth).Error; err != nil {
+		tx.Rollback()
+		global.GVA_LOG.Error(err.Error())
+		return
+	}
 
 	tx.Commit()
 	return

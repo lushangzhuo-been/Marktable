@@ -10,10 +10,9 @@
             @header-dragend="headerDragend"
         >
             <!-- #region -->
-            <template v-for="(item, index) in col">
+            <div v-for="(item, index) in col" :key="index">
                 <el-table-column
                     v-if="item.mode === 'selection'"
-                    :key="index"
                     :selectable="selectable"
                     type="selection"
                     width="40"
@@ -21,7 +20,6 @@
                 </el-table-column>
                 <!-- 操作列 -->
                 <operation-column
-                    :key="index"
                     v-else-if="item.mode === 'operation'"
                     :item="item"
                     @copy-link="copyLink"
@@ -29,7 +27,6 @@
                 ></operation-column>
                 <!-- 标题title列 -->
                 <main-text-column
-                    :key="index"
                     v-if="
                         item.mode === 'text_com' && item.field_key === 'title'
                     "
@@ -39,7 +36,6 @@
                 ></main-text-column>
                 <!-- 关联流程列 -->
                 <relation-progress-column
-                    :key="index"
                     v-if="item.mode === 'related_com'"
                     :item="item"
                     @open-detail="openDetail"
@@ -47,7 +43,6 @@
                 ></relation-progress-column>
                 <!-- 纯文本列 -->
                 <text-column
-                    :key="index"
                     v-if="
                         item.mode === 'text_com' && item.field_key !== 'title'
                     "
@@ -55,33 +50,28 @@
                     @edit-form-item="editFormItem"
                 ></text-column>
                 <number-column
-                    :key="index"
                     v-if="item.mode === 'number_com'"
                     :item="item"
                     @edit-form-item="editFormItem"
                 ></number-column>
                 <!-- 下拉-单选 -->
                 <col-radio-select
-                    :key="index"
                     v-if="item.mode === 'select_com'"
                     :item="item"
                     @edit-form-item="editFormItem"
                 ></col-radio-select>
                 <!-- 下拉-多选 -->
                 <col-multi-select
-                    :key="index"
                     v-if="item.mode === 'multi_select_com'"
                     :item="item"
                     @edit-form-item="editFormItem"
                 ></col-multi-select>
                 <single-people-column
-                    :key="index"
                     v-if="item.mode === 'person_com' && item.expr === 'single'"
                     :item="item"
                     @edit-form-item="editFormItem"
                 ></single-people-column>
                 <multiple-people-column
-                    :key="index"
                     v-if="
                         item.mode === 'person_com' && item.expr === 'multiple'
                     "
@@ -90,14 +80,12 @@
                 ></multiple-people-column>
                 <!-- 日期列 -->
                 <date-column
-                    :key="index"
                     v-if="item.mode === 'date_com'"
                     :item="item"
                     @edit-form-item="editFormItem"
                 ></date-column>
                 <!-- 可编辑的时间列 -->
                 <date-time-column
-                    :key="index"
                     v-if="
                         item.mode === 'time_com' &&
                         item.field_key !== 'created_at' &&
@@ -107,33 +95,28 @@
                     @edit-form-item="editFormItem"
                 ></date-time-column>
                 <rich-text-column
-                    :key="index"
                     v-if="item.mode === 'textarea_com'"
                     :item="item"
                     @edit-form-item="editFormItem"
                 ></rich-text-column>
                 <!-- html编辑器 -->
                 <col-html-text
-                    :key="index"
                     v-if="item.mode === 'html_text_com'"
                     :item="item"
                     @open-html-col="openHtmlCol"
                 ></col-html-text>
                 <progress-column
-                    :key="index"
                     v-if="item.mode === 'progress_com'"
                     :item="item"
                     @edit-form-item="editFormItem"
                 ></progress-column>
                 <link-column
-                    :key="index"
                     v-if="item.mode === 'link_com'"
                     :item="item"
                     @edit-form-item="editFormItem"
                 ></link-column>
                 <!-- blank列-不可编辑列 -->
                 <blank-column
-                    :key="index"
                     v-if="
                         item.field_key === 'created_at' ||
                         item.field_key === 'updated_at'
@@ -142,12 +125,11 @@
                 ></blank-column>
                 <!-- 状态列，单独一列可编辑，以前为blank列 -->
                 <status-column
-                    :key="index"
                     v-if="item.mode === 'status_com'"
                     :item="item"
                     @refresh-table-data="refreshTableData"
                 ></status-column>
-            </template>
+            </div>
             <!-- #endregion -->
         </el-table>
     </div>
@@ -203,6 +185,24 @@ export default {
         data: {
             type: Array,
             default: () => []
+        }
+    },
+    watch: {
+        col: {
+            handler() {
+                this.$nextTick(() => {
+                    this.refreshTableKey();
+                });
+            },
+            deep: true
+        },
+        data: {
+            handler() {
+                this.$nextTick(() => {
+                    this.refreshTableKey();
+                });
+            },
+            deep: true
         }
     },
     data() {

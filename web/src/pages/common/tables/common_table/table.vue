@@ -6,12 +6,11 @@
             style="width: 100%"
             :row-key="rowKey"
         >
-            <template v-for="(item, index) in col">
+            <div v-for="(item, index) in col" :key="index">
                 <interactive-column
                     v-if="item.type === 'interactive'"
                     :name="item.prop"
                     :column="item"
-                    :key="index"
                     @interactive="interactive"
                 ></interactive-column>
                 <slot
@@ -22,10 +21,9 @@
                 </slot>
                 <default-column
                     v-if="!item.type"
-                    :key="index"
                     :column="item"
                 ></default-column>
-            </template>
+            </div>
         </el-table>
     </div>
 </template>

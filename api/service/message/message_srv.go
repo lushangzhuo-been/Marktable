@@ -17,7 +17,7 @@ type MessageSrv struct{}
 
 func (s *MessageSrv) GetUnReadCount(userid int) (resp interface{}, err error) {
 	filter := bson.M{"userid": userid, "read_sign": enum.ReadSignNo}
-	collection := global.GVA_MONGO.Database("mark3").Collection("user_message")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("user_message")
 	cnt, err := collection.CountDocuments(context.TODO(), filter)
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (s *MessageSrv) GetUnReadCount(userid int) (resp interface{}, err error) {
 }
 
 func (s *MessageSrv) GetMessageList(userid int, req types.GetMessageListReq) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("user_message")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("user_message")
 	var filter bson.M
 	switch req.Mode {
 	case enum.ModeReassign:
@@ -97,7 +97,7 @@ func (s *MessageSrv) GetMessageList(userid int, req types.GetMessageListReq) (re
 }
 
 func (s *MessageSrv) ReadMessage(userid int, req types.ReadMessageReq) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("user_message")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("user_message")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return nil, err
@@ -127,7 +127,7 @@ func (s *MessageSrv) ReadMessage(userid int, req types.ReadMessageReq) (resp int
 }
 
 func (s *MessageSrv) ReadAllMessage(userid int, req types.ReadAllMessageReq) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("user_message")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("user_message")
 
 	var unReadFilter bson.M
 	switch req.Mode {

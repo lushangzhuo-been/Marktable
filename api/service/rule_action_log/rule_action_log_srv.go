@@ -179,7 +179,7 @@ func GetOneDocument(rule model.RuleModel, issueId string) (bson.M, error) {
 	}
 	filter["_id"] = objectID
 
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	var document bson.M
 	err = collection.FindOne(context.TODO(), filter).Decode(&document)
 	if err != nil {
@@ -197,7 +197,7 @@ func GetDocuments(rule model.RuleModel) ([]bson.M, error) {
 	if err != nil {
 		return nil, err
 	}
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	// mgField := bson.D{{"_id", 1}}
 	// cursor, err := collection.Find(context.TODO(), filter, options.Find().SetProjection(mgField))
 	cursor, err := collection.Find(context.TODO(), filter)

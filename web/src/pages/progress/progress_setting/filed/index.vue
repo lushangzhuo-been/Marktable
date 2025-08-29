@@ -297,7 +297,7 @@ export default {
                     let params = {
                         ws_id: _this.curSpace.id,
                         tmpl_id: _this.$route.params.id,
-                        module: "filed"
+                        module: "field"
                     };
                     if (tmpKeyList.length) {
                         params.coordinate = tmpKeyList.join(",");

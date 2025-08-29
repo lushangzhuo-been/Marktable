@@ -252,6 +252,7 @@ func NewRouter() *gin.Engine {
 	fileAppApi := new(appTmpl.UploadApi)
 	r.GET("/tmpl/app/get_upload_ext_config", middleware.AuthMiddleware(), fileAppApi.GetUploadExtConfig)
 	r.GET("/tmpl/app/get_file_list", middleware.AuthMiddleware(), fileAppApi.GetFileList)
+	r.GET("/tmpl/app/get_file_one", middleware.AuthMiddleware(), fileAppApi.GetFileOne)
 	r.POST("/tmpl/app/upload_file", middleware.AuthMiddleware(), fileAppApi.UploadFile)
 	r.GET("/tmpl/app/download_file", middleware.AuthMiddleware(), fileAppApi.DownloadFile)
 	r.POST("/tmpl/app/delete_file", middleware.AuthMiddleware(), fileAppApi.DeleteFile)

@@ -83,20 +83,7 @@ export default {
             }
         ];
     },
-    progressBasicUnshiftCol: [
-        {
-            prop: "subTask",
-            label: "",
-            align: "center",
-            mode: "subTask",
-            fixed: "left",
-            columnName: "subTask"
-        }
-    ],
     progressBasicCol: [
-        // {
-        //     mode: "selection",
-        // },
         {
             prop: "operation",
             label: "操作",

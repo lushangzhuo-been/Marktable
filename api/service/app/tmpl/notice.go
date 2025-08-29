@@ -63,7 +63,7 @@ func reassignNotice(wsId int, tmplId int, issueId string, userid int, toUserList
 		message["created_at"] = common.GetCurrentTime()
 		messageList = append(messageList, message)
 	}
-	collection := global.GVA_MONGO.Database("mark3").Collection("user_message")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("user_message")
 	_, err := collection.InsertMany(context.TODO(), messageList)
 	if err != nil {
 		global.GVA_LOG.Error(err.Error())
@@ -152,7 +152,7 @@ func AtPersonNotice(userid int, wsId int, tmplId int, progress bson.M) {
 		return
 	}
 
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(issueId)
 	if err != nil {
 		return
@@ -188,7 +188,7 @@ func AtPersonNotice(userid int, wsId int, tmplId int, progress bson.M) {
 		message["created_at"] = common.GetCurrentTime()
 		messageList = append(messageList, message)
 	}
-	collection = global.GVA_MONGO.Database("mark3").Collection("user_message")
+	collection = global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("user_message")
 	_, err = collection.InsertMany(context.TODO(), messageList)
 	if err != nil {
 		global.GVA_LOG.Error(err.Error())

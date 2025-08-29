@@ -8,6 +8,7 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"time"
 )
 
 func TestToPdf(fileSrcPath string, outPath string, fileType string) (fileOutPath string, error error) {
@@ -59,6 +60,9 @@ func TestToPdf(fileSrcPath string, outPath string, fileType string) (fileOutPath
 * @return fileOutPath 转换成功生成的文件的路径 error 转换错误
  */
 func FuncDocs2Pdf(command string, fileSrcPath string, fileOutDir string, converterType string) (fileOutPath string, error error) {
+	fileOutPath = fileOutDir + "/" + strings.Split(path.Base(fileSrcPath), ".")[0]
+	fileOutPath += "." + converterType
+	_ = global.GVA_RDB.Set(strings.Split(path.Base(fileSrcPath), ".")[0], "awaiting", time.Minute*5).Err()
 	//校验fileSrcPath
 	srcFile, erByOpenSrcFile := os.Open(fileSrcPath)
 	if erByOpenSrcFile != nil && os.IsNotExist(erByOpenSrcFile) {
@@ -87,8 +91,8 @@ func FuncDocs2Pdf(command string, fileSrcPath string, fileOutDir string, convert
 		return "", errByCmdStart
 	}
 	//success
-	fileOutPath = fileOutDir + "/" + strings.Split(path.Base(fileSrcPath), ".")[0]
-	fileOutPath += "." + converterType
+	_ = global.GVA_RDB.Del(strings.Split(path.Base(fileSrcPath), ".")[0]).Err()
 	global.GVA_LOG.Info("文件转换成功...", string(byteByStat))
+
 	return fileOutPath, nil
 }

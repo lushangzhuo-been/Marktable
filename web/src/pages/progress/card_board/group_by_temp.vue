@@ -117,60 +117,76 @@ export default {
         groupByList: {
             handler(arr) {
                 this.groupByInfo = _.cloneDeep(arr);
-                if (arr && arr.length) {
+                this.checkCurEnumStillEfect();
+                if (this.groupByInfo && this.groupByInfo.length) {
                     // 优先处理this.curEffectEnum，再this.cardFilterDown
                     if (Object.keys(this.curEffectEnum).length) {
                         // 当前选中的枚举值  需要确认列表中枚举值是否仍然存在
                         if (
                             this.groupByFieldInfo.mode === "person_com" &&
-                            _.find(arr, {
+                            _.find(this.groupByInfo, {
                                 user_id: this.curEffectEnum.user_id
                             })
                         ) {
                             // 当前人类型值仍有效
                         } else if (
-                            this.groupByFieldInfo.mode !== "person_com" &&
-                            _.find(arr, {
+                            // 其他和状态
+                            _.find(this.groupByInfo, {
                                 name: this.curEffectEnum.name
                             })
                         ) {
                             // 当前非人类型值仍有效
                         } else {
                             // 默认第一个
-                            this.curEffectEnum = arr[0];
+                            this.curEffectEnum = this.groupByInfo[0];
                         }
                         this.$emit("check-field-search", this.curEffectEnum);
                     } else if (this.cardFilterDown) {
                         // 视图存储的值
                         if (
                             this.groupByFieldInfo.mode === "person_com" &&
-                            _.find(arr, {
+                            _.find(this.groupByInfo, {
                                 user_id: this.cardFilterDown.group_value
                             })
                         ) {
+                            // 人
                             // 优先取视图保存的group_value信息
-                            this.curEffectEnum = _.find(arr, {
+                            this.curEffectEnum = _.find(this.groupByInfo, {
                                 user_id: this.cardFilterDown.group_value
                             });
                         } else if (
+                            this.groupByFieldInfo.mode === "status_com" &&
+                            _.find(this.groupByInfo, {
+                                status_id:
+                                    this.cardFilterDown.group_value.toString()
+                            })
+                        ) {
+                            // 状态
+                            this.curEffectEnum = _.find(this.groupByInfo, {
+                                status_id:
+                                    this.cardFilterDown.group_value.toString()
+                            });
+                        } else if (
                             this.groupByFieldInfo.mode !== "person_com" &&
-                            _.find(arr, {
+                            _.find(this.groupByInfo, {
                                 user_id: this.cardFilterDown.group_value
                             })
                         ) {
-                            this.curEffectEnum = _.find(arr, {
+                            // 其他
+                            this.curEffectEnum = _.find(this.groupByInfo, {
                                 name: this.cardFilterDown.group_value
                             });
                         } else {
                             // 默认第一个
-                            this.curEffectEnum = arr[0];
+                            this.curEffectEnum = this.groupByInfo[0];
                         }
                         this.$emit("check-field-search", this.curEffectEnum);
                     } else {
                         // 空值
-                        this.curEffectEnum = arr[0];
+                        this.curEffectEnum = this.groupByInfo[0];
                         this.$emit("check-field-search", this.curEffectEnum);
                     }
+                    this.checkCurEnumStillEfect();
                 }
             },
             immediate: true,
@@ -191,7 +207,36 @@ export default {
         },
         // 只刷新左侧枚举信息
         justRefreshEnumInfoNum(arr) {
+            // 有一种情况就是当前分组内已经没有数据了
             this.groupByInfo = _.cloneDeep(arr);
+            this.checkCurEnumStillEfect();
+        },
+        // 删除等操作会导致枚举值丢失，需要进行逻辑处理
+        checkCurEnumStillEfect() {
+            if (this.groupByInfo && this.groupByInfo.length) {
+                if (Object.keys(this.curEffectEnum).length) {
+                    // 当前选中的枚举值  需要确认列表中枚举值是否仍然存在
+                    if (
+                        this.groupByFieldInfo.mode === "person_com" &&
+                        _.find(this.groupByInfo, {
+                            user_id: this.curEffectEnum.user_id
+                        })
+                    ) {
+                        // 当前人类型值仍有效
+                    } else if (
+                        // 其他和状态
+                        _.find(this.groupByInfo, {
+                            name: this.curEffectEnum.name
+                        })
+                    ) {
+                        // 当前非人类型值仍有效
+                    } else {
+                        // 默认第一个
+                        this.curEffectEnum = this.groupByInfo[0];
+                        this.$emit("check-field-search", this.curEffectEnum);
+                    }
+                }
+            }
         },
         checkField(info) {
             this.curEffectEnum = info;
@@ -219,7 +264,7 @@ export default {
 .group-by-list {
     box-sizing: border-box;
     width: 40px;
-    background: #fafafb;
+    background: #ffffff;
     border-radius: 4px 0px 0px 4px;
     border: 1px solid #e6e9f0;
     &.expand {
@@ -229,6 +274,7 @@ export default {
         height: 40px;
         line-height: 40px;
         padding: 0 8px;
+        background: #fafafb;
         display: flex;
         justify-content: space-between;
         &.close {
@@ -293,8 +339,9 @@ export default {
             padding: 0 12px;
             display: flex;
             cursor: pointer;
+            margin-bottom: 2px;
             &:hover {
-                background-color: #ecf4fb;
+                background-color: #f5f5f5;
             }
             &.cur-effect {
                 background-color: rgba($color: #1890ff, $alpha: 0.06);

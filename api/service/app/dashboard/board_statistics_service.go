@@ -358,7 +358,7 @@ func (s *BoardStatisticsService) GetBoardStatisticsPreview(boardDict map[string]
 	if ok {
 		mgFilter = s.GetMgFilterDown(mgFilter, filterDown.(string), boardDict)
 	}
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	cursor, err := collection.Find(context.Background(), mgFilter, options.Find().SetProjection(mgField))
 	if err != nil {
 		return nil, err
@@ -485,7 +485,7 @@ func (s *BoardStatisticsService) GetRelatedDocuments(wsID, tmplID int, issueIDs 
 		"_id":     bson.M{"$in": objectIDs},
 	}
 
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	cursor, err := collection.Find(context.Background(), mgFilter)
 	if err != nil {
 		return nil, err
@@ -658,6 +658,9 @@ func (s *BoardStatisticsService) StatusComData(
 		sort.Slice(dataGroupList, func(i, j int) bool {
 			valI := dataGroupList[i]["value"].(int)
 			valJ := dataGroupList[j]["value"].(int)
+			if valI == valJ {
+				return dataGroupList[i]["name"].(string) < dataGroupList[j]["name"].(string)
+			}
 			if reverse {
 				return valI > valJ
 			}
@@ -918,6 +921,9 @@ func (s *BoardStatisticsService) prepareDataGroupList(resDict map[string]int, da
 		order := boardDict["order"].(string)
 		reverse := order != "asc"
 		sort.Slice(dataGroupList, func(i, j int) bool {
+			if dataGroupList[i]["value"].(int) == dataGroupList[j]["value"].(int) {
+				return dataGroupList[i]["name"].(string) < dataGroupList[j]["name"].(string)
+			}
 			if reverse {
 				return dataGroupList[i]["value"].(int) > dataGroupList[j]["value"].(int)
 			}

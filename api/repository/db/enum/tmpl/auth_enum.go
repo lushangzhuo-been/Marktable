@@ -1,5 +1,7 @@
 package tmpl
 
+import model "mark3/repository/db/model/tmpl"
+
 const (
 	AuthSee      = "see"
 	AuthExport   = "export"
@@ -20,4 +22,55 @@ var AuthMap = map[string]string{
 	AuthProgress: "进展",
 	AuthFile:     "附件",
 	AuthSubTmpl:  "子任务",
+}
+
+var AuthList = []model.TmplAuthModel{
+	{
+		Mode:          AuthSee,
+		WsRoles:       "admin,general",
+		UserList:      "",
+		IssueRoleList: "",
+	},
+	{
+		Mode:          AuthExport,
+		WsRoles:       "admin,general",
+		UserList:      "",
+		IssueRoleList: "",
+	},
+	{
+		Mode:          AuthCreate,
+		WsRoles:       "admin,general",
+		UserList:      "",
+		IssueRoleList: "",
+	},
+	{
+		Mode:          AuthEdit,
+		WsRoles:       "",
+		UserList:      "",
+		IssueRoleList: "handler,creator",
+	},
+	{
+		Mode:          AuthDelete,
+		WsRoles:       "",
+		UserList:      "",
+		IssueRoleList: "creator",
+	},
+	{
+		Mode:          AuthProgress,
+		WsRoles:       "",
+		UserList:      "",
+		IssueRoleList: "handler,creator",
+	},
+	{
+		Mode:          AuthFile,
+		WsRoles:       "",
+		UserList:      "",
+		IssueRoleList: "handler,creator",
+	},
+	{
+		Mode:          AuthSubTmpl,
+		WsRoles:       "",
+		UserList:      "",
+		IssueRoleList: "handler,creator",
+	},
 }

@@ -30,7 +30,7 @@ export const FieldColumnWidth = {
     time_com: 180,
     // created_at: 180,
     // updated_at: 180,
-    date_com: 120,
+    date_com: 160,
     multi_select_com: 140,
     textarea_com: 220,
     html_text_com: 140,

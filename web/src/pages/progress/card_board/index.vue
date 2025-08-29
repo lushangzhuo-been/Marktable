@@ -251,6 +251,7 @@ export default {
                     group_axis: this.groupByFieldInfo.field_key,
                     group_value:
                         parseInt(this.groupByFieldEnumInfo.user_id) ||
+                        parseInt(this.groupByFieldEnumInfo.status_id) ||
                         this.groupByFieldEnumInfo.name ||
                         "" // 维度值  角色取user_id
                 };
@@ -405,9 +406,7 @@ export default {
             this.checkCurListAll(fromCardInfo);
             this.checkCurListAll(toCardInfo);
         },
-
-        // 获取字段分组信息
-        confimGroupBy(groupInfo, order) {
+        confimGroupBy: _.debounce(function (groupInfo, order) {
             // 如果是无分组 需要直接调卡片列表 否则调枚举值列表
             this.groupByFieldInfo = groupInfo;
             if (groupInfo.id) {
@@ -450,7 +449,7 @@ export default {
                     this.checkFieldSearch(DataHandle.noGroupInfo);
                 }
             }
-        },
+        }, 300),
         // 当前流程拥有的全部状态
         getRuleStatusList(key) {
             let params = {
@@ -505,6 +504,7 @@ export default {
                         this.groupByFieldEnumInfo.filed_mode === "all"
                             ? ""
                             : parseInt(this.groupByFieldEnumInfo.user_id) ||
+                              parseInt(this.groupByFieldEnumInfo.status_id) ||
                               this.groupByFieldEnumInfo.name ||
                               "" // 维度值  角色取user_id
                 };
@@ -593,6 +593,7 @@ export default {
                     this.groupByFieldEnumInfo.filed_mode === "all"
                         ? ""
                         : parseInt(this.groupByFieldEnumInfo.user_id) ||
+                          parseInt(this.groupByFieldEnumInfo.status_id) ||
                           this.groupByFieldEnumInfo.name ||
                           "" // 维度值  角色取user_id
             };
@@ -633,6 +634,7 @@ export default {
                     this.groupByFieldEnumInfo.filed_mode === "all"
                         ? ""
                         : parseInt(this.groupByFieldEnumInfo.user_id) ||
+                          parseInt(this.groupByFieldEnumInfo.status_id) ||
                           this.groupByFieldEnumInfo.name ||
                           "" // 维度值  角色取user_id
             };

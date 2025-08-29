@@ -345,15 +345,15 @@
 import TextItem from "@/pages/progress/detail/components/node_operation_form/text_item/index.vue";
 import NumberItem from "@/pages/progress/detail/components/node_operation_form/number_item/index.vue";
 import ProgressItem from "@/pages/progress/detail/components/node_operation_form/progress_item/index.vue";
-import MultiplePeopleItem from "@/pages/progress/detail/components/node_operation_form/multiple_people_item/index2.vue";
-import SinglePeopleItem from "@/pages/progress/detail/components/node_operation_form/single_people_item/index2.vue";
-import RelationProgressItem from "@/pages/progress/detail/components/node_operation_form/relation_progress_item/index2.vue";
+import MultiplePeopleItem from "@/pages/progress/detail/components/node_operation_form/multiple_people_item/index.vue";
+import SinglePeopleItem from "@/pages/progress/detail/components/node_operation_form/single_people_item/index.vue";
+import RelationProgressItem from "@/pages/progress/detail/components/node_operation_form/relation_progress_item/index.vue";
 import DateItem from "@/pages/progress/detail/components/node_operation_form/date_item/index.vue";
 import DateTimeItem from "@/pages/progress/detail/components/node_operation_form/date_time_item/index.vue";
 import RichTextItem from "@/pages/progress/detail/components/node_operation_form/rich_text_item/index.vue";
 import LinkItem from "@/pages/progress/detail/components/node_operation_form/link_item/index.vue";
 import { FieldType } from "@/assets/tool/const";
-import MultiSelectItem from "@/pages/progress/detail/components/node_operation_form/multi_select_item/index2.vue";
+import MultiSelectItem from "@/pages/progress/detail/components/node_operation_form/multi_select_item/index.vue";
 import RadioSelectItem from "@/pages/progress/detail/components/node_operation_form/radio_select_item/index.vue";
 import HtmlTextItem from "@/pages/progress/detail/components/node_operation_form/html_text_item/index.vue";
 

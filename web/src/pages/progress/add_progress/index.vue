@@ -362,15 +362,14 @@ import { DefauleAvatar } from "@/assets/tool/const";
 import TextItem from "./form_item/text_item/index.vue";
 import NumberItem from "./form_item/number_item/index.vue";
 import ProgressItem from "./form_item/progress_item/index.vue";
-
 import RelationProgressItem from "./form_item/relation_progress_item/index.vue";
 import SinglePeopleItem from "./form_item/single_people_item/index.vue";
-import MultiplePeopleItem from "./form_item/multiple_people_item/index2.vue";
+import MultiplePeopleItem from "./form_item/multiple_people_item/index.vue";
 import DateItem from "./form_item/date_item/index.vue";
 import DateTimeItem from "./form_item/date_time_item/index.vue";
 import RichTextItem from "./form_item/rich_text_item/index.vue";
 import HtmlTextItem from "./form_item/html_text_item/index.vue";
-import MultiSelectItem from "./form_item/multi_select_item/index2.vue";
+import MultiSelectItem from "./form_item/multi_select_item/index.vue";
 import RadioSelectItem from "./form_item/radio_select_item/index.vue";
 import LinkItem from "./form_item/link_item/index.vue";
 import { FieldType } from "@/assets/tool/const";

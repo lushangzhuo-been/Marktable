@@ -57,74 +57,60 @@
                 <!-- 点击此展示下拉内容 -->
                 <div slot="reference">
                     <!-- 名字列表 -->
-                    <div class="detail" v-if="selectArr.length">
-                        <tip-one
-                            :text="selectArr[0].value"
-                            v-show="!behandArr.length"
-                        >
-                            <span
-                                class="first-tag"
-                                :style="{
-                                    color: '#fff',
-                                    backgroundColor: selectArr[0].color,
-                                    maxWidth:
-                                        selectArr.length === 1
-                                            ? 'calc(100% - 24px)'
-                                            : 'calc(100% - 30px - 24px)',
-                                    marginRight:
-                                        selectArr.length === 1 ? 0 : '8px'
-                                }"
+                    <!-- 名字列表 -->
+                    <div v-show="frontArr.length" class="detail">
+                        <template>
+                            <div
+                                ref="listCon"
+                                class="tag-list"
+                                :class="{ 'show-num': showNum }"
                             >
-                                <span class="value">{{
-                                    selectArr[0].value
-                                }}</span>
-                            </span>
-                        </tip-one>
-                        <span
-                            v-show="behandArr.length"
-                            class="first-tag"
-                            :style="{
-                                color: '#fff',
-                                backgroundColor: selectArr[0].color,
-                                maxWidth:
-                                    selectArr.length === 1
-                                        ? 'calc(100% - 24px)'
-                                        : 'calc(100% - 30px - 24px)',
-                                marginRight: selectArr.length === 1 ? 0 : '8px'
-                            }"
-                        >
-                            <span class="value">{{ selectArr[0].value }}</span>
-                        </span>
-                        <!-- 数字气泡 -->
-                        <el-tooltip
-                            class="item"
-                            effect="dark"
-                            placement="top"
-                            popper-class="col-mutil-select-tooltip"
-                        >
-                            <div slot="content">
                                 <div
-                                    v-for="(item, index) in behandArr"
-                                    :key="index"
+                                    v-overflow
+                                    class="tag-item"
+                                    v-for="(tagItem, tagIndex) in frontArr"
+                                    :key="tagIndex"
+                                    :style="{
+                                        color: '#fff',
+                                        backgroundColor: tagItem.color
+                                    }"
                                 >
-                                    <span
-                                        class="tip-item"
-                                        :style="{
-                                            color: '#fff',
-                                            backgroundColor: item.color
-                                        }"
-                                    >
-                                        {{ item.value }}
-                                    </span>
+                                    {{ tagItem.value }}
                                 </div>
                             </div>
-                            <b v-if="behandArr.length" class="num-box"
-                                >+{{ behandArr.length }}</b
+                            <!-- 数字气泡 -->
+                            <el-tooltip
+                                v-show="showNum"
+                                class="item"
+                                effect="dark"
+                                placement="top"
+                                popper-class="col-mutil-select-tooltip"
                             >
-                        </el-tooltip>
+                                <div slot="content">
+                                    <div
+                                        v-for="(item, index) in behandArr"
+                                        :key="index"
+                                    >
+                                        <span
+                                            class="tip-item"
+                                            :style="{
+                                                color: '#fff',
+                                                backgroundColor: item.color
+                                            }"
+                                        >
+                                            {{ item.value }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <b ref="num-box" class="num-box"
+                                    >+{{ behandArr.length }}</b
+                                >
+                            </el-tooltip>
+                        </template>
+                        <span v-show="!selectArr.length"></span>
                     </div>
                     <div
-                        v-else
+                        v-show="!frontArr.length"
                         class="detail default-text"
                         :class="{
                             'validate-failed': validateFailed
@@ -143,7 +129,6 @@
 
 <script>
 import _ from "lodash";
-import TipOne from "@/pages/common/tooltip_one_line.vue";
 export default {
     props: {
         formItem: {
@@ -159,9 +144,7 @@ export default {
             default: 0
         }
     },
-    components: {
-        TipOne
-    },
+    components: {},
     data() {
         return {
             validateFailed: false,
@@ -173,7 +156,9 @@ export default {
             frontArr: [],
             behandArr: [],
             popoverWidth: 220,
-            optionsList: []
+            optionsList: [],
+            labelIndex: 0,
+            showNum: false
         };
     },
     watch: {
@@ -223,11 +208,10 @@ export default {
                         });
                     }
                     this.selectArr = selectArr;
-                    if (this.selectArr.length > 1) {
-                        this.behandArr = this.getArrBehand(this.selectArr);
-                    } else {
-                        this.behandArr = [];
-                    }
+                    this.frontArr = this.selectArr;
+                    this.$nextTick(() => {
+                        this.getTagInit();
+                    });
                 } else {
                     this.selectArr = [];
                 }
@@ -239,6 +223,50 @@ export default {
     },
     mounted() {},
     methods: {
+        getArrFront(arr) {
+            let deepClone = _.cloneDeep(arr);
+            let front = deepClone.splice(0, this.labelIndex);
+            return front;
+        },
+        getArrBehand(arr) {
+            let deepClone = _.cloneDeep(arr);
+            let behand = deepClone.splice(this.labelIndex);
+            return behand;
+        },
+        getShowLabel(labelIndex) {
+            this.labelIndex = labelIndex;
+            this.frontArr = this.getArrFront(this.selectArr);
+            this.behandArr = this.getArrBehand(this.selectArr);
+        },
+        getAllLabel() {
+            this.frontArr = this.selectArr;
+            this.behandArr = [];
+        },
+        getTagInit() {
+            // 会因为突然显示的数字球  导致换行
+            const listCon = this.$refs.listCon;
+            if (listCon) {
+                const labels = listCon.querySelectorAll(".tag-item");
+                let labelIndex = 0; // 渲染到第几个
+                const listConBottom = listCon.getBoundingClientRect().bottom; // 容器底部距视口顶部距离
+                this.showNum = false;
+                this.$nextTick(() => {
+                    for (let i = 0; i < labels.length; i++) {
+                        const _top = labels[i].getBoundingClientRect().top;
+                        if (_top >= listConBottom) {
+                            // 如果有标签顶部距离超过容器底部则表示超出容器隐藏
+                            this.showNum = true;
+                            labelIndex = i;
+                            this.getShowLabel(labelIndex);
+                            break;
+                        } else {
+                            this.getAllLabel();
+                            this.showNum = false;
+                        }
+                    }
+                });
+            }
+        },
         doValidate() {
             this.curFormItem = this.formItem;
             if (this.curFormItem.required === "yes" && !this.selectArr.length) {
@@ -276,11 +304,10 @@ export default {
         removeItem(item, index) {
             this.selectArr.splice(index, 1);
             this.optionsList = this.getOptionsList();
-            if (this.selectArr.length > 1) {
-                this.behandArr = this.getArrBehand(this.selectArr);
-            } else {
-                this.behandArr = [];
-            }
+            this.frontArr = this.selectArr;
+            this.$nextTick(() => {
+                this.getTagInit();
+            });
             if (this.formItem.required === "yes" && !this.selectArr.length) {
                 this.validateFailed = true;
             } else {
@@ -363,24 +390,13 @@ export default {
                 this.formItem.mode
             );
         },
-        getArrFront(arr) {
-            let deepClone = _.cloneDeep(arr);
-            let front = deepClone.splice(0, 2);
-            return front;
-        },
-        getArrBehand(arr) {
-            let deepClone = _.cloneDeep(arr);
-            let behand = deepClone.splice(1);
-            return behand;
-        },
         checkboxChange(item) {
             this.selectArr.push(item);
             this.optionsList = this.getOptionsList();
-            if (this.selectArr.length > 1) {
-                this.behandArr = this.getArrBehand(this.selectArr);
-            } else {
-                this.behandArr = [];
-            }
+            this.frontArr = this.selectArr;
+            this.$nextTick(() => {
+                this.getTagInit();
+            });
             if (this.formItem.required === "yes" && !this.selectArr.length) {
                 this.validateFailed = true;
             } else {
@@ -402,24 +418,28 @@ export default {
     align-items: center;
     border: 1px solid #dcdfe6;
     padding: 0 10px;
-    white-space: nowrap;
     height: 32px;
     border-radius: 4px;
     &:focus {
         border: 1px solid var(--PRIMARY_COLOR);
     }
-    .first-tag {
+    .tag-list {
         display: inline-block;
-        height: 24px;
-        line-height: 24px;
-        text-align: center;
-        margin-right: 8px;
-        padding: 0 4px;
-        max-width: 62px;
-        border-radius: 4px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
+        height: 32px;
+        white-space: wrap;
+        max-width: calc(100% - 30px);
+        &.show-num {
+            white-space: nowrap;
+        }
+        .tag-item {
+            display: inline-block;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            margin: 4px 8px 6px 0px;
+            padding: 0 4px;
+            border-radius: 4px;
+        }
     }
 }
 

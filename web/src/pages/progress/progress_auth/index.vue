@@ -211,17 +211,18 @@ export default {
     height: 800px;
     .auth-left {
         width: 200px;
-        border: 1px solid #ccc;
         height: 100%;
         margin-right: 24px;
-        background-color: #fafafb;
+        background-color: #ffffff;
+        border-radius: 4px 0px 0px 4px;
+        border: 1px solid #e6e9f0;
         .small-title {
             height: 40px;
             line-height: 40px;
-            border-bottom: 1px solid #ccc;
             margin-bottom: 10px;
             font-weight: 500;
             padding: 0 12px;
+            background-color: #fafafb;
         }
         .auth-item {
             height: 40px;
@@ -229,7 +230,7 @@ export default {
             padding: 0 12px;
             cursor: pointer;
             &:hover {
-                background-color: #f1f9ff;
+                background-color: #fafafb;
             }
         }
     }

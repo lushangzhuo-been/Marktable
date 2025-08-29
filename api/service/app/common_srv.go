@@ -325,7 +325,7 @@ func GetDocumentsByIdStr(wsId int, tmplId int, issueIdsStr string) []bson.M {
 		"tmpl_id": tmplId,
 		"_id":     bson.M{"$in": objectIds},
 	}
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil

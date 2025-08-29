@@ -115,7 +115,7 @@ func log(userid int, wsId int, tmplId int, issueId string, newData bson.M, oldDa
 	document["action"] = action
 	document["content"] = logContent
 	document["created_at"] = common.GetCurrentTime()
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_log")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_log")
 	_, err := collection.InsertOne(context.TODO(), &document)
 	go rule_action_log.CheckRule(userid, wsId, tmplId, issueId, oldData, fieldsMap, changeData, action)
 	if err != nil {
@@ -138,7 +138,7 @@ func logForFile(userid int, wsId int, tmplId int, issueId string, fileName strin
 	document["action"] = action
 	document["content"] = []string{logContent}
 	document["created_at"] = common.GetCurrentTime()
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_log")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_log")
 	_, err := collection.InsertOne(context.TODO(), &document)
 	if err != nil {
 		return
