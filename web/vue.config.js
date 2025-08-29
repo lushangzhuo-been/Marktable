@@ -10,7 +10,7 @@ module.exports = defineConfig({
     chainWebpack: (config) => {
         config.plugins.delete('prefetch');//默认开启prefetch(预先加载模块)，提前获取用户未来可能会访问的内容 在首屏会把这十几个路由文件，都一口气下载了 所以我们要关闭这个功能模块
         config.plugin("html").tap((args) => {
-            args[0].title = "MarkTable";
+            args[0].title = "项目管理";
             return args;
         });
         if (isProdOrTest) {

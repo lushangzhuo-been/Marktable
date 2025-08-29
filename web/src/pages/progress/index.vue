@@ -782,6 +782,7 @@ export default {
                 this.table.page_num = 1;
                 if (this.groupByFieldInfo) {
                     this.refreshEnumInfo(); // 是否有分组信息等 调刷新接口
+                    this.getListData();
                 } else {
                     this.getListData();
                 }
