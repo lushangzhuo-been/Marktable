@@ -224,6 +224,19 @@ func (s *UserSrv) Register(req types.RegisterReq) (resp interface{}, err error) 
 		global.GVA_LOG.Error(err.Error())
 		return
 	}
+	// 初始化权限
+	var defaultTmplAuth []tmplModel.TmplAuthModel
+	for _, auth := range tmplEnum.AuthList {
+		auth.WsId = ws.Id
+		auth.TmplId = tmpl.Id
+		defaultTmplAuth = append(defaultTmplAuth, auth)
+	}
+	if err = tx.Create(&defaultTmplAuth).Error; err != nil {
+		tx.Rollback()
+		global.GVA_LOG.Error(err.Error())
+		return
+	}
+
 	tx.Commit()
 
 	return

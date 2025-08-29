@@ -51,7 +51,7 @@
                             :key="tagIndex"
                         >
                             <el-avatar
-                                class="progress-avatar"
+                                class="email-to-avatar"
                                 icon="el-icon-user-solid"
                                 size="small"
                                 :src="getAvatar(tagItem.avatar)"
@@ -75,7 +75,7 @@
                             @click="confirmPeople(listItem)"
                         >
                             <el-avatar
-                                class="progress-avatar"
+                                class="email-to-avatar"
                                 icon="el-icon-user-solid"
                                 size="small"
                                 :src="getAvatar(listItem.avatar)"
@@ -88,8 +88,8 @@
                     </div>
                 </div>
 
-                <!-- 任务角色 -->
-                <div v-show="activeName === '任务角色'" class="role-content">
+                <!-- 任务属性 -->
+                <div v-show="activeName === '任务属性'" class="role-content">
                     <el-checkbox-group
                         v-if="roleListShow.length"
                         v-model="checkArr"
@@ -121,6 +121,9 @@
             <!-- 标签化 -->
             <div class="detail" slot="reference">
                 <!-- 名字列表 -->
+                <div class="default-text" v-if="!frontArr.length">
+                    {{ placeholder }}
+                </div>
                 <div class="mem-list-content">
                     <div
                         ref="listCon"
@@ -134,7 +137,7 @@
                         >
                             <el-avatar
                                 v-show="tagItem.avatar !== 'role'"
-                                class="progress-avatar"
+                                class="email-to-avatar"
                                 icon="el-icon-user-solid"
                                 size="small"
                                 :src="getAvatar(tagItem.avatar)"
@@ -160,7 +163,7 @@
                             >
                                 <el-avatar
                                     v-show="tagItem.avatar !== 'role'"
-                                    class="progress-avatar"
+                                    class="email-to-avatar"
                                     icon="el-icon-user-solid"
                                     size="small"
                                     :src="getAvatar(tagItem.avatar)"
@@ -175,9 +178,6 @@
                             >+{{ behandArr.length }}</b
                         >
                     </el-tooltip>
-                </div>
-                <div class="default-text" v-if="!frontArr.length">
-                    {{ placeholder }}
                 </div>
                 <b class="triangle"></b>
             </div>
@@ -220,8 +220,8 @@ export default {
                     name: "成员"
                 },
                 {
-                    label: "任务角色",
-                    name: "任务角色"
+                    label: "任务属性",
+                    name: "任务属性"
                 }
             ],
             searchInput: "", // 关键词
@@ -230,7 +230,7 @@ export default {
             peopleList: [], // 成员列表origin
             showList: [], // 成员列表show
             personList: [], // 已选择用户对象信息
-            // 任务角色相关数据
+            // 任务属性相关数据
             checkArr: [], // 已选择角色
             roleList: [], // 角色列表
             roleListShow: [], // 角色列表
@@ -267,7 +267,9 @@ export default {
         selectArr: {
             handler(arr) {
                 // 变形数据与checkArr整合回显
-                this.inputShow();
+                this.$nextTick(() => {
+                    this.inputShow();
+                });
                 this.$emit("userlist-change", arr);
             },
             deep: true
@@ -275,7 +277,9 @@ export default {
         checkArr: {
             handler(arr) {
                 // 变形数据与selectArr整合回显
-                this.inputShow();
+                this.$nextTick(() => {
+                    this.inputShow();
+                });
                 this.$emit("rolelist-change", arr);
             },
             deep: true
@@ -284,7 +288,9 @@ export default {
             handler(arr) {
                 if (arr && arr.length) {
                     this.personList = _.cloneDeep(arr);
-                    this.inputShow();
+                    this.$nextTick(() => {
+                        this.inputShow();
+                    });
                 }
             },
             deep: true,
@@ -292,10 +298,17 @@ export default {
         },
         roleCheckList: {
             handler(str) {
-                this.checkArr = str.split(",");
-                this.inputShow();
+                if (str) {
+                    this.checkArr = str.split(",");
+                } else {
+                    this.checkArr = [];
+                }
+                this.$nextTick(() => {
+                    this.inputShow();
+                });
             },
-            deep: true
+            deep: true,
+            immediate: true
         }
     },
     mounted() {
@@ -340,13 +353,16 @@ export default {
         removeTagItem(people) {
             // 移除页面绑定
             _.remove(this.personList, function (persion) {
-                return persion.id === people.id;
+                return persion.id == people.id;
             });
             // 移除提交参数
             _.remove(this.selectArr, function (id) {
-                return id === people.id;
+                return id == people.id;
             });
             this.getPeopleList();
+            this.$nextTick(() => {
+                this.inputShow();
+            });
         },
         popoverShow() {
             this.isEditing = true;
@@ -467,8 +483,10 @@ export default {
                 this.$nextTick(() => {
                     for (let i = 0; i < labels.length; i++) {
                         const _top = labels[i].getBoundingClientRect().top;
+                        console.log("_top", _top);
                         if (_top >= listConBottom) {
                             // 如果有标签顶部距离超过容器底部则表示超出容器隐藏
+                            console.log("_top---", _top);
                             this.showNum = true;
                             labelIndex = i;
                             this.getShowLabel(labelIndex);
@@ -482,9 +500,11 @@ export default {
             }
         },
         getShowLabel(labelIndex) {
+            console.log("labelIndex", labelIndex);
             this.labelIndex = labelIndex;
             this.frontArr = this.getArrFront(this.integratedArr);
             this.behandArr = this.getArrBehand(this.integratedArr);
+            console.log("labelIndex", labelIndex);
         },
         getAllLabel() {
             this.frontArr = this.integratedArr;
@@ -514,20 +534,17 @@ export default {
         white-space: wrap;
         .mem-list-content {
             display: flex;
-            // white-space: nowrap;
+            max-width: calc(100% - 32px);
             .tag-list {
                 display: inline-block;
                 height: 32px;
-                &.show-num {
-                    // width: calc(100% - 32px);
-                    // white-space: nowrap;
-                }
             }
         }
     }
 }
 .default-text {
     color: #c0c4cc;
+    white-space: nowrap;
 }
 
 .tag-item {
@@ -656,6 +673,13 @@ export default {
                 }
             }
         }
+    }
+}
+.email-to-avatar.el-avatar {
+    vertical-align: middle;
+    &.el-avatar--small {
+        width: 20px;
+        height: 20px;
     }
 }
 </style>

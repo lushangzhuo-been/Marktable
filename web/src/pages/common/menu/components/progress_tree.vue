@@ -151,6 +151,7 @@ export default {
         getIsPublicClass() {
             return (data) => {
                 if (data.impl_table_name === "ws_file") return "icon folder";
+                return "icon";
                 return data.mode === "public" ? "icon public" : "icon private";
             };
         },
@@ -213,11 +214,11 @@ export default {
                     module: "customerRole"
                 },
                 {
-                    name: "角色&成员",
-                    path: "/member",
+                    name: "权限设置",
+                    path: "/auth",
                     children: [{}],
-                    img: require(`@/assets/image/field_type_icon/people_multiple.svg`),
-                    module: "progressMember"
+                    img: require(`@/assets/image/common/auth_setting.svg`),
+                    module: "progressAuth"
                 },
                 {
                     name: "删除",
@@ -729,7 +730,7 @@ export default {
                     if (item == id) {
                         // 判断当前节点是否存在， 存在不做处理
                         flag = true;
-
+                        return;
                     }
                 });
                 if (!flag) {
@@ -925,6 +926,8 @@ ul.progress-more-dropdown.el-dropdown-menu.el-popper {
         width: 16px;
         height: 16px;
         margin: 4px;
+        background-image: url("~@/assets/image/common/icon_progress.svg");
+        background-size: 100% 100%;
     }
     .folder {
         background-image: url("~@/assets/image/common/icon_folder.png");

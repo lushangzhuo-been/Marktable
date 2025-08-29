@@ -43,24 +43,51 @@
                 ></no-data>
             </div>
             <div class="table" v-show="isShowTable">
-                <div class="line"></div>
-                <div class="operation">
-                    <el-dropdown
-                        split-button
-                        type="primary"
-                        size="small"
-                        class="btn-group"
-                        @click="addProgress"
-                        @command="rightBtn"
-                    >
-                        <b class="add"></b>新增
-                        <el-dropdown-menu slot="dropdown" class="operation-btn">
-                            <el-dropdown-item command="export">
-                                <b class="export-box"></b>导出</el-dropdown-item
+                <div class="line">
+                    <span></span>
+                    <div class="operation">
+                        <el-button
+                            class="basic-ui add-btn"
+                            size="small"
+                            type="primary"
+                            :disabled="!createPrmission"
+                            @click="addProgress"
+                        >
+                            <b class="add"></b>新增
+                        </el-button>
+                        <span class="split-line">|</span>
+                        <el-popover
+                            placement="bottom-end"
+                            trigger="click"
+                            popper-class="progress-more-operate-poppover"
+                            :visible-arrow="false"
+                        >
+                            <div
+                                class="pop-item"
+                                :class="exportPrmission ? '' : 'disabled'"
+                                @click="handleOpreate('export')"
                             >
-                        </el-dropdown-menu>
-                    </el-dropdown>
+                                <img
+                                    :src="
+                                        require(`@/assets/image/common/export.svg`)
+                                    "
+                                    alt=""
+                                    width="18px"
+                                    height="18px"
+                                />
+                                导出
+                            </div>
+                            <b
+                                slot="reference"
+                                class="progress-more-operate-icon"
+                                width="18px"
+                                height="18px"
+                            >
+                            </b>
+                        </el-popover>
+                    </div>
                 </div>
+
                 <p-table
                     ref="dialogProgressTable"
                     :data="sheet.tableData"
@@ -206,7 +233,9 @@ export default {
             },
             isReturnBtnShow: false,
             filter_down: {},
-            color: "#1890ff"
+            color: "#1890ff",
+            exportPrmission: false,
+            createPrmission: false
         };
     },
 
@@ -219,9 +248,10 @@ export default {
         }
     },
     methods: {
-        // 导出表格
-        rightBtn(command) {
+        handleOpreate(command) {
             if (command === "export") {
+                if (!this.exportPrmission) return;
+                // 导出表格
                 let filterParams = this.filterData.filterParams;
                 let params = {
                     ws_id: this.curSpace.id,
@@ -316,6 +346,10 @@ export default {
         openDialog(item, out = false, chart, option) {
             this.curItem = _.cloneDeep(item);
             this.title = item.title;
+            // 获取导出权限
+            this.fetchAuthExport();
+            // 获取新增权限
+            this.fetchAuthAdd();
             this.dialogVisible = true;
             if (out) {
                 // 外层下钻
@@ -332,6 +366,36 @@ export default {
                     });
                 });
             }
+        },
+        fetchAuthExport() {
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: "all",
+                auth_mode: "export"
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    this.exportPrmission = res.data;
+                } else {
+                    this.exportPrmission = false;
+                }
+            });
+        },
+        fetchAuthAdd() {
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: "all",
+                auth_mode: "create"
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    this.createPrmission = res.data;
+                } else {
+                    this.createPrmission = false;
+                }
+            });
         },
         initData() {
             this.isReturnBtnShow = false;
@@ -659,9 +723,46 @@ export default {
         //     margin: 0 0 20px;
         //     background-color: rgba(230, 233, 240, 1);
         // }
-        .operation {
-            text-align: right;
+        .line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 16px;
+            .operation {
+                display: flex;
+                align-items: center;
+                .add-btn {
+                    height: 28px !important;
+                    line-height: 28px !important;
+                }
+                b.add {
+                    display: inline-block;
+                    width: 16px;
+                    height: 16px;
+                    margin-right: 2px;
+                    vertical-align: text-bottom;
+                    background-image: url(@/assets/image/common/add_white.png);
+                    background-size: 100% 100%;
+                }
+                .split-line {
+                    font-size: 12px;
+                    color: #bfc1c6;
+                    margin: 0 12px 0 16px;
+                }
+                .progress-more-operate-icon {
+                    display: inline-block;
+                    width: 18px;
+                    height: 18px;
+                    cursor: pointer;
+                    vertical-align: middle;
+                    background-size: 100% 100%;
+                    background-image: url(@/assets/image/common/progress_more_operate.svg);
+                    &.actived,
+                    &.hover {
+                        background-image: url(@/assets/image/common/progress_more_operate.svg);
+                    }
+                }
+            }
         }
     }
 }
@@ -713,6 +814,48 @@ export default {
 }
 </style>
 <style lang="scss">
+// 新增右侧-流程更多操作
+// .el-popover.el-popper.progress-more-operate-poppover[x-placement^="bottom"] {
+//     margin-top: 2px;
+// }
+// .el-popover.el-popper.progress-more-operate-poppover[x-placement^="top"] {
+//     margin-bottom: 2px;
+// }
+.el-popover.el-popper.progress-more-operate-poppover {
+    min-width: 20px;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: 2px 2px 8px 1px rgba(47, 56, 76, 0.3);
+    .pop-item {
+        display: flex;
+        align-items: center;
+        height: 32px;
+        padding: 0 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        &.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            img {
+                cursor: not-allowed;
+            }
+            &:hover {
+                background-color: #fff;
+                opacity: 0.5;
+            }
+        }
+        &.his {
+            width: 106px;
+        }
+        img {
+            margin-right: 4px;
+        }
+        &:hover {
+            background-color: #ecf5ff;
+        }
+    }
+}
 .basic-ui.full-screen-dialog .el-dialog {
     width: calc(100% - 164px);
     height: calc(100% - 120px);

@@ -167,7 +167,7 @@ func (s *CommonSrv) GetWsUserList(req types.CommonGetWsUserListReq, userid int) 
 
 	var users []UserInfo
 	db.Scan(&users)
-	var commonlyUsedListLen = 0
+	var commonlyUsedListLen int = 0
 	if commonlyUsedList != nil {
 		commonlyUsedListLen = len(commonlyUsedList)
 	}
@@ -325,7 +325,7 @@ func GetDocumentsByIdStr(wsId int, tmplId int, issueIdsStr string) []bson.M {
 		"tmpl_id": tmplId,
 		"_id":     bson.M{"$in": objectIds},
 	}
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil

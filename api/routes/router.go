@@ -2,7 +2,7 @@ package routes
 
 import (
 	"mark3/api/v1/app"
-	"mark3/api/v1/app/dashboard"
+	dashboard "mark3/api/v1/app/dashboard"
 	appTmpl "mark3/api/v1/app/tmpl"
 	ws2 "mark3/api/v1/app/ws"
 	"mark3/api/v1/message"
@@ -101,6 +101,11 @@ func NewRouter(i18nInstance *i18n.I18n) *gin.Engine {
 	r.POST("/tmpl/role/update", middleware.AuthMiddleware(), tmplRoleApi.Update)
 	r.POST("/tmpl/role/delete", middleware.AuthMiddleware(), tmplRoleApi.Delete)
 	r.GET("/tmpl/role/list", middleware.AuthMiddleware(), tmplRoleApi.List)
+
+	tmplAuthApi := new(tmpl.AuthApi)
+	r.GET("/tmpl/auth/config", middleware.AuthMiddleware(), tmplAuthApi.Config)
+	r.POST("/tmpl/auth/update", middleware.AuthMiddleware(), tmplAuthApi.Update)
+	r.GET("/tmpl/auth/Info", middleware.AuthMiddleware(), tmplAuthApi.Detail)
 
 	tmplCommonApi := new(tmpl.CommonApi)
 	r.GET("/tmpl/get_user_list", middleware.AuthMiddleware(), tmplCommonApi.GetUserList)
@@ -230,6 +235,7 @@ func NewRouter(i18nInstance *i18n.I18n) *gin.Engine {
 	r.GET("/tmpl/app/get_screen", middleware.AuthMiddleware(), tmplAppApi.GetScreen)
 	r.POST("/tmpl/app/create_action", middleware.AuthMiddleware(), tmplAppApi.CreateAction)
 	r.POST("/tmpl/app/create_sub_action", middleware.AuthMiddleware(), tmplAppApi.CreateSubAction)
+	r.GET("/tmpl/app/get_user_auth", middleware.AuthMiddleware(), tmplAppApi.GetUserAuth)
 	r.GET("/tmpl/app/get_list_data", middleware.AuthMiddleware(), tmplAppApi.GetListData)
 	r.GET("/tmpl/app/get_list_data_select", middleware.AuthMiddleware(), tmplAppApi.GetListDataSelect)
 	r.GET("/tmpl/app/get_data", middleware.AuthMiddleware(), tmplAppApi.GetData)
@@ -250,6 +256,7 @@ func NewRouter(i18nInstance *i18n.I18n) *gin.Engine {
 	fileAppApi := new(appTmpl.UploadApi)
 	r.GET("/tmpl/app/get_upload_ext_config", middleware.AuthMiddleware(), fileAppApi.GetUploadExtConfig)
 	r.GET("/tmpl/app/get_file_list", middleware.AuthMiddleware(), fileAppApi.GetFileList)
+	r.GET("/tmpl/app/get_file_one", middleware.AuthMiddleware(), fileAppApi.GetFileOne)
 	r.POST("/tmpl/app/upload_file", middleware.AuthMiddleware(), fileAppApi.UploadFile)
 	r.GET("/tmpl/app/download_file", middleware.AuthMiddleware(), fileAppApi.DownloadFile)
 	r.POST("/tmpl/app/delete_file", middleware.AuthMiddleware(), fileAppApi.DeleteFile)

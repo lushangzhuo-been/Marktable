@@ -256,92 +256,29 @@ func (s *TmplSrv) GetScreen(req types.GetScreenReq) (resp interface{}, err error
 	return screenList, nil
 }
 
-func (s *TmplSrv) getFilter(userid int, req types.GetListDataReq, fieldsMap map[string]model.FieldModel, userTmplRightInfo right.UserTmplRight) (filter bson.M, err error) {
-	filter = bson.M{
-		"ws_id":   req.WsId,
-		"tmpl_id": req.TmplId,
-	}
-
-	//获取数据权限
-	if userTmplRightInfo.TmplMode == enum.TmplModePrivate {
-		if userTmplRightInfo.WsRoleSign == wsEnum.WsRoleGeneral {
-			if userTmplRightInfo.TmplViewPermission == enum.RoleViewPermissionOnlyMe {
-				filter["$or"] = []bson.M{
-					{"creator": userid},
-					{"handler": userid},
-				}
-			}
-		}
-	}
-
-	type filterAtom struct {
-		FieldKey string      `json:"field_key"`
-		Op       string      `json:"op"`
-		Value    interface{} `json:"value"`
-	}
-
-	//增加下钻过滤
-	filterDownInner := s.getFilterDown(req.FilterDown)
-	if len(filterDownInner) > 0 {
-		filter["$and"] = filterDownInner
-	}
-
-	var filterList []filterAtom
-	if err = json.Unmarshal([]byte(req.Filter), &filterList); err != nil {
-		return filter, nil
-	}
-	if len(filterList) == 0 {
-		return filter, nil
-	}
-
-	var filterInner bson.A
-	var cond bson.M
-	for _, atom := range filterList {
-		if atom.FieldKey != "" && atom.Op != "" {
-			if field, ok := fieldsMap[atom.FieldKey]; !ok {
-				continue
-			} else {
-				//如果字段类型为文本类型的，需要特殊处理一下
-				if field.Mode == enum.FieldTextCom || field.Mode == enum.FieldTextareaCom {
-					cond = bson.M{atom.FieldKey: bson.M{"$regex": atom.Value, "$options": "i"}}
-				} else if field.Mode == enum.FieldLinkCom {
-					key := fmt.Sprintf("%s.%s", atom.FieldKey, "name")
-					cond = bson.M{key: bson.M{atom.Op: atom.Value}}
-				} else {
-					cond = bson.M{atom.FieldKey: bson.M{atom.Op: atom.Value}}
-				}
-			}
-			filterInner = append(filterInner, cond)
-		}
-	}
-
-	if req.Lor == "filter_or" {
-		filter["$or"] = filterInner
-	} else if len(filterDownInner) > 0 {
-		//过滤和图表下钻过滤合并
-		filter["$and"] = append(filterDownInner, filterInner...)
-	} else {
-		filter["$and"] = filterInner
-	}
-	return filter, nil
-}
-
 func (s *TmplSrv) getFilterNew(userid int, req types.GetListDataReq, fieldsMap map[string]model.FieldModel, userTmplRightInfo right.UserTmplRight) (filter bson.M, err error, subTmplEmpty bool) {
 	filter = bson.M{
 		"ws_id":   req.WsId,
 		"tmpl_id": req.TmplId,
 	}
 	subTmplEmpty = false
-
-	//获取数据权限
-	if userTmplRightInfo.TmplMode == enum.TmplModePrivate {
-		if userTmplRightInfo.WsRoleSign == wsEnum.WsRoleGeneral {
-			if userTmplRightInfo.TmplViewPermission == enum.RoleViewPermissionOnlyMe {
-				filter["$or"] = []bson.M{
-					{"creator": userid},
-					{"handler": userid},
-				}
-			}
+	var andFilter bson.A
+	// 获取数据权限，子任务列表判断父流程查看权限
+	if req.ParentTmplId > 0 && req.ObjId != "" {
+		authFilter, err := s.GetDataAuthFilter(userid, req.WsId, req.ParentTmplId, enum.AuthSee, fieldsMap, userTmplRightInfo)
+		if err != nil {
+			return nil, err, subTmplEmpty
+		}
+		if len(authFilter) > 0 {
+			andFilter = append(andFilter, bson.M{"$or": authFilter})
+		}
+	} else {
+		authFilter, err := s.GetDataAuthFilter(userid, req.WsId, req.TmplId, enum.AuthSee, fieldsMap, userTmplRightInfo)
+		if err != nil {
+			return nil, err, subTmplEmpty
+		}
+		if len(authFilter) > 0 {
+			andFilter = append(andFilter, bson.M{"$or": authFilter})
 		}
 	}
 
@@ -384,6 +321,9 @@ func (s *TmplSrv) getFilterNew(userid int, req types.GetListDataReq, fieldsMap m
 			}
 		}
 	}
+	if len(filterDownInner) > 0 {
+		andFilter = append(andFilter, filterDownInner...)
+	}
 	// 子任务过滤
 	if req.ParentTmplId > 0 && req.ObjId != "" {
 		var subObjs []model.TmplSubObjModel
@@ -401,7 +341,7 @@ func (s *TmplSrv) getFilterNew(userid int, req types.GetListDataReq, fieldsMap m
 				}
 				objectIds = append(objectIds, objectId)
 			}
-			filterDownInner = append(filterDownInner, bson.M{
+			andFilter = append(andFilter, bson.M{
 				"_id": bson.M{
 					"$in": objectIds,
 				},
@@ -411,10 +351,11 @@ func (s *TmplSrv) getFilterNew(userid int, req types.GetListDataReq, fieldsMap m
 			return nil, nil, subTmplEmpty
 		}
 	}
-	if len(filterDownInner) > 0 {
-		filter["$and"] = filterDownInner
+	if len(andFilter) > 0 {
+		filter["$and"] = andFilter
 	}
 
+	// 解析过滤筛选条件
 	var filterAllList []filterAll
 	if err = json.Unmarshal([]byte(req.Filter), &filterAllList); err != nil {
 		return filter, nil, subTmplEmpty
@@ -443,9 +384,9 @@ func (s *TmplSrv) getFilterNew(userid int, req types.GetListDataReq, fieldsMap m
 	}
 	if req.Lor == "filter_or" {
 		filter["$or"] = filterInner
-	} else if len(filterDownInner) > 0 {
-		//过滤和图表下钻过滤合并
-		filter["$and"] = append(filterDownInner, filterInner...)
+	} else if len(andFilter) > 0 {
+		// 过滤和图表下钻过滤合并
+		filter["$and"] = append(andFilter, filterInner...)
 	} else {
 		filter["$and"] = filterInner
 	}
@@ -636,7 +577,7 @@ func getPaginationList(filter bson.M, sortOrder bson.D, pageSize int, pageNum in
 		SetLimit(int64(pageSize)).
 		SetSkip(int64(skip))
 
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	cnt, err := collection.CountDocuments(context.TODO(), filter)
 	if err != nil {
 		return nil, 0, err
@@ -656,7 +597,7 @@ func getAllList(filter bson.M, sortOrder bson.D) ([]bson.M, error) {
 	findOptions := options.Find().
 		SetSort(sortOrder)
 
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	cursor, err := collection.Find(context.TODO(), filter, findOptions)
 	if err != nil {
 		return nil, err
@@ -849,39 +790,13 @@ func convertPersonCom(value interface{}) []int {
 }
 
 func getDataEditRight(userid int, document bson.M, userTmplRightInfo right.UserTmplRight) (permission Permission) {
-	permission = Permission{Edit: "no", Delete: "no"}
-
-	creatorIds := convertPersonCom(document["creator"])
-	handlerIds := convertPersonCom(document["handler"])
-
-	for _, handlerId := range handlerIds {
-		if handlerId == userid {
-			permission.Edit = "yes"
-			break
-		}
-	}
-
-	for _, creatorId := range creatorIds {
-		if creatorId == userid {
-			permission.Edit = "yes"
-			permission.Delete = "yes"
-		}
-	}
-
-	if userTmplRightInfo.TmplRoleSign == enum.RoleSignAdmin {
-		permission.Edit = "yes"
-		permission.Delete = "yes"
-	}
-
-	if userTmplRightInfo.WsRoleSign == wsEnum.WsRoleAdmin {
-		permission.Edit = "yes"
-		permission.Delete = "yes"
-	}
+	// todo 权限废弃
+	permission = Permission{Edit: "yes", Delete: "yes"}
 	return
 }
 
 func (s *TmplSrv) GetFileRight(userid int, req types.GetDataReq, userTmplRightInfo right.UserTmplRight) (permission Permission, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return
@@ -903,11 +818,146 @@ func (s *TmplSrv) GetFileRight(userid int, req types.GetDataReq, userTmplRightIn
 	return getDataEditRight(userid, document, userTmplRightInfo), nil
 }
 
-func (s *TmplSrv) GetData(userid int, req types.GetDataReq, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
-	objectID, err := primitive.ObjectIDFromHex(req.Id)
+func (s *TmplSrv) GetDataAuthFilter(userid int, wsId int, tmplId int, authMode string, fieldsMap map[string]model.FieldModel,
+	userTmplRightInfo right.UserTmplRight) (resp bson.A, err error) {
+	// 获取权限过滤条件：满足角色或人员校验时，则不需要加过滤条件，否则人员相关字段过滤
+	var auntName string
+	mo, ok := enum.AuthMap[authMode]
+	if ok {
+		auntName = mo
+	}
+	var tmplAuthDetail model.TmplAuthModel
+	global.GVA_DB.Model(&model.TmplAuthModel{}).Where("ws_id=? and tmpl_id=? and mode=?",
+		wsId, tmplId, authMode).First(&tmplAuthDetail)
+	if tmplAuthDetail.Id == 0 {
+		return nil, errors.New(fmt.Sprintf("您没有%s权限，请联系空间管理员", auntName))
+	}
+	var authFilter bson.A
+	// 空间角色校验
+	if len(tmplAuthDetail.WsRoles) != 0 {
+		wsRoles := strings.Split(tmplAuthDetail.WsRoles, ",")
+		for _, role := range wsRoles {
+			if role == userTmplRightInfo.WsRoleSign {
+				return authFilter, nil
+			}
+		}
+	}
+	// 人员校验
+	if len(tmplAuthDetail.UserList) != 0 {
+		userLists := strings.Split(tmplAuthDetail.UserList, ",")
+		for _, u := range userLists {
+			uid, err := strconv.Atoi(u)
+			if err == nil && uid == userid {
+				return authFilter, nil
+			}
+		}
+	}
+	if authMode == enum.AuthSee || authMode == enum.AuthCreate || authMode == enum.AuthExport {
+		return nil, errors.New(fmt.Sprintf("您没有%s权限，请联系空间管理员", auntName))
+	}
+	// 任务人员属性
+	var isSetFieldAuth = false
+	if len(tmplAuthDetail.IssueRoleList) != 0 {
+		fieldList := strings.Split(tmplAuthDetail.IssueRoleList, ",")
+		for _, f := range fieldList {
+			_, ok := fieldsMap[f]
+			if !ok {
+				continue
+			}
+			cond := bson.M{f: userid}
+			authFilter = append(authFilter, cond)
+			isSetFieldAuth = true
+		}
+	}
+	if isSetFieldAuth {
+		return authFilter, nil
+	} else {
+		return nil, errors.New(fmt.Sprintf("您没有%s权限，请联系空间管理员", auntName))
+	}
+}
+
+func (s *TmplSrv) GetDataCheckAuth(objId string, userid int, wsId int, tmplId int, authMode string,
+	fieldsMap map[string]model.FieldModel,
+	userTmplRightInfo right.UserTmplRight) (resp bson.M, err error) {
+
+	authFilter, err := s.GetDataAuthFilter(userid, wsId, tmplId, authMode, fieldsMap, userTmplRightInfo)
+	if err != nil {
+		return nil, err
+	}
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
+	objectID, err := primitive.ObjectIDFromHex(objId)
 	if err != nil {
 		return
+	}
+	filter := bson.M{
+		"$and": []bson.M{
+			{"ws_id": wsId},
+			{"tmpl_id": tmplId},
+			{"_id": objectID},
+		},
+	}
+	if len(authFilter) > 0 {
+		andConditions, ok := filter["$and"].([]bson.M)
+		if !ok {
+			return nil, errors.New("服务异常")
+		}
+		andConditions = append(andConditions, bson.M{"$or": authFilter})
+		filter["$and"] = andConditions
+	}
+
+	var document bson.M
+	err = collection.FindOne(context.TODO(), filter).Decode(&document)
+	if err != nil {
+		var auntName string
+		mo, ok := enum.AuthMap[authMode]
+		if ok {
+			auntName = mo
+		}
+		return nil, errors.New(fmt.Sprintf("数据不存在或没有该数据%s权限", auntName))
+	}
+	return document, nil
+}
+
+func (s *TmplSrv) GetUserAuth(ctx *gin.Context, userid int, req types.GetUserAuthReq, userTmplRightInfo right.UserTmplRight) (resp bool, err error) {
+	// 查看、创建、导出 权限
+	if req.AuthMode == enum.AuthSee || req.AuthMode == enum.AuthCreate || req.AuthMode == enum.AuthExport {
+		var auntName string
+		mo, ok := enum.AuthMap[req.AuthMode]
+		if ok {
+			auntName = mo
+		}
+		var tmplAuthDetail model.TmplAuthModel
+		global.GVA_DB.Model(&model.TmplAuthModel{}).Where("ws_id=? and tmpl_id=? and mode=?",
+			req.WsId, req.TmplId, req.AuthMode).First(&tmplAuthDetail)
+		if tmplAuthDetail.Id == 0 {
+			return false, errors.New(fmt.Sprintf("您没有%s权限，请联系空间管理员", auntName))
+		}
+		// 角色校验
+		if len(tmplAuthDetail.WsRoles) != 0 {
+			wsRoles := strings.Split(tmplAuthDetail.WsRoles, ",")
+			for _, role := range wsRoles {
+				if role == userTmplRightInfo.WsRoleSign {
+					return true, nil
+				}
+			}
+		}
+		// 人员校验
+		if len(tmplAuthDetail.UserList) != 0 {
+			userLists := strings.Split(tmplAuthDetail.UserList, ",")
+			for _, u := range userLists {
+				uid, err := strconv.Atoi(u)
+				if err == nil && uid == userid {
+					return true, nil
+				}
+			}
+		}
+		return false, errors.New(fmt.Sprintf("您没有%s权限，请联系空间管理员", auntName))
+	}
+	// 编辑、删除、进展 权限
+	// 校验数据是否存在
+	objectID, err := primitive.ObjectIDFromHex(req.Id)
+	if err != nil {
+		return false, err
 	}
 	filter := bson.M{
 		"$and": []bson.M{
@@ -916,15 +966,203 @@ func (s *TmplSrv) GetData(userid int, req types.GetDataReq, userTmplRightInfo ri
 			{"_id": objectID},
 		},
 	}
-
 	var document bson.M
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	err = collection.FindOne(context.TODO(), filter).Decode(&document)
 	if err != nil {
-		return nil, errors.New("数据不存在")
+		return false, errors.New("数据不存在")
 	}
 
 	tmplCaller := new(tmpl.Caller)
 	fieldsMap := tmplCaller.GetFieldsMap(req.TmplId)
+	if req.AuthMode == enum.AuthEdit {
+		// 优先判断字段只读规则
+		fieldKey := ctx.Query("field_key")
+		if fieldKey == "status" {
+			// 状态编辑权限规则
+			hasStepLimiterAndAuth, hasStepLimiterNotAuth, notStepLimiter, err := s.GetUserEditStatusAuth(req.TmplId, userid, fieldsMap, document)
+			if err != nil {
+				return false, err
+			}
+			if hasStepLimiterAndAuth {
+				return true, nil
+			}
+			if !notStepLimiter && hasStepLimiterNotAuth {
+				return false, nil
+			}
+		} else {
+			hasEdit, err := s.GetUserEditAuth(fieldKey, userid, fieldsMap, document)
+			if err != nil {
+				if hasEdit {
+					err = nil
+				}
+				return hasEdit, err
+			}
+		}
+	}
+	_, err = s.GetDataCheckAuth(req.Id, userid, req.WsId, req.TmplId, req.AuthMode, fieldsMap, userTmplRightInfo)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (s *TmplSrv) GetUserEditAuth(fieldKey string, userid int, fieldsMap map[string]model.FieldModel, document bson.M) (resp bool, err error) {
+	field, ok := fieldsMap[fieldKey]
+	if !ok {
+		return false, errors.New(fmt.Sprintf("字段不存在，请联系空间管理员"))
+	}
+	if field.Level == "level1" {
+		return false, errors.New("参数非法，level1级别字段不支持修改")
+	}
+
+	if len(field.ReadOnlyRule) != 0 {
+		//判断编辑字段的读写规则
+		var readOnlyRule struct {
+			StatusList    []int    `json:"status_list"`
+			UserList      []int    `json:"user_list"`
+			IssueRoleList []string `json:"issue_role_list"`
+		}
+		err := json.Unmarshal([]byte(field.ReadOnlyRule), &readOnlyRule)
+		if err != nil {
+			return false, err
+		}
+		var isSign = false //判断状态是否命中
+
+		for _, s := range readOnlyRule.StatusList {
+			if s == int(document["status"].(int32)) {
+				isSign = true
+			}
+		}
+		if isSign {
+			// 可编辑成员
+			for _, u := range readOnlyRule.UserList {
+				if u == userid {
+					return true, errors.New("支持编辑")
+				}
+			}
+			// 可编辑人员字段
+			for _, f := range readOnlyRule.IssueRoleList {
+				_, ok := fieldsMap[f]
+				if !ok {
+					continue
+				}
+				if document[f] == nil {
+					continue
+				}
+				val := reflect.ValueOf(document[f])
+				for i := 0; i < val.Len(); i++ {
+					v := val.Index(i)
+					vInt32, ok := v.Interface().(int32)
+					if ok && int(vInt32) == userid {
+						return true, errors.New("支持编辑")
+					}
+				}
+			}
+			return false, errors.New("当前状态下该字段被设置为只读，不支持编辑")
+		}
+	}
+
+	return true, nil
+}
+
+func (s *TmplSrv) GetUserEditStatusAuth(tmplId int, userid int, fieldsMap map[string]model.FieldModel, document bson.M) (resp bool, resp1 bool, resp2 bool, err error) {
+	hasStepLimiterAndAuth := false // 有限制器配置，且满足权限条件
+	hasStepLimiterNotAuth := false // 有限制器配置，且不满足权限条件
+	notStepLimiter := false        // 无限制器配置
+	tmplCaller := new(tmpl.Caller)
+	statusId, ok := document["status"].(int32)
+	if !ok {
+		return false, false, false, errors.New("状态数据异常")
+	}
+	// 查询可转换的状态列表
+	stepList, err := tmplCaller.GetStepList(tmplId, int(statusId))
+	var hasStepLimiterMap = make(map[int]bool) // 是否有配置只读规则
+	var nextStepAuthMap = make(map[int]bool)   // 是否有下一步状态切换权限
+	for _, step := range stepList {
+		// 判断是否限制操作
+		limits, err := tmplCaller.GetStepLimiter(tmplId, step.Id)
+		if err != nil {
+			return false, false, false, err
+		}
+		nextStepAuth := true // 是否有切换到目标状态的编辑权限，没有限制器则默认有权限
+		for _, l := range limits {
+			//todo 是否加这个判断
+			if l.Mode == "permission" {
+				var rule struct {
+					UserList      []int    `json:"user_list"`
+					IssueRoleList []string `json:"issue_role_list"`
+				}
+				err := json.Unmarshal([]byte(l.Rule), &rule)
+				if err != nil {
+					return false, false, false, err
+				}
+				var isGo = false //判断是有权限编辑
+				for _, u := range rule.UserList {
+					if u == userid {
+						isGo = true
+						break
+					}
+				}
+				if !isGo {
+					for _, f := range rule.IssueRoleList {
+						_, ok := fieldsMap[f]
+						if !ok {
+							continue
+						}
+						if document[f] == nil {
+							continue
+						}
+						userIds := convertPersonCom(document[f])
+						for _, u := range userIds {
+							if u == userid {
+								isGo = true
+								break
+							}
+						}
+						if isGo {
+							break
+						}
+					}
+				}
+				// 其中一个限制器不满足，则无权限
+				if !isGo {
+					nextStepAuth = false
+				}
+			} else if l.Mode == "sub" {
+				//todo
+				continue
+			} else {
+				continue
+			}
+		}
+
+		if len(limits) > 0 {
+			hasStepLimiterMap[step.EndStatusId] = true
+			nextStepAuthMap[step.EndStatusId] = nextStepAuth
+			if nextStepAuth {
+				hasStepLimiterAndAuth = true
+			} else {
+				hasStepLimiterNotAuth = true
+			}
+		} else {
+			hasStepLimiterMap[step.EndStatusId] = false
+			nextStepAuthMap[step.EndStatusId] = true
+			notStepLimiter = true
+		}
+	}
+	return hasStepLimiterAndAuth, hasStepLimiterNotAuth, notStepLimiter, nil
+}
+
+func (s *TmplSrv) GetData(userid int, req types.GetDataReq, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
+	tmplCaller := new(tmpl.Caller)
+	fieldsMap := tmplCaller.GetFieldsMap(req.TmplId)
+	document, err := s.GetDataCheckAuth(req.Id, userid, req.WsId, req.TmplId, enum.AuthSee, fieldsMap, userTmplRightInfo)
+	if err != nil {
+		return nil, err
+	}
+
 	for key, value := range document {
 		field, ok := fieldsMap[key]
 		if !ok {
@@ -988,23 +1226,22 @@ func (s *TmplSrv) CreateSubAction(ctx *gin.Context, req types.CreateSubActionReq
 	return
 }
 
-func (s *TmplSrv) Create(ctx *gin.Context, req types.CommonReq, userTmplRightInfo right.UserTmplRight) (resp bson.M, err error) {
-	//判断是否有添加权限
-	isPermission := false
-	if userTmplRightInfo.TmplMode == enum.TmplModePrivate {
-		for _, p := range strings.Split(userTmplRightInfo.TmplEditPermission, ",") {
-			if p == enum.RoleEditPermissionCreate {
-				isPermission = true
-			}
-		}
-	} else {
-		isPermission = true
-	}
-
-	if !isPermission {
+func (s *TmplSrv) CreateAction(ctx *gin.Context, req types.CommonReq, userTmplRightInfo right.UserTmplRight) (resp bson.M, err error) {
+	// 判断是否有添加权限
+	userid, _ := ctx.Get("userid")
+	var authReq types.GetUserAuthReq
+	authReq.WsId = req.WsId
+	authReq.TmplId = req.TmplId
+	authReq.AuthMode = enum.AuthCreate
+	hasAuth, _ := s.GetUserAuth(ctx, userid.(int), authReq, userTmplRightInfo)
+	if !hasAuth {
 		return nil, errors.New("无创建任务权限")
 	}
 
+	return s.Create(ctx, req, userTmplRightInfo)
+}
+
+func (s *TmplSrv) Create(ctx *gin.Context, req types.CommonReq, userTmplRightInfo right.UserTmplRight) (resp bson.M, err error) {
 	tmplCaller := new(tmpl.Caller)
 	screens, _ := tmplCaller.GetScreenByModule(req.TmplId, "create")
 
@@ -1092,7 +1329,7 @@ func (s *TmplSrv) Create(ctx *gin.Context, req types.CommonReq, userTmplRightInf
 	document["creator"] = []int32{int32(userid.(int))}
 	document["created_at"] = common.GetCurrentTime()
 	document["updated_at"] = common.GetCurrentTime()
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	result, err := collection.InsertOne(context.TODO(), &document)
 	if err != nil {
 		return nil, err
@@ -1105,8 +1342,10 @@ func (s *TmplSrv) Create(ctx *gin.Context, req types.CommonReq, userTmplRightInf
 
 func (s *TmplSrv) Update(ctx *gin.Context, req types.UpdateReq, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
 	userid, _ := ctx.Get("userid")
+	fieldKey := ctx.PostForm("field_key")
+	val := ctx.PostForm(fieldKey)
 
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return
@@ -1118,17 +1357,28 @@ func (s *TmplSrv) Update(ctx *gin.Context, req types.UpdateReq, userTmplRightInf
 			{"_id": objectID},
 		},
 	}
+	tmplCaller := new(tmpl.Caller)
+	fieldsMap := tmplCaller.GetFieldsMap(req.TmplId)
 
 	var oldDocument bson.M
+	collection = global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	err = collection.FindOne(context.TODO(), filter).Decode(&oldDocument)
 	if err != nil {
-		return nil, errors.New("数据不存在")
+		return false, errors.New("数据不存在")
 	}
 
-	tmplCaller := new(tmpl.Caller)
+	hasEdit, err := s.GetUserEditAuth(fieldKey, userid.(int), fieldsMap, oldDocument)
+	if err != nil {
+		if !hasEdit {
+			return nil, err
+		}
+	} else {
+		_, err = s.GetDataCheckAuth(req.Id, userid.(int), req.WsId, req.TmplId, enum.AuthEdit, fieldsMap, userTmplRightInfo)
+		if err != nil {
+			return nil, err
+		}
+	}
 	screens, _ := tmplCaller.GetScreenByModule(req.TmplId, "detail")
-	fieldKey := ctx.PostForm("field_key")
-	val := ctx.PostForm(fieldKey)
 
 	conflictRight := false //权限冲突标记
 	document := bson.M{}
@@ -1304,6 +1554,26 @@ func (s *TmplSrv) DeleteSubAction(userid int, req types.DeleteSubActionReq, user
 	return
 }
 
+func (s *TmplSrv) DeleteAction(userid int, req types.DeleteReq, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
+	// 校验权限
+	tmplCaller := new(tmpl.Caller)
+	fieldsMap := tmplCaller.GetFieldsMap(req.TmplId)
+	ids := strings.Split(req.Ids, ",")
+	for _, id := range ids {
+		_, err := s.GetDataCheckAuth(id, userid, req.WsId, req.TmplId, enum.AuthDelete, fieldsMap, userTmplRightInfo)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf("没有该数据删除权限"))
+		}
+	}
+
+	_, err = s.Delete(userid, req, userTmplRightInfo)
+	if err != nil {
+		return nil, err
+	} else {
+		return
+	}
+}
+
 func (s *TmplSrv) Delete(userid int, req types.DeleteReq, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
 	ids := strings.Split(req.Ids, ",")
 	var objectIds []primitive.ObjectID
@@ -1319,7 +1589,7 @@ func (s *TmplSrv) Delete(userid int, req types.DeleteReq, userTmplRightInfo righ
 			"$in": objectIds,
 		},
 	}
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
@@ -1352,8 +1622,8 @@ func (s *TmplSrv) Delete(userid int, req types.DeleteReq, userTmplRightInfo righ
 	return
 }
 
-func (s *TmplSrv) GetStepList(req types.GetStepListReq) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+func (s *TmplSrv) GetStepList(req types.GetStepListReq, userid int, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return
@@ -1381,6 +1651,13 @@ func (s *TmplSrv) GetStepList(req types.GetStepListReq) (resp interface{}, err e
 	if err != nil {
 		return nil, err
 	}
+	fieldsMap := tmplCaller.GetFieldsMap(req.TmplId)
+	authDocument, _ := s.GetDataCheckAuth(req.Id, userid, req.WsId, req.TmplId, enum.AuthEdit, fieldsMap, userTmplRightInfo)
+	hasEdit := false
+	if authDocument != nil {
+		hasEdit = true
+	}
+
 	type stepVo struct {
 		Id               int    `json:"id"`
 		StartStatusId    int    `json:"start_status_id"`
@@ -1389,6 +1666,7 @@ func (s *TmplSrv) GetStepList(req types.GetStepListReq) (resp interface{}, err e
 		EndStatusId      int    `json:"end_status_id"`
 		EndStatusName    string `json:"end_status_name"`
 		EndStatusColor   string `json:"end_status_color"`
+		StepAuth         bool   `json:"step_auth"`
 	}
 	var stepVoList []stepVo
 	for _, step := range stepList {
@@ -1408,6 +1686,70 @@ func (s *TmplSrv) GetStepList(req types.GetStepListReq) (resp interface{}, err e
 			endStatusName = endStatus.Name
 			endStatusColor = endStatus.Color
 		}
+
+		// 判断是否限制操作
+		limits, err := tmplCaller.GetStepLimiter(req.TmplId, step.Id)
+		if err != nil {
+			return nil, err
+		}
+		nextStepAuth := true // 是否有切换到目标状态的编辑权限，没有限制器则默认有权限
+		for _, l := range limits {
+			//todo 是否加这个判断
+			if l.Mode == "permission" {
+				var rule struct {
+					UserList      []int    `json:"user_list"`
+					IssueRoleList []string `json:"issue_role_list"`
+				}
+				err := json.Unmarshal([]byte(l.Rule), &rule)
+				if err != nil {
+					return nil, err
+				}
+				var isGo = false //判断是有权限编辑
+				for _, u := range rule.UserList {
+					if u == userid {
+						isGo = true
+						break
+					}
+				}
+				if !isGo {
+					for _, f := range rule.IssueRoleList {
+						_, ok := fieldsMap[f]
+						if !ok {
+							continue
+						}
+						if document[f] == nil {
+							continue
+						}
+						userIds := convertPersonCom(document[f])
+						for _, u := range userIds {
+							if u == userid {
+								isGo = true
+								break
+							}
+						}
+						if isGo {
+							break
+						}
+					}
+				}
+				// 其中一个限制器不满足，则无权限
+				if !isGo {
+					nextStepAuth = false
+				}
+			} else if l.Mode == "sub" {
+				//todo
+				continue
+			} else {
+				continue
+			}
+		}
+		var stepAuth bool
+		if len(limits) > 0 {
+			stepAuth = nextStepAuth
+		} else {
+			stepAuth = hasEdit
+		}
+
 		var stepVo = stepVo{
 			Id:               step.Id,
 			StartStatusId:    step.StartStatusId,
@@ -1416,6 +1758,7 @@ func (s *TmplSrv) GetStepList(req types.GetStepListReq) (resp interface{}, err e
 			EndStatusId:      step.EndStatusId,
 			EndStatusName:    endStatusName,
 			EndStatusColor:   endStatusColor,
+			StepAuth:         stepAuth,
 		}
 		stepVoList = append(stepVoList, stepVo)
 	}
@@ -1423,7 +1766,7 @@ func (s *TmplSrv) GetStepList(req types.GetStepListReq) (resp interface{}, err e
 }
 
 func (s *TmplSrv) GetStepScreen(ctx *gin.Context, req types.GetStepScreenReq, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return nil, err
@@ -1516,7 +1859,7 @@ func (s *TmplSrv) GetStepScreen(ctx *gin.Context, req types.GetStepScreenReq, us
 }
 
 func (s *TmplSrv) SwitchStep(ctx *gin.Context, req types.SwitchStepReq, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return nil, err
@@ -1703,7 +2046,7 @@ func (s *TmplSrv) SwitchStep(ctx *gin.Context, req types.SwitchStepReq, userTmpl
 }
 
 func (s *TmplSrv) GetProgressList(userid int, req types.GetProgressList) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 
 	filter := bson.M{
 		"$and": []bson.M{
@@ -1765,7 +2108,7 @@ func (s *TmplSrv) GetProgressList(userid int, req types.GetProgressList) (resp i
 }
 
 func (s *TmplSrv) getProgressCount(wsId int, tmplId int, issueId string) int64 {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 	filter := bson.M{
 		"$and": []bson.M{
 			{"ws_id": wsId},
@@ -1786,7 +2129,7 @@ func (s *TmplSrv) AddProgress(userid int, req types.AddProgress) (resp interface
 	document["creator"] = userid
 	document["created_at"] = common.GetCurrentTime()
 	document["updated_at"] = common.GetCurrentTime()
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 	_, err = collection.InsertOne(context.TODO(), &document)
 	if err != nil {
 		return
@@ -1796,7 +2139,7 @@ func (s *TmplSrv) AddProgress(userid int, req types.AddProgress) (resp interface
 }
 
 func (s *TmplSrv) UpdateProgress(userid int, req types.UpdateProgress) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return nil, err
@@ -1837,7 +2180,7 @@ func (s *TmplSrv) UpdateProgress(userid int, req types.UpdateProgress) (resp int
 }
 
 func (s *TmplSrv) DeleteProgress(userid int, req types.DeleteProgress) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return nil, err
@@ -1871,7 +2214,7 @@ func (s *TmplSrv) DeleteProgress(userid int, req types.DeleteProgress) (resp int
 }
 
 func (s *TmplSrv) GetLogList(req types.GetLogList) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_log")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_log")
 
 	filter := bson.M{
 		"$and": []bson.M{
@@ -1956,7 +2299,7 @@ func (s *TmplSrv) GetSubListCount(req types.GetSubListCountReq) (resp interface{
 				"$in": objectIds,
 			},
 		}
-		collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+		collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 		cnt, err := collection.CountDocuments(context.TODO(), filter)
 		if err != nil {
 			return 0, err

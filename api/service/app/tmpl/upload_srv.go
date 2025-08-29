@@ -80,7 +80,7 @@ func (s *UploadSrv) UploadImageForHtml(req types.UploadImageForHtml, file *multi
 }
 
 func (s *UploadSrv) UploadFile(userid int, req types.UploadFile, file *multipart.FileHeader, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.IssueId)
 	if err != nil {
 		return
@@ -156,30 +156,10 @@ func (s *UploadSrv) UploadFile(userid int, req types.UploadFile, file *multipart
 		needTransformed2PDFExtConfig = append(needTransformed2PDFExtConfig, ext, strings.ToUpper(ext))
 	}
 
-	if common.InArray(fileExt, needTransformed2PDFExtConfig) {
-		_, err = common.TestToPdf(global.GVA_CONFIG.Upload.Path+dirName+"/"+fileName, global.GVA_CONFIG.Upload.Path+dirName, "pdf")
-		if err != nil {
-			global.GVA_LOG.Error(err.Error())
-		} else {
-			TransformedRelativePath = dirName + "/" + strings.Split(path.Base(fileName), ".")[0] + ".pdf"
-			TransformedOriginalName = strings.Split(path.Base(file.Filename), ".")[0] + ".pdf"
-		}
-	}
-
 	var needTransformed2EndXExtConfig []string
 	for _, ext := range strings.Split(global.GVA_CONFIG.Upload.NeedTransformed2EndX, ",") {
 		ext = "." + ext
 		needTransformed2EndXExtConfig = append(needTransformed2EndXExtConfig, ext, strings.ToUpper(ext))
-	}
-
-	if common.InArray(fileExt, needTransformed2EndXExtConfig) {
-		_, err = common.TestToPdf(global.GVA_CONFIG.Upload.Path+dirName+"/"+fileName, global.GVA_CONFIG.Upload.Path+dirName, fileExt+"x")
-		if err != nil {
-			global.GVA_LOG.Error(err.Error())
-		} else {
-			TransformedRelativePath = dirName + "/" + strings.Split(path.Base(fileName), ".")[0] + "." + fileExt + "x"
-			TransformedOriginalName = strings.Split(path.Base(file.Filename), ".")[0] + "." + fileExt + "x"
-		}
 	}
 
 	versionCode := 1
@@ -201,7 +181,18 @@ func (s *UploadSrv) UploadFile(userid int, req types.UploadFile, file *multipart
 		}
 	}
 
-	if err = global.GVA_DB.Create(&fileModel.FileModel{
+	if common.InArray(fileExt, needTransformed2PDFExtConfig) {
+		TransformedRelativePath = dirName + "/" + strings.Split(path.Base(fileName), ".")[0] + ".pdf"
+		TransformedOriginalName = strings.Split(path.Base(file.Filename), ".")[0] + ".pdf"
+	}
+
+	if common.InArray(fileExt, needTransformed2EndXExtConfig) {
+		TransformedRelativePath = dirName + "/" + strings.Split(path.Base(fileName), ".")[0] + "." + fileExt + "x"
+		TransformedOriginalName = strings.Split(path.Base(file.Filename), ".")[0] + "." + fileExt + "x"
+	}
+
+	transformedStatus := fileModel.NoTransform
+	userTmplFile := fileModel.FileModel{
 		WsId:                    req.WsId,
 		TmplId:                  req.TmplId,
 		IssueId:                 req.IssueId,
@@ -210,14 +201,42 @@ func (s *UploadSrv) UploadFile(userid int, req types.UploadFile, file *multipart
 		VersionCode:             versionCode,
 		OriginalName:            file.Filename,
 		RelativePath:            dirName + "/" + fileName,
-		TransformedOriginalName: TransformedOriginalName,
-		TransformedRelativePath: TransformedRelativePath,
 		FileSize:                int(file.Size),
+		TransformedStatus:       transformedStatus,
+		TransformedRelativePath: TransformedRelativePath,
+		TransformedOriginalName: TransformedOriginalName,
 		Userid:                  userid,
 		CreatedAt:               common.GetCurrentTime(),
-	}).Error; err != nil {
+	}
+
+	if err = global.GVA_DB.Create(&userTmplFile).Error; err != nil {
 		global.GVA_LOG.Error(err.Error())
 		return nil, errors.New("上传失败")
+	}
+
+	if common.InArray(fileExt, needTransformed2PDFExtConfig) || common.InArray(fileExt, needTransformed2EndXExtConfig) {
+		fileType := "pdf"
+		if common.InArray(fileExt, needTransformed2EndXExtConfig) {
+			fileType = fileExt + "x"
+		}
+
+		go func() {
+			goUserTmplFile := userTmplFile
+			goUserTmplFile.TransformedStatus = fileModel.Transforming
+			if err = global.GVA_DB.Model(&fileModel.FileModel{}).Where("id=?", goUserTmplFile.Id).Save(goUserTmplFile).Error; err != nil {
+				global.GVA_LOG.Error(err.Error())
+			}
+			_, err := common.TestToPdf(global.GVA_CONFIG.Upload.Path+dirName+"/"+fileName, global.GVA_CONFIG.Upload.Path+dirName, fileType)
+			if err != nil {
+				global.GVA_LOG.Error(err.Error())
+				goUserTmplFile.TransformedStatus = fileModel.Failed
+			} else {
+				goUserTmplFile.TransformedStatus = fileModel.Succeed
+			}
+			if err = global.GVA_DB.Model(&fileModel.FileModel{}).Where("id=?", goUserTmplFile.Id).Save(goUserTmplFile).Error; err != nil {
+				global.GVA_LOG.Error(err.Error())
+			}
+		}()
 	}
 
 	logForFile(userid, req.WsId, req.TmplId, req.IssueId, file.Filename, "upload_file")
@@ -268,7 +287,7 @@ func (s *UploadSrv) GetFileList(req types.GetFileList) (resp interface{}, err er
 }
 
 func (s *UploadSrv) GetFile(userid int, req types.DownloadFile, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.IssueId)
 	if err != nil {
 		return
@@ -317,7 +336,7 @@ func (s *UploadSrv) UpdateFileIsCurrentVersion(req types.UpdateFileIsCurrentVers
 }
 
 func (s *UploadSrv) DeleteFile(userid int, req types.DeleteFile, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.IssueId)
 	if err != nil {
 		return

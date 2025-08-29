@@ -5,7 +5,8 @@
             <div
                 :id="`comment-input-data${id}`"
                 class="input-border"
-                contenteditable="paintext-only"
+                :class="{ 'pointer-focus': focus, disabled: !hasProgressAuth }"
+                :contenteditable="hasProgressAuth ? 'plaintext-only' : 'false'"
                 :data-placeholder="placeholder"
                 @input="handleInput"
                 @keyup="handleKeyup"
@@ -135,6 +136,10 @@ export default {
         placeholder: {
             type: String,
             default: "请输入"
+        },
+        hasProgressAuth: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -301,6 +306,7 @@ export default {
             this.$emit("confirm-content", this.value, this.msgObj);
         },
         inputFocus() {
+            if (!this.hasProgressAuth) return;
             // 聚焦
             this.focus = true;
         },
@@ -836,7 +842,7 @@ export default {
 }
 .input-border {
     box-sizing: border-box;
-    height: 34px;
+    // height: 34px;
     font-size: 14px;
     padding: 4px 8px;
     overflow-y: auto;
@@ -854,12 +860,22 @@ export default {
             height: 24px;
         }
     }
-    &:not(:empty) {
-        height: 98px;
-    }
-    &:focus {
+    // &:not(:empty) {
+    //     height: 98px;
+    // }
+    &.pointer-focus {
         height: 98px;
         border: 1px solid #1890ff;
+    }
+    &.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background-color: #f5f5f5;
+        border: 1px solid #dcdfe6;
+        // pointer-events: none;
+        &:hover {
+            border: 1px solid #dcdfe6;
+        }
     }
     &:hover {
         border: 1px solid #1890ff;

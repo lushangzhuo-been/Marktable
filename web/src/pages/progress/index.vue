@@ -6,33 +6,6 @@
         <!-- 标题及管理员信息 -->
         <div class="title-administrators">
             <div class="title">{{ progressInfo.tmpl.name || "--" }}</div>
-            <div
-                v-if="progressInfo.admin_list && progressInfo.admin_list.length"
-                class="administrators"
-            >
-                <span class="member-label">超级管理员：</span>
-                <span class="member-value">
-                    <span
-                        v-for="(
-                            adminItem, adminIndex
-                        ) in progressInfo.admin_list"
-                        :key="adminIndex"
-                        class="admin-tag"
-                    >
-                        <user-message :userMessage="adminItem">
-                            <span>
-                                <el-avatar
-                                    class="progress-avatar"
-                                    icon="el-icon-user-solid"
-                                    size="small"
-                                    :src="getAvatar(adminItem.avatar)"
-                                ></el-avatar>
-                                <span> {{ adminItem.full_name }}</span>
-                            </span>
-                        </user-message>
-                    </span>
-                </span>
-            </div>
         </div>
         <!-- 流程描述 -->
         <div
@@ -117,61 +90,90 @@
                         :groupByOption="groupByOption"
                         :cardFilterDown="cardFilterDown"
                         @confim-group-by="confimGroupBy"
+                        @check-field-search="checkFieldSearch"
                         @group-by-save-view="groupBySaveView"
                     ></group-by>
                 </div>
                 <div class="operation-right">
-                    <el-dropdown
-                        split-button
-                        type="primary"
+                    <el-button
+                        class="basic-ui add-btn"
                         size="small"
-                        class="btn-group"
+                        type="primary"
+                        :disabled="!createPrmission"
                         @click="addProgress"
-                        @command="rightBtn"
                     >
                         <b class="add"></b>新增
-                        <el-dropdown-menu slot="dropdown" class="operation-btn">
-                            <el-dropdown-item command="export">
-                                <b class="export-box"></b>导出</el-dropdown-item
-                            >
-                        </el-dropdown-menu>
-                    </el-dropdown>
+                    </el-button>
+                    <span class="split-line">|</span>
+                    <el-popover
+                        placement="bottom-end"
+                        trigger="click"
+                        popper-class="progress-more-operate-poppover"
+                        :visible-arrow="false"
+                    >
+                        <div
+                            class="pop-item"
+                            :class="exportPrmission ? '' : 'disabled'"
+                            @click="handleOpreate('export')"
+                        >
+                            <img
+                                :src="
+                                    require(`@/assets/image/common/export.svg`)
+                                "
+                                alt=""
+                                width="18px"
+                                height="18px"
+                            />
+                            导出
+                        </div>
+                        <b
+                            slot="reference"
+                            class="progress-more-operate-icon"
+                            width="18px"
+                            height="18px"
+                        >
+                        </b>
+                    </el-popover>
                 </div>
             </div>
-            <!-- 列表 -->
             <div
-                v-if="currentTabType === 'list'"
-                class="table-loading"
-                :class="{
-                    'had-group-by-temp':
-                        groupByFieldInfo && groupByFieldInfo.field_key
-                }"
+                v-show="currentTabType === 'list'"
                 v-loading="tableLoading"
+                class="table-loading"
                 element-loading-text="加载中"
                 element-loading-background="rgba(255, 255, 255)"
             >
                 <!-- 维度枚举 -->
-                <group-by-temp
-                    v-if="groupByFieldInfo && groupByFieldInfo.field_key"
-                    :groupByFieldInfo="groupByFieldInfo"
-                    :groupByList="groupByList"
-                    :cardFilterDown="cardFilterDown"
-                    :currentTab="currentTab"
-                    @check-field-search="checkFieldSearch"
-                ></group-by-temp>
-                <p-table
-                    ref="ProgressTable"
-                    class="table-content"
-                    :data="tableData"
-                    :col="tableCol"
-                    @open-html-col="openHtmlCol"
-                    @open-detail="openDetail"
-                    @multiple-selection="multipleSelection"
-                    @refresh="refreshCurrentPage"
-                    @copy-link="copyLink"
-                    @delete-row="deleteRow"
-                    @change-column-width="changeColumnWidth"
-                ></p-table>
+                <div
+                    class="gourp-by-with-table"
+                    :class="{
+                        'had-group-by-temp':
+                            groupByFieldInfo && groupByFieldInfo.field_key
+                    }"
+                >
+                    <group-by-temp
+                        v-if="groupByFieldInfo && groupByFieldInfo.field_key"
+                        ref="GroupByTemp"
+                        :groupByFieldInfo="groupByFieldInfo"
+                        :groupByList="groupByList"
+                        :cardFilterDown="cardFilterDown"
+                        :currentTab="currentTab"
+                        @check-field-search="checkFieldSearch"
+                    ></group-by-temp>
+                    <p-table
+                        ref="ProgressTable"
+                        class="table-content"
+                        :data="tableData"
+                        :col="tableCol"
+                        @open-html-col="openHtmlCol"
+                        @open-detail="openDetail"
+                        @multiple-selection="multipleSelection"
+                        @refresh="refreshCurrentPage"
+                        @copy-link="copyLink"
+                        @delete-row="deleteRow"
+                        @change-column-width="changeColumnWidth"
+                    ></p-table>
+                </div>
                 <el-pagination
                     v-show="table.count > 20"
                     class="basic-ui"
@@ -183,18 +185,19 @@
                 >
                 </el-pagination>
             </div>
+
             <!-- 看板 -->
-            <div v-if="currentTabType === 'card'" class="kanban-view-block">
+            <div v-show="currentTabType === 'card'" class="kanban-view-block">
                 <card-board
                     ref="KanBan"
                     class="kanban-block"
                     :currentTab="currentTab"
+                    :curTabItems="curTabItems"
                     :filterParams="filterParams"
                     :sortOrder="sortOrder"
                     :filterRelation="filterRelation"
                     :cardFilterDown="cardFilterDown"
                 ></card-board>
-                <!-- :cardsFieldShow="cardsFieldShow" -->
             </div>
         </div>
         <!-- 仪表盘 -->
@@ -208,7 +211,7 @@
         <add-progress
             ref="AddProgress"
             :formLabel="createCol"
-            @refresh="refreshToFirstPage"
+            @refresh="refreshForAdd"
         ></add-progress>
         <save-filter ref="SaveFilter" @create-view="createView"></save-filter>
         <!-- html富文本编辑器 -->
@@ -246,7 +249,6 @@ import HandleData from "./data_handle";
 import { imgHost } from "@/assets/tool/const";
 import Sorts from "./sort/index";
 import GroupBy from "./group_by/index";
-import ListCardSwitch from "./group_by/list_card_switch";
 import GroupByTemp from "@/pages/progress/card_board/group_by_temp";
 import CardBoard from "./card_board/index.vue";
 import UserMessage from "@/components/user_message_tip";
@@ -267,7 +269,6 @@ export default {
         NoPermissions,
         Sorts,
         GroupBy,
-        ListCardSwitch,
         GroupByTemp,
         CardBoard,
         UserMessage,
@@ -313,7 +314,7 @@ export default {
                 mode: "list",
                 filter: ""
             },
-            noProgressAuth: true,
+            noProgressAuth: true, // 默认无权限
             exportPrmission: false,
             createPrmission: false,
             curTabItems: {},
@@ -351,69 +352,99 @@ export default {
                     this.progressTree &&
                     Object.keys(this.progressTree).length
                 ) {
-                    let curNode = this.resursionTree(this.progressTree);
-                    if (curNode.is_member === "yes") {
-                        this.noProgressAuth = false;
-                        this.getProgressInfo();
-                        this.getView();
-                    } else {
-                        this.noProgressAuth = true;
-                    }
+                    // 获取查看权限
+                    this.fetchAuthView();
                 }
             },
+            deep: true,
             immediate: true
         },
-        curProgress: {
+        $route: {
             // 流程切换
             handler(CurId, PreId) {
                 if (
                     this.progressTree &&
                     Object.keys(this.progressTree).length
                 ) {
-                    // 重置配置
-                    this.tableLoading = true;
-                    this.table.page_num = 1;
-                    this.currentTab = "";
-                    this.viewFilter = [];
-                    this.viewFilterStandby = [];
-                    this.filterParams = [];
-                    this.backupParams = []; // 备份filter参数，  前后不一致再调接口
-                    this.expandBtnShow = false;
-                    this.showMore = false;
-                    this.filterRelation = "filter_and";
-                    let curNode = this.resursionTree(this.progressTree);
-                    if (curNode.is_member === "yes") {
-                        this.noProgressAuth = false;
-                        this.getProgressInfo();
-                        this.getView();
-                    } else {
-                        this.noProgressAuth = true;
-                    }
-                    if (this.$refs.ProgressTable) {
-                        this.$refs.ProgressTable.refreshTableKey();
-                    }
-                }
-            }
-        },
-        filterParams: {
-            handler(params, oldParams) {
-                if (JSON.stringify(params) !== JSON.stringify(oldParams)) {
-                    this.tableLoading = true;
+                    // 获取查看权限
+                    this.fetchAuthView();
                 }
             }
         }
-        // currentTab: {
-        //     handler(id) {
-        //         // 重置
-        //         this.groupByFieldInfo = {};
-        //     }
-        // }
     },
     created() {},
-    mounted() {
-        this.tableLoading = true;
-    },
     methods: {
+        fetchAuthView() {
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: "all",
+                auth_mode: "see"
+            };
+            api.getUserAuth(params).then((res) => {
+                if (this.$route.name !== "progress") return;
+                if (res && res.resultCode === 200) {
+                    this.noProgressAuth = !res.data;
+                    if (!this.noProgressAuth) {
+                        // 有权限才重置
+                        // 重置配置
+                        this.tableCol = [];
+                        this.tableData = [];
+                        this.tableLoading = true;
+                        this.table.page_num = 1;
+                        this.currentTab = "";
+                        this.viewFilter = [];
+                        this.viewFilterStandby = [];
+                        this.filterParams = [];
+                        this.backupParams = []; // 备份filter参数，  前后不一致再调接口
+                        this.expandBtnShow = false;
+                        this.showMore = false;
+                        this.filterRelation = "filter_and";
+                        // 获取导出权限
+                        this.fetchAuthExport();
+                        // 获取新增权限
+                        this.fetchAuthAdd();
+                        this.getProgressInfo();
+                        this.getView();
+                        if (this.$refs.ProgressTable) {
+                            this.$refs.ProgressTable.refreshTableKey();
+                        }
+                    }
+                } else {
+                    this.noProgressAuth = true;
+                }
+            });
+        },
+        fetchAuthExport() {
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: "all",
+                auth_mode: "export"
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    this.exportPrmission = res.data;
+                } else {
+                    this.exportPrmission = false;
+                }
+            });
+        },
+        fetchAuthAdd() {
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: "all",
+                auth_mode: "create"
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    this.createPrmission = res.data;
+                } else {
+                    this.createPrmission = false;
+                }
+            });
+        },
         resursionTree(tree, cur = {}) {
             tree.forEach((sub) => {
                 if (sub.id == Number(this.curProgress)) {
@@ -428,18 +459,6 @@ export default {
                 }
             });
             return cur;
-        },
-        initData() {
-            this.tableLoading = true;
-            this.table.page_num = 1;
-            this.currentTab = "";
-            this.viewFilter = [];
-            this.viewFilterStandby = [];
-            this.filterParams = [];
-            this.backupParams = []; // 备份filter参数，  前后不一致再调接口
-            this.expandBtnShow = false;
-            this.showMore = false;
-            this.filterRelation = "filter_and";
         },
         // 操作列复制连接
         copyLink(row) {
@@ -544,30 +563,30 @@ export default {
                 if (res && res.resultCode === 200 && res.data) {
                     this.progressInfo = res.data;
                     // 新建 导出权限
-                    if (
-                        this.progressInfo.permission &&
-                        this.progressInfo.permission.edit_permission
-                    ) {
-                        let editPermission = [];
-                        editPermission =
-                            this.progressInfo.permission.edit_permission.split(
-                                ","
-                            );
-                        this.createPrmission =
-                            editPermission.indexOf("create") > -1;
-                        this.exportPrmission =
-                            editPermission.indexOf("export_list") > -1;
-                    } else {
-                        this.createPrmission = false;
-                        this.exportPrmission = false;
-                    }
+                    // if (
+                    //     this.progressInfo.permission &&
+                    //     this.progressInfo.permission.edit_permission
+                    // ) {
+                    //     let editPermission = [];
+                    //     editPermission =
+                    //         this.progressInfo.permission.edit_permission.split(
+                    //             ","
+                    //         );
+                    //     this.createPrmission =
+                    //         editPermission.indexOf("create") > -1;
+                    //     this.exportPrmission =
+                    //         editPermission.indexOf("export_list") > -1;
+                    // } else {
+                    //     this.createPrmission = false;
+                    //     this.exportPrmission = false;
+                    // }
                 } else {
                     this.progressInfo = {
                         admin_list: [],
                         tmpl: {}
                     };
-                    this.createPrmission = false;
-                    this.exportPrmission = false;
+                    // this.createPrmission = false;
+                    // this.exportPrmission = false;
                 }
                 this.$nextTick(() => {
                     this.getDescConfig();
@@ -642,9 +661,6 @@ export default {
                     res.data &&
                     Object.keys(res.data).length
                 ) {
-                    // if (this.currentTabType === "card") {
-                    //     this.cardsFieldShow = res.data;
-                    // }
                     if (this.currentTabType === "list") {
                         let apiCol = [];
                         res.data.forEach((col) => {
@@ -654,18 +670,12 @@ export default {
                             };
                             apiCol.push(obj);
                         });
-                        this.tableCol = [];
-                        let unshiftCol = _.cloneDeep(
-                            HandleData.progressBasicUnshiftCol
-                        );
-                        let unshiftColBackup = unshiftCol.concat(apiCol);
-                        let backupCol = _.cloneDeep(
+                        let basicColCol = _.cloneDeep(
                             HandleData.progressBasicCol
                         );
-                        this.tableCol = unshiftColBackup.concat(backupCol);
+                        this.tableCol = apiCol.concat(basicColCol);
                     }
                 } else {
-                    // this.cardsFieldShow = [];
                     this.tableCol = [];
                 }
             });
@@ -685,6 +695,7 @@ export default {
                     this.table.page_num = 1;
                     this.getListData();
                     this.backupParams = _.cloneDeep(params);
+                    this.justRefreshEnumInfoNum(this.groupByFieldInfo);
                 }
             }
         },
@@ -696,7 +707,7 @@ export default {
                 this.table.page_num = 1;
                 this.getListData();
             }
-            if (this.currentTabType === "list") {
+            if (this.currentTabType === "card") {
                 this.$refs.KanBan.getAllStatusCardsList();
             }
         },
@@ -711,17 +722,21 @@ export default {
                 this.$refs.KanBan.getColConfig(paramsColumns);
             }
         },
-        getListData() {
+        getListData: _.debounce(function () {
             let filterDown = {
-                // x_axis: "status", // 状态
-                // x_value: parseInt(status.id),
                 x_axis: "", // 状态
                 x_value: "",
-                group_axis: this.groupByFieldInfo.field_key || "", // 维度
+                group_axis:
+                    this.groupByFieldEnumInfo.filed_mode === "all"
+                        ? ""
+                        : this.groupByFieldInfo.field_key || "", // 维度
                 group_value:
-                    parseInt(this.groupByFieldEnumInfo.user_id) ||
-                    this.groupByFieldEnumInfo.name ||
-                    "" // 维度值  角色取user_id
+                    this.groupByFieldEnumInfo.filed_mode === "all"
+                        ? ""
+                        : parseInt(this.groupByFieldEnumInfo.user_id) ||
+                          parseInt(this.groupByFieldEnumInfo.status_id) ||
+                          this.groupByFieldEnumInfo.name ||
+                          "" // 维度值  角色取user_id
             };
             let params = {
                 ws_id: this.curSpace.id,
@@ -744,19 +759,42 @@ export default {
                 }
                 this.tableLoading = false;
             });
-        },
+        }),
         // 更新列表
-        refreshToFirstPage() {
+        refreshPage: _.debounce(function () {
             if (this.currentTabType === "list") {
                 this.table.page_num = 1;
+                // 添加事件  不用下传
                 this.getListData();
             }
-            if (this.currentTabType === "card") {
-                this.$refs.KanBan.refreshFirstList();
+        }),
+        refreshCurrentPage() {
+            if (this.groupByFieldInfo) {
+                // 刷新当前页。并刷新枚举数量
+                this.justRefreshEnumInfoNum(this.groupByFieldInfo);
+            } else {
+                this.getListData();
             }
         },
-        refreshCurrentPage() {
-            this.getListData();
+        refreshForAdd() {
+            if (this.currentTabType === "list") {
+                // 刷新枚举信息与列表
+                this.table.page_num = 1;
+                if (this.groupByFieldInfo) {
+                    this.refreshEnumInfo(); // 是否有分组信息等 调刷新接口
+                } else {
+                    this.getListData();
+                }
+            }
+            if (this.currentTabType === "card") {
+                this.$refs.KanBan.refreshForAdd();
+            }
+        },
+        // 刷新枚举信息，新增 删除  编辑 时调用
+        refreshEnumInfo() {
+            if (this.groupByFieldInfo) {
+                this.confimGroupBy(this.groupByFieldInfo);
+            }
         },
         gePersonList() {
             let params = {
@@ -807,10 +845,15 @@ export default {
                 // 首次进入视图tab为undefind
                 return;
             }
+            this.tableLoading = true;
             this.groupByFieldInfo = {};
             this.currentTab = tab.jsonId;
             this.currentTabType = tab.mode;
             this.curTabItems = _.cloneDeep(tab);
+            // board的信息组件内查询
+            if (tab.mode === "board") {
+                return;
+            }
             let params = {
                 ws_id: this.curSpace.id,
                 tmpl_id: this.curProgress,
@@ -818,7 +861,11 @@ export default {
             };
             // 表格和卡片的条件配置
             api.getViewInfo(params).then((res) => {
-                if (res.resultCode === 200) {
+                if (
+                    res &&
+                    res.resultCode === 200 &&
+                    this.currentTab == tab.id
+                ) {
                     let viewInfo = res.data;
                     viewInfo.jsonId = JSON.stringify(viewInfo.id);
                     this.viewFilter = [];
@@ -877,18 +924,24 @@ export default {
                         };
                         // 卡片分组信息
                         api.getCardGroupByList(params).then((cardRes) => {
-                            if (cardRes.resultCode === 200) {
+                            if (
+                                cardRes &&
+                                cardRes.resultCode === 200 &&
+                                this.currentTab == tab.id
+                            ) {
                                 this.groupByOption = cardRes.data || [];
                             } else {
                                 this.groupByOption = [];
                             }
                             if (tab.mode === "list") {
-                                this.getColConfig(paramsColumn).then(() => {
-                                    this.refreshToFirstPage();
-                                });
+                                this.getColConfig(paramsColumn);
                             }
                             if (tab.mode === "card") {
                                 // 调配置类接口
+                                // 手动移除状态项
+                                _.remove(this.groupByOption, {
+                                    field_key: "status"
+                                });
                                 this.$nextTick(() => {
                                     this.$refs.KanBan.getConfigTypeInfo(
                                         paramsColumn
@@ -901,10 +954,10 @@ export default {
             });
         },
         // 切换枚举值第一次请求
-        checkFieldSearch(info) {
+        checkFieldSearch: _.debounce(function (info) {
             this.groupByFieldEnumInfo = info;
-            this.refreshToFirstPage();
-        },
+            this.refreshPage();
+        }, 200),
         // 取消删除表格行
         cancelDeleteTableRow() {
             // this.tableMultipleSelection = [];
@@ -941,6 +994,7 @@ export default {
                     group_axis: this.groupByFieldInfo.field_key,
                     group_value:
                         parseInt(this.groupByFieldEnumInfo.user_id) ||
+                        parseInt(this.groupByFieldEnumInfo.status_id) ||
                         this.groupByFieldEnumInfo.name ||
                         "" // 维度值  角色取user_id
                 };
@@ -1070,13 +1124,15 @@ export default {
             this.$refs["DetailDrawer"].openDrawer(type, scope.row);
         },
         addProgress() {
+            if (!this.createPrmission) return;
             // 掉新增config接口，打开dialog
             this.getAddProgressConfig();
             this.$refs.AddProgress.openDialog();
         },
-        // 导出表格
-        rightBtn(command) {
+        handleOpreate(command) {
+            // 导出表格
             if (command === "export") {
+                if (!this.exportPrmission) return;
                 let params = {
                     ws_id: this.curSpace.id,
                     tmpl_id: this.curProgress,
@@ -1101,7 +1157,6 @@ export default {
                     res.resultCode === 200 &&
                     Object.keys(res.data).length
                 ) {
-                    // this.cardsFieldShow = res.data;
                     this.createCol = res.data;
                 }
             });
@@ -1148,28 +1203,35 @@ export default {
                 this.groupByFieldInfo = groupInfo;
                 // 获取分组字段信息
                 // 如果是无分组 需要直接调卡片列表 否则调枚举值列表
-                this.groupByFieldInfo = groupInfo;
                 if (groupInfo.id) {
                     let param = {
-                        filter: "",
+                        filter: this.filterParams.length
+                            ? JSON.stringify(this.filterParams)
+                            : "",
                         lor: "filter_and",
                         mode: "base_histogram",
                         order: "desc",
-                        show_empty: "no",
                         title: "title",
-                        tmpl_id: this.curProgress,
+                        tmpl_id: parseInt(this.curProgress),
                         userid: this.userInfo.id,
-                        view_id: this.currentTab,
+                        view_id: parseInt(this.currentTab),
                         ws_id: this.curSpace.id,
+                        show_empty: "yes", //枚举值中返回空值
                         xMode: groupInfo.mode, // 分组字段类型
                         x_axis: groupInfo.field_key, // 分组字段
                         y_axis: "count" //  写死
                     };
+                    let selectAll = {
+                        filed_mode: "all",
+                        name: "全部"
+                    };
                     dashApi.getPrviewChart(param).then((res) => {
                         if (res.resultCode === 200) {
                             this.groupByList = res.data.board_statistics;
+                            this.groupByList.unshift(selectAll);
                         } else {
                             this.groupByList = [];
+                            this.groupByList.unshift(selectAll);
                         }
                     });
                 } else {
@@ -1186,6 +1248,51 @@ export default {
                     }
                     this.$refs.KanBan.confimGroupBy(groupInfo, order);
                 });
+            }
+        },
+        // 只刷新数量
+        justRefreshEnumInfoNum(groupInfo) {
+            if (this.currentTabType === "list") {
+                this.groupByFieldInfo = groupInfo;
+                this.getListData();
+                // 获取分组字段信息
+                // 如果是无分组 需要直接调卡片列表 否则调枚举值列表
+                if (groupInfo.id) {
+                    let param = {
+                        filter: this.filterParams.length
+                            ? JSON.stringify(this.filterParams)
+                            : "",
+                        lor: "filter_and",
+                        mode: "base_histogram",
+                        order: "desc",
+                        title: "title",
+                        tmpl_id: parseInt(this.curProgress),
+                        userid: this.userInfo.id,
+                        view_id: parseInt(this.currentTab),
+                        ws_id: this.curSpace.id,
+                        show_empty: "yes", //枚举值中返回空值
+                        xMode: groupInfo.mode, // 分组字段类型
+                        x_axis: groupInfo.field_key, // 分组字段
+                        y_axis: "count" //  写死
+                    };
+                    let selectAll = {
+                        filed_mode: "all",
+                        name: "全部"
+                    };
+                    dashApi.getPrviewChart(param).then((res) => {
+                        let arr = [];
+                        // 刷新枚举，但不能
+                        if (res.resultCode === 200) {
+                            arr = res.data.board_statistics;
+                            arr.unshift(selectAll);
+                        } else {
+                            arr = [];
+                            arr.unshift(selectAll);
+                        }
+                        // 判断当前枚举值是否还有效果
+                        this.$refs.GroupByTemp.justRefreshEnumInfoNum(arr);
+                    });
+                }
             }
         },
         groupBySaveView() {
@@ -1208,6 +1315,7 @@ export default {
                     group_axis: this.groupByFieldInfo.field_key,
                     group_value:
                         parseInt(this.groupByFieldEnumInfo.user_id) ||
+                        parseInt(this.groupByFieldEnumInfo.status_id) ||
                         this.groupByFieldEnumInfo.name ||
                         "" // 维度值  角色取user_id
                 };
@@ -1241,9 +1349,13 @@ export default {
 
 <style lang="scss" scoped>
 .table-loading {
-    // min-height: 480px;
-    &.had-group-by-temp {
-        display: flex;
+    min-height: calc(100vh - 400px);
+    .gourp-by-with-table {
+        &.had-group-by-temp {
+            display: flex;
+            // min-height: calc(100vh - 220px);
+            min-height: 600px;
+        }
     }
     .group-by-list {
         width: 200px;
@@ -1297,6 +1409,41 @@ export default {
     margin-bottom: 12px;
     .operation-left {
         line-height: 32px;
+    }
+    .operation-right {
+        display: flex;
+        align-items: center;
+        .add-btn {
+            height: 28px !important;
+            line-height: 28px !important;
+        }
+        b.add {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 2px;
+            vertical-align: text-bottom;
+            background-image: url(@/assets/image/common/add_white.png);
+            background-size: 100% 100%;
+        }
+        .split-line {
+            font-size: 12px;
+            color: #bfc1c6;
+            margin: 0 12px 0 16px;
+        }
+        .progress-more-operate-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            vertical-align: middle;
+            background-size: 100% 100%;
+            background-image: url(@/assets/image/common/progress_more_operate.svg);
+            &.actived,
+            &.hover {
+                background-image: url(@/assets/image/common/progress_more_operate.svg);
+            }
+        }
     }
 }
 
@@ -1380,52 +1527,57 @@ export default {
         height: 32px;
         line-height: 32px;
         padding: 0 15px;
+        padding: 0;
         font-size: 14px;
     }
     .el-dropdown__caret-button {
         padding: 0 5px;
     }
 }
-.btn-group .add {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    margin-right: 2px;
-    vertical-align: text-bottom;
-    background-image: url(@/assets/image/common/add_white.png);
-    background-size: 100% 100%;
-}
-
-.el-dropdown-menu.el-popper.operation-btn.el-dropdown-menu--small {
-    padding: 0 !important;
-    margin-right: 0;
-    margin-top: 2px;
-    .el-dropdown-menu__item {
-        display: inline-block;
-        height: 32px;
-        line-height: 32px;
-        box-sizing: border-box;
-        width: 97px;
-        padding: 0 12px;
-        color: #171e31;
-        font-size: 14px;
-        margin: 4px !important;
-        cursor: pointer;
-    }
-}
-.export-box {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    margin-right: 2px;
-    vertical-align: middle;
-    background-image: url(@/assets/image/common/export.svg);
-    background-size: 100% 100%;
-    position: relative;
-    top: -2px;
-}
 </style>
 <style lang="scss">
+// 新增右侧-流程更多操作
+// .el-popover.el-popper.progress-more-operate-poppover[x-placement^="bottom"] {
+//     margin-top: 2px;
+// }
+// .el-popover.el-popper.progress-more-operate-poppover[x-placement^="top"] {
+//     margin-bottom: 2px;
+// }
+.el-popover.el-popper.progress-more-operate-poppover {
+    min-width: 20px;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: 2px 2px 8px 1px rgba(47, 56, 76, 0.3);
+    .pop-item {
+        display: flex;
+        align-items: center;
+        height: 32px;
+        padding: 0 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        &.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            img {
+                cursor: not-allowed;
+            }
+            &:hover {
+                background-color: #fff;
+                opacity: 0.5;
+            }
+        }
+        &.his {
+            width: 106px;
+        }
+        img {
+            margin-right: 4px;
+        }
+        &:hover {
+            background-color: #ecf5ff;
+        }
+    }
+}
 .el-popover.el-popper.progress-operate-col[x-placement^="bottom"] {
     margin-top: 2px;
 }
@@ -1445,6 +1597,17 @@ export default {
         padding: 0 8px;
         border-radius: 4px;
         cursor: pointer;
+        &.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            img {
+                cursor: not-allowed;
+            }
+            &:hover {
+                background-color: #fff;
+                opacity: 0.5;
+            }
+        }
         &.his {
             width: 106px;
         }

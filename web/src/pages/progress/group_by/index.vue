@@ -118,15 +118,18 @@ export default {
                     this.currentGroupByInfo = _.find(this.GroupByListShow, {
                         field_key: this.cardFilterDown.group_axis
                     });
+                    // 有枚举值向下接着取
                     this.$emit(
                         "confim-group-by",
                         this.currentGroupByInfo,
                         "fromViewFilterDown"
                     );
                 } else {
+                    // 无枚举值查询详情
                     this.currentGroupByInfo = _.cloneDeep(
                         DataHandle.noGroupInfo
                     );
+                    this.$emit("check-field-search", this.currentGroupByInfo);
                 }
                 // 回显filterDown 内容
             },
@@ -148,7 +151,6 @@ export default {
         checkGroupBy(info) {
             this.currentGroupByInfo = info;
             this.$emit("confim-group-by", info);
-            // this.$refs["GroupBy"].doClose();
         },
         getType(type, expr, field_key) {
             if (type === "person_com") {
@@ -323,6 +325,7 @@ export default {
             line-height: 40px;
             padding: 0 4px;
             border-radius: 4px;
+            cursor: pointer;
             .type-box {
                 display: inline-block;
                 width: 20px;
@@ -332,7 +335,7 @@ export default {
                 top: 4px;
             }
             &:hover {
-                background-color: #f1f9ff;
+                background-color: #f5f5f5;
             }
             &.active {
                 background-color: #f1f9ff;

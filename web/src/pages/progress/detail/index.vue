@@ -70,6 +70,7 @@
                         </div>
                         <div v-show="leftActiveName === 'sub_tmpl'">
                             <sub-task-content
+                                ref="subTask"
                                 :detailId="detailId"
                                 :subTaskConfig="subTaskConfig"
                                 @refresh-sub-task-count="getSubTaskCount"
@@ -223,6 +224,7 @@ export default {
                     this.$refs.FileUpload.downloadTypeCheck();
                 }
                 if (type === "sub_tmpl") {
+                    this.$refs.subTask.getSubTmplAuth(); //获取子任务的增删权限
                     // 子任务
                     this.getSubTaskConfig();
                 }
@@ -232,6 +234,7 @@ export default {
             handler(type) {
                 if (type === "progress") {
                     this.$nextTick(() => {
+                        this.$refs.Evolve.fetAuthProgress();
                         this.$refs.Evolve.getEvolveDetail();
                     });
                 }
@@ -278,6 +281,7 @@ export default {
         },
         // 删除成功后
         deleteRow() {
+            this.cardEditInfo.other = true;
             this.drawer = false;
         },
         openDrawer(type, row) {
@@ -291,6 +295,7 @@ export default {
             this.getStatusMenusList();
             this.getSubTaskCount();
             this.$nextTick(() => {
+                this.$refs.Evolve.fetAuthProgress();
                 // 获取进展附件数量
                 this.$refs.FileUpload.getFileList();
             });

@@ -28,7 +28,6 @@
                 placement="bottom-end"
                 trigger="click"
                 popper-class="progress-operate-col"
-                class="aaaaa"
                 :visible-arrow="false"
                 @show="(val) => poppoverShow(scope.row, val)"
                 @hide="(val) => poppoverHide(scope.row, val)"
@@ -44,7 +43,11 @@
                     />
                     复制链接
                 </div>
-                <div class="pop-item" @click="deleteRow(scope.row)">
+                <div
+                    class="pop-item"
+                    :class="hasDeleteAuth ? '' : 'disabled'"
+                    @click="deleteRow(scope.row)"
+                >
                     <img
                         :src="require(`@/assets/image/common/delete.svg`)"
                         alt=""
@@ -74,6 +77,7 @@
 
 <script>
 import { baseMixin } from "@/mixin.js";
+import api from "@/common/api/module/progress";
 export default {
     mixins: [baseMixin],
     props: {
@@ -84,7 +88,8 @@ export default {
     },
     data() {
         return {
-            rowObj: {}
+            rowObj: {},
+            hasDeleteAuth: false
         };
     },
     computed: {
@@ -100,7 +105,24 @@ export default {
     methods: {
         poppoverShow(row) {
             // this.$set(this.rowObj[`operation_${row._id}`], 'isActived', true)
-            this.$set(row, "isActived", true);
+            this.fetAuthDelete(row);
+        },
+        fetAuthDelete(row) {
+            // 获取进展权限
+            let params = {
+                ws_id: this.curSpace.id,
+                tmpl_id: this.curProgress,
+                id: row._id,
+                auth_mode: "delete"
+            };
+            api.getUserAuth(params).then((res) => {
+                if (res && res.resultCode === 200) {
+                    this.hasDeleteAuth = res.data;
+                } else {
+                    this.hasDeleteAuth = false;
+                }
+                this.$set(row, "isActived", true);
+            });
         },
         poppoverHide(row) {
             this.$set(row, "isActived", false);
@@ -135,6 +157,7 @@ export default {
         },
         // 删除行
         deleteRow(row) {
+            if (!this.hasDeleteAuth) return;
             this.$emit("delete-row", row);
         },
         getType() {

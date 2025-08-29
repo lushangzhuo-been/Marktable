@@ -47,7 +47,7 @@
                             @input.stop
                             @blur="renameInputBlur(item)"
                         />
-                        <span v-show="!item.editing">
+                        <span v-show="!item.editing" class="drag-sort-block">
                             {{ item.name }}
                         </span>
                     </div>

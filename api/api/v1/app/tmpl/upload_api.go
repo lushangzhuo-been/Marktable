@@ -2,6 +2,7 @@ package tmpl
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"mark3/global"
 	"mark3/pkg/ctl"
 	"mark3/pkg/right"
@@ -10,8 +11,8 @@ import (
 	types "mark3/types/app/tmpl"
 	"net/url"
 	"os"
-
-	"github.com/gin-gonic/gin"
+	"path"
+	"strings"
 )
 
 type UploadApi struct{}
@@ -40,13 +41,9 @@ func (a *UploadApi) UploadImageForHtml(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err = right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -67,13 +64,9 @@ func (a *UploadApi) GetFileList(ctx *gin.Context) {
 	}
 	userid, _ := ctx.Get("userid")
 	//判断是否为模版成员
-	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	_, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -82,6 +75,52 @@ func (a *UploadApi) GetFileList(ctx *gin.Context) {
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
+	}
+	ctl.OkWithData(resp, ctx)
+}
+
+func (a *UploadApi) GetFileOne(ctx *gin.Context) {
+	var req types.DownloadFile
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctl.FailWithMessage(err.Error(), ctx)
+		return
+	}
+	userid, _ := ctx.Get("userid")
+	//判断是否为模版成员
+	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
+	if err != nil {
+		ctl.FailWithMessage(err.Error(), ctx)
+		return
+	}
+
+	l := new(tmpl.UploadSrv)
+	resp, err := l.GetFile(userid.(int), req, userTmplRight)
+	if err != nil {
+		ctl.FailWithMessage(err.Error(), ctx)
+		return
+	}
+
+	file := resp.(fileModel.FileModel)
+	filePath := file.RelativePath
+
+	if file.TransformedStatus == fileModel.Transforming {
+		ctl.FailWithMessage("文件正在转换中，请稍后", ctx)
+		return
+	}
+
+	if file.TransformedStatus == fileModel.Failed {
+		ctl.FailWithMessage("文件转换失败，请重新上传", ctx)
+		return
+	}
+
+	if req.DownloadFileType == "transformed_original_name" {
+		filePath = file.TransformedRelativePath
+		exists, _ := global.GVA_RDB.Get(strings.Split(path.Base(filePath), ".")[0]).Result()
+
+		if exists == "awaiting" {
+			ctl.FailWithMessage("文件正在转换中，请稍后", ctx)
+			return
+		}
 	}
 	ctl.OkWithData(resp, ctx)
 }
@@ -104,10 +143,6 @@ func (a *UploadApi) UploadFile(ctx *gin.Context) {
 	userTmplRight, err := right.NewUserTmplRight(userid.(int), req.WsId, req.TmplId)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
-		return
-	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
 		return
 	}
 
@@ -133,10 +168,6 @@ func (a *UploadApi) DownloadFile(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
 
 	l := new(tmpl.UploadSrv)
 	resp, err := l.GetFile(userid.(int), req, userTmplRight)
@@ -153,7 +184,6 @@ func (a *UploadApi) DownloadFile(ctx *gin.Context) {
 		fileName = file.TransformedOriginalName
 		filePath = file.TransformedRelativePath
 	}
-
 	_, err = os.Open(global.GVA_CONFIG.Upload.Path + filePath)
 	if err != nil {
 		ctl.FailWithMessage(err.Error(), ctx)
@@ -179,10 +209,7 @@ func (a *UploadApi) DeleteFile(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
+
 	l := new(tmpl.UploadSrv)
 	resp, err := l.DeleteFile(userid.(int), req, userTmplRight)
 	if err != nil {
@@ -205,10 +232,7 @@ func (a *UploadApi) UpdateFileIsCurrentVersion(ctx *gin.Context) {
 		ctl.FailWithMessage(err.Error(), ctx)
 		return
 	}
-	if err := userTmplRight.CanAccess(); err != nil {
-		ctl.UnPermission(err.Error(), ctx)
-		return
-	}
+
 	var needUpdateFileReq types.DownloadFile
 	needUpdateFileReq.Id = req.Id
 	needUpdateFileReq.WsId = req.WsId

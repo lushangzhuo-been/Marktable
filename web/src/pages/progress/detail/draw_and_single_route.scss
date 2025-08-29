@@ -49,6 +49,9 @@
     //     background-image: url("~@/assets/image/common/share-active.svg");
     // }
 }
+.disabled .delete-box {
+    cursor: not-allowed;
+}
 .delete-box {
     cursor: pointer;
     display: inline-block;

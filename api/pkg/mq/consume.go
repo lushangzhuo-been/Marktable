@@ -151,7 +151,7 @@ func UpdateDocumentData(ruleActionLogId string) {
 	var action model.RuleActionLogModel
 	global.GVA_DB.Where("id=?", ruleActionLogId).First(&action)
 	if action.Id != 0 {
-		collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+		collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 		objectID, err := primitive.ObjectIDFromHex(action.DataId)
 		if err != nil {
 			global.GVA_DB.Model(&model.RuleActionLogModel{}).Where("id=? ", ruleActionLogId).Updates(map[string]interface{}{"status": enum.RuleActionLogStatusFail, "execute_at": common.GetCurrentTime()})
@@ -284,7 +284,7 @@ func documentLog(userid int, wsId int, tmplId int, issueId string, newData bson.
 	document["action"] = action
 	document["content"] = logContent
 	document["created_at"] = common.GetCurrentTime()
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_log")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_log")
 	_, err := collection.InsertOne(context.TODO(), &document)
 
 	if err != nil {
@@ -541,7 +541,7 @@ func GetUserList(userIds []int) []userModel.UserModel {
 }
 
 func GetDocument(wsId int, tmplId int, issueId string) (resp bson.M, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(issueId)
 	if err != nil {
 		return

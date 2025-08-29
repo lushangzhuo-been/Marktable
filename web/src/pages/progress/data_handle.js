@@ -8,10 +8,10 @@ export default {
             label: "描述",
             value: ""
         },
-        {
-            label: "类型",
-            value: ""
-        },
+        // {
+        //     label: "类型",
+        //     value: ""
+        // },
         {
             label: "创建人",
             value: ""
@@ -31,10 +31,10 @@ export default {
                 label: "描述",
                 value: res.desc
             },
-            {
-                label: "类型",
-                value: res.mode
-            },
+            // {
+            //     label: "类型",
+            //     value: res.mode
+            // },
             {
                 label: "创建人",
                 value: res.created_full_name
@@ -83,20 +83,7 @@ export default {
             }
         ];
     },
-    progressBasicUnshiftCol: [
-        {
-            prop: "subTask",
-            label: "",
-            align: "center",
-            mode: "subTask",
-            fixed: "left",
-            columnName: "subTask"
-        }
-    ],
     progressBasicCol: [
-        // {
-        //     mode: "selection",
-        // },
         {
             prop: "operation",
             label: "操作",

@@ -13,7 +13,12 @@
                     }"
                 ></b>
             </div>
-            <div class="add-sub-task" @click="addSubTask">
+            <div
+                v-if="subTmplAuth"
+                class="add-sub-task"
+                :class="subTmplAuth ? '' : 'disabled'"
+                @click="addSubTask"
+            >
                 <b class="plus-box"></b>
                 添加子任务
             </div>
@@ -27,6 +32,7 @@
         >
             <sub-task-table
                 :data="tableData"
+                :subTmplAuth="subTmplAuth"
                 @delete-sub-task="deleteSubTask"
                 @open-detail="openSubTaskDetail"
             ></sub-task-table>
@@ -78,6 +84,10 @@ export default {
         detailId: {
             type: String,
             default: ""
+        },
+        subTmplAuth: {
+            type: Boolean,
+            default: false
         }
     },
     watch: {

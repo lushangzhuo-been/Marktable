@@ -131,6 +131,10 @@ export default {
             type: String,
             default: ""
         },
+        curTabItems: {
+            type: Object,
+            default: () => {}
+        },
         filterParams: {
             type: Array,
             default: () => []
@@ -143,10 +147,6 @@ export default {
             type: String,
             default: ""
         },
-        // cardsFieldShow: {
-        //     type: Array,
-        //     default: () => []
-        // },
         cardFilterDown: {
             type: [String, Object],
             default: ""
@@ -172,31 +172,36 @@ export default {
     },
     watch: {
         currentTab: {
-            handler(id) {
+            handler() {
                 // 重置
                 this.groupByFieldInfo = {};
             }
         },
+
         filterParams: {
-            handler(arr) {
+            handler() {
+                if (this.curTabItems.mode !== "card") {
+                    return;
+                }
+                this.confimGroupBy(this.groupByFieldInfo);
                 this.getAllStatusCardsList();
             },
             deep: true
         },
         filterRelation: {
-            handler(str) {
+            handler() {
+                if (this.curTabItems.mode !== "card") {
+                    return;
+                }
                 this.getAllStatusCardsList();
             },
             deep: true
         },
-        // sortOrder: {
-        //     handler(arr) {
-        //         // this.getAllStatusCardsList();
-        //     },
-        //     deep: true
-        // },
         cardFilterDown: {
-            handler(param) {
+            handler() {
+                if (this.curTabItems.mode !== "card") {
+                    return;
+                }
                 this.getAllStatusCardsList();
             },
             deep: true
@@ -205,9 +210,9 @@ export default {
     mounted() {},
     methods: {
         // 新增刷新
-        refreshFirstList() {
-            let startCardListInfo = _.find(this.cardsGroup, { mode: "first" });
-            this.checkCurListAll(startCardListInfo);
+        refreshForAdd() {
+            // 可能会有新增的枚举值
+            this.confimGroupBy(this.groupByFieldInfo); // 刷新枚举->刷全列
         },
         // 刷新  编辑后刷新
         refresh(changeInfo) {
@@ -230,8 +235,8 @@ export default {
                 let curCardInfo = _.find(this.cardsGroup, {
                     id: changeInfo.defaultStatus
                 });
-                this.confimGroupBy(this.groupByFieldInfo, "by-update");
-                this.checkCurListAll(curCardInfo);
+                this.confimGroupBy(this.groupByFieldInfo, "by-update"); // 刷新枚举
+                this.checkCurListAll(curCardInfo); // 刷新当前状态列
             } else {
                 // 不用刷新
             }
@@ -246,6 +251,7 @@ export default {
                     group_axis: this.groupByFieldInfo.field_key,
                     group_value:
                         parseInt(this.groupByFieldEnumInfo.user_id) ||
+                        parseInt(this.groupByFieldEnumInfo.status_id) ||
                         this.groupByFieldEnumInfo.name ||
                         "" // 维度值  角色取user_id
                 };
@@ -400,18 +406,17 @@ export default {
             this.checkCurListAll(fromCardInfo);
             this.checkCurListAll(toCardInfo);
         },
-
-        // 获取字段分组信息
-        confimGroupBy(groupInfo, order) {
+        confimGroupBy: _.debounce(function (groupInfo, order) {
             // 如果是无分组 需要直接调卡片列表 否则调枚举值列表
             this.groupByFieldInfo = groupInfo;
             if (groupInfo.id) {
                 let param = {
-                    filter: "",
+                    filter: this.filterParams.length
+                        ? JSON.stringify(this.filterParams)
+                        : "",
                     lor: "filter_and",
                     mode: "base_histogram",
                     order: "desc",
-                    // show_empty: "no",
                     title: "title",
                     tmpl_id: parseInt(this.curProgress),
                     userid: this.userInfo.id,
@@ -422,11 +427,18 @@ export default {
                     x_axis: groupInfo.field_key, // 分组字段
                     y_axis: "count" //  写死
                 };
+                let selectAll = {
+                    filed_mode: "all",
+                    name: "全部"
+                };
                 dashApi.getPrviewChart(param).then((res) => {
                     if (res.resultCode === 200) {
                         this.groupByList = res.data.board_statistics;
+                        // 拼接全部
+                        this.groupByList.unshift(selectAll);
                     } else {
                         this.groupByList = [];
+                        this.groupByList.unshift(selectAll);
                     }
                 });
             } else {
@@ -437,7 +449,7 @@ export default {
                     this.checkFieldSearch(DataHandle.noGroupInfo);
                 }
             }
-        },
+        }, 300),
         // 当前流程拥有的全部状态
         getRuleStatusList(key) {
             let params = {
@@ -478,16 +490,23 @@ export default {
             this.getAllStatusCardsList();
         },
         getAllStatusCardsList: _.debounce(function () {
+            // 因为使用的v-show  需要判断当前view是否为卡片
             // qes  单选时入参  取name  返回值错误
             this.statusGroupInfo.forEach((status) => {
                 let filterDown = {
                     x_axis: "status", // 状态
                     x_value: parseInt(status.id),
-                    group_axis: this.groupByFieldInfo.field_key || "", // 维度
+                    group_axis:
+                        this.groupByFieldEnumInfo.filed_mode === "all"
+                            ? ""
+                            : this.groupByFieldInfo.field_key || "", // 维度
                     group_value:
-                        parseInt(this.groupByFieldEnumInfo.user_id) ||
-                        this.groupByFieldEnumInfo.name ||
-                        "" // 维度值  角色取user_id
+                        this.groupByFieldEnumInfo.filed_mode === "all"
+                            ? ""
+                            : parseInt(this.groupByFieldEnumInfo.user_id) ||
+                              parseInt(this.groupByFieldEnumInfo.status_id) ||
+                              this.groupByFieldEnumInfo.name ||
+                              "" // 维度值  角色取user_id
                 };
                 let params = {
                     board_id: 0,
@@ -560,14 +579,23 @@ export default {
         }, 400),
         // 重新请求当前列已请求分页全部数据
         checkCurListAll(cardList) {
+            if (!cardList) {
+                return;
+            }
             let filterDown = {
                 x_axis: "status", // 状态
                 x_value: parseInt(cardList.id),
-                group_axis: this.groupByFieldInfo.field_key, // 维度
+                group_axis:
+                    this.groupByFieldEnumInfo.filed_mode === "all"
+                        ? ""
+                        : this.groupByFieldInfo.field_key || "", // 维度
                 group_value:
-                    parseInt(this.groupByFieldEnumInfo.user_id) ||
-                    this.groupByFieldEnumInfo.name ||
-                    "" // 维度值  角色去user_id
+                    this.groupByFieldEnumInfo.filed_mode === "all"
+                        ? ""
+                        : parseInt(this.groupByFieldEnumInfo.user_id) ||
+                          parseInt(this.groupByFieldEnumInfo.status_id) ||
+                          this.groupByFieldEnumInfo.name ||
+                          "" // 维度值  角色取user_id
             };
             let params = {
                 board_id: 0,
@@ -598,11 +626,17 @@ export default {
             let filterDown = {
                 x_axis: "status", // 状态
                 x_value: parseInt(cardList.id),
-                group_axis: this.groupByFieldInfo.field_key, // 维度
+                group_axis:
+                    this.groupByFieldEnumInfo.filed_mode === "all"
+                        ? ""
+                        : this.groupByFieldInfo.field_key || "", // 维度
                 group_value:
-                    parseInt(this.groupByFieldEnumInfo.user_id) ||
-                    this.groupByFieldEnumInfo.name ||
-                    "" // 维度值  角色去user_id
+                    this.groupByFieldEnumInfo.filed_mode === "all"
+                        ? ""
+                        : parseInt(this.groupByFieldEnumInfo.user_id) ||
+                          parseInt(this.groupByFieldEnumInfo.status_id) ||
+                          this.groupByFieldEnumInfo.name ||
+                          "" // 维度值  角色取user_id
             };
             let params = {
                 board_id: 0,
@@ -754,7 +788,7 @@ export default {
     outline: none !important;
     background-image: none !important;
     .card-item-temp {
-        transform: skew(0deg, 3deg) !important;
+        transform: rotate(4deg) !important;
         box-shadow: 2px 2px 8px 1px rgba(47, 56, 76, 0.1) !important;
     }
 }

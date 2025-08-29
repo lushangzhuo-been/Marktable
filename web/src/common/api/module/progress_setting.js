@@ -389,6 +389,21 @@ export default {
     deleteSteps(params) {
         let url = "tmpl/step/delete"
         return http.post(url, params);
-    }
+    },
     //  <-- 新节点(流程) end -->
+    // 获取权限配置
+    fetchAuthConfig(params) {
+        let url = "tmpl/auth/config"
+        return http.get(url, params);
+    },
+    // 获取当前权限的详情
+    fetchAuthDetail(params) {
+        let url = "tmpl/auth/Info"
+        return http.get(url, params);
+    },
+    // 保存选中的权限角色等
+    updateSelectedAuth(params) {
+        let url = "tmpl/auth/update"
+        return http.post(url, params);
+    }
 };

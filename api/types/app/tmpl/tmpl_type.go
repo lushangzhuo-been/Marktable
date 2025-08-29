@@ -66,6 +66,12 @@ type GetListDataSelectReq struct {
 	Ex  string `form:"ex" json:"ex"`
 }
 
+type GetUserAuthReq struct {
+	CommonReq
+	Id       string `form:"id" json:"id" binding:"required"`
+	AuthMode string `form:"auth_mode" json:"auth_mode" binding:"required"`
+}
+
 type GetDataReq struct {
 	CommonReq
 	Id string `form:"id" json:"id" binding:"required"`

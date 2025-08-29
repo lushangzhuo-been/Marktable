@@ -10,7 +10,7 @@
                     @click="enterToProgress(item)"
                 >
                     <div class="content">
-                        <b :class="['icon-type', item.tmpl_mode]"></b>
+                        <b class="icon-type"></b>
                         <tip-one :text="item.tmpl_name" position="top">
                             <div class="name">{{ item.tmpl_name || "--" }}</div>
                         </tip-one>
@@ -250,7 +250,7 @@ export default {
                     res.data &&
                     res.data.length
                 ) {
-                    this.recentVisitedList = res.data;
+                    this.recentVisitedList = res.data.slice(0, 20);
                 } else {
                     this.recentVisitedList = [];
                 }
@@ -343,7 +343,6 @@ export default {
         border-radius: 8px;
         cursor: pointer;
         &:hover {
-            // box-shadow: 2px 2px 8px 1px rgba(47, 56, 76, 0.1);
             background-color: #e9f0f8;
         }
         .icon-type {
@@ -355,16 +354,7 @@ export default {
             text-align: center;
             border-radius: 4px;
             background-size: 100% 100%;
-        }
-        .icon-type.private {
-            background-image: url("~@/assets/image/common/icon_private.svg");
-            //         color: #7b5b12;
-            // background: linear-gradient(91deg, #ffd980 0%, #fdf5d8 100%);
-        }
-        .icon-type.public {
-            background-image: url("~@/assets/image/common/icon_public.svg");
-            // color: #394c84;
-            // background: linear-gradient(270deg, #f0f4f8 0%, #ccdbf7 100%);
+            background-image: url("~@/assets/image/common/progress-icon.png");
         }
         .name {
             font-weight: 700;
