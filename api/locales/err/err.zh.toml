@@ -1,0 +1,14 @@
+[title]
+other = "我的网页应用"
+
+[welcomeMessage]
+other = "欢迎访问我们的网站"
+
+[greeting]
+other = "你好, {{.Name}}"
+
+[defaultTmplName]
+other = "默认流程"
+
+[defaultWsName]
+other = "默认空间"

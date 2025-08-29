@@ -12,14 +12,18 @@ import (
 	"mark3/api/v1/user"
 	"mark3/api/v1/ws"
 	"mark3/api/v1/ws_file"
+	"mark3/internal/i18n"
 	"mark3/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter() *gin.Engine {
+func NewRouter(i18nInstance *i18n.I18n) *gin.Engine {
 	r := gin.New()
 	r.Use(middleware.CorsMiddleware())
+
+	// 应用中间件
+	r.Use(i18nInstance.GinMiddleware())
 
 	//加载静态资源
 	r.Static("/static", "./views")
