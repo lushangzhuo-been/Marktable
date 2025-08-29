@@ -577,7 +577,7 @@ func getPaginationList(filter bson.M, sortOrder bson.D, pageSize int, pageNum in
 		SetLimit(int64(pageSize)).
 		SetSkip(int64(skip))
 
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	cnt, err := collection.CountDocuments(context.TODO(), filter)
 	if err != nil {
 		return nil, 0, err
@@ -597,7 +597,7 @@ func getAllList(filter bson.M, sortOrder bson.D) ([]bson.M, error) {
 	findOptions := options.Find().
 		SetSort(sortOrder)
 
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	cursor, err := collection.Find(context.TODO(), filter, findOptions)
 	if err != nil {
 		return nil, err
@@ -796,7 +796,7 @@ func getDataEditRight(userid int, document bson.M, userTmplRightInfo right.UserT
 }
 
 func (s *TmplSrv) GetFileRight(userid int, req types.GetDataReq, userTmplRightInfo right.UserTmplRight) (permission Permission, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return
@@ -884,7 +884,7 @@ func (s *TmplSrv) GetDataCheckAuth(objId string, userid int, wsId int, tmplId in
 	if err != nil {
 		return nil, err
 	}
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(objId)
 	if err != nil {
 		return
@@ -967,7 +967,7 @@ func (s *TmplSrv) GetUserAuth(ctx *gin.Context, userid int, req types.GetUserAut
 		},
 	}
 	var document bson.M
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	err = collection.FindOne(context.TODO(), filter).Decode(&document)
 	if err != nil {
 		return false, errors.New("数据不存在")
@@ -1329,7 +1329,7 @@ func (s *TmplSrv) Create(ctx *gin.Context, req types.CommonReq, userTmplRightInf
 	document["creator"] = []int32{int32(userid.(int))}
 	document["created_at"] = common.GetCurrentTime()
 	document["updated_at"] = common.GetCurrentTime()
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	result, err := collection.InsertOne(context.TODO(), &document)
 	if err != nil {
 		return nil, err
@@ -1345,7 +1345,7 @@ func (s *TmplSrv) Update(ctx *gin.Context, req types.UpdateReq, userTmplRightInf
 	fieldKey := ctx.PostForm("field_key")
 	val := ctx.PostForm(fieldKey)
 
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return
@@ -1361,7 +1361,7 @@ func (s *TmplSrv) Update(ctx *gin.Context, req types.UpdateReq, userTmplRightInf
 	fieldsMap := tmplCaller.GetFieldsMap(req.TmplId)
 
 	var oldDocument bson.M
-	collection = global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection = global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	err = collection.FindOne(context.TODO(), filter).Decode(&oldDocument)
 	if err != nil {
 		return false, errors.New("数据不存在")
@@ -1589,7 +1589,7 @@ func (s *TmplSrv) Delete(userid int, req types.DeleteReq, userTmplRightInfo righ
 			"$in": objectIds,
 		},
 	}
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
@@ -1623,7 +1623,7 @@ func (s *TmplSrv) Delete(userid int, req types.DeleteReq, userTmplRightInfo righ
 }
 
 func (s *TmplSrv) GetStepList(req types.GetStepListReq, userid int, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return
@@ -1766,7 +1766,7 @@ func (s *TmplSrv) GetStepList(req types.GetStepListReq, userid int, userTmplRigh
 }
 
 func (s *TmplSrv) GetStepScreen(ctx *gin.Context, req types.GetStepScreenReq, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return nil, err
@@ -1859,7 +1859,7 @@ func (s *TmplSrv) GetStepScreen(ctx *gin.Context, req types.GetStepScreenReq, us
 }
 
 func (s *TmplSrv) SwitchStep(ctx *gin.Context, req types.SwitchStepReq, userTmplRightInfo right.UserTmplRight) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return nil, err
@@ -2046,7 +2046,7 @@ func (s *TmplSrv) SwitchStep(ctx *gin.Context, req types.SwitchStepReq, userTmpl
 }
 
 func (s *TmplSrv) GetProgressList(userid int, req types.GetProgressList) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 
 	filter := bson.M{
 		"$and": []bson.M{
@@ -2108,7 +2108,7 @@ func (s *TmplSrv) GetProgressList(userid int, req types.GetProgressList) (resp i
 }
 
 func (s *TmplSrv) getProgressCount(wsId int, tmplId int, issueId string) int64 {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 	filter := bson.M{
 		"$and": []bson.M{
 			{"ws_id": wsId},
@@ -2129,7 +2129,7 @@ func (s *TmplSrv) AddProgress(userid int, req types.AddProgress) (resp interface
 	document["creator"] = userid
 	document["created_at"] = common.GetCurrentTime()
 	document["updated_at"] = common.GetCurrentTime()
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 	_, err = collection.InsertOne(context.TODO(), &document)
 	if err != nil {
 		return
@@ -2139,7 +2139,7 @@ func (s *TmplSrv) AddProgress(userid int, req types.AddProgress) (resp interface
 }
 
 func (s *TmplSrv) UpdateProgress(userid int, req types.UpdateProgress) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return nil, err
@@ -2180,7 +2180,7 @@ func (s *TmplSrv) UpdateProgress(userid int, req types.UpdateProgress) (resp int
 }
 
 func (s *TmplSrv) DeleteProgress(userid int, req types.DeleteProgress) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_progress")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_progress")
 	objectID, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
 		return nil, err
@@ -2214,7 +2214,7 @@ func (s *TmplSrv) DeleteProgress(userid int, req types.DeleteProgress) (resp int
 }
 
 func (s *TmplSrv) GetLogList(req types.GetLogList) (resp interface{}, err error) {
-	collection := global.GVA_MONGO.Database("mark3").Collection("issue_log")
+	collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue_log")
 
 	filter := bson.M{
 		"$and": []bson.M{
@@ -2299,7 +2299,7 @@ func (s *TmplSrv) GetSubListCount(req types.GetSubListCountReq) (resp interface{
 				"$in": objectIds,
 			},
 		}
-		collection := global.GVA_MONGO.Database("mark3").Collection("issue")
+		collection := global.GVA_MONGO.Database(global.GVA_CONFIG.Mongo.MongoDataBase).Collection("issue")
 		cnt, err := collection.CountDocuments(context.TODO(), filter)
 		if err != nil {
 			return 0, err

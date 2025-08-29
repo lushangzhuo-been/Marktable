@@ -73,35 +73,47 @@
             </div>
             <!-- 标签化 -->
             <div slot="reference">
-                <!-- 名字列表 -->
                 <div
-                    class="detail"
+                    v-show="frontArr.length"
+                    class="detail mem-list-content"
                     :class="{
-                        'validate-failed': validateFailed,
+                        'validate-failed': validateFailed
                     }"
-                    v-if="frontArr.length"
                 >
                     <div
-                        class="tag-item"
-                        v-for="(tagItem, tagIndex) in frontArr"
-                        :key="tagIndex"
+                        ref="listCon"
+                        class="tag-list"
+                        :class="{ 'show-num': showNum }"
                     >
-                        <el-avatar
-                            class="progress-avatar"
-                            icon="el-icon-user-solid"
-                            size="small"
-                            :src="getAvatar(tagItem.avatar)"
-                            :style="getAvatarStack(tagItem.avatar, tagIndex)"
-                        ></el-avatar>
-                        {{ tagItem.full_name }}
+                        <div
+                            class="tag-item"
+                            v-for="(tagItem, tagIndex) in frontArr"
+                            :key="tagIndex"
+                        >
+                            <el-avatar
+                                class="progress-avatar"
+                                icon="el-icon-user-solid"
+                                size="small"
+                                :src="getAvatar(tagItem.avatar)"
+                                :style="
+                                    getAvatarStack(tagItem.avatar, tagIndex)
+                                "
+                            ></el-avatar>
+                            {{ tagItem.full_name }}
+                        </div>
                     </div>
                     <!-- 数字气泡 -->
-                    <el-tooltip class="item" effect="dark" placement="top">
+                    <el-tooltip
+                        v-show="showNum"
+                        class="item"
+                        effect="dark"
+                        placement="top"
+                    >
                         <div slot="content">
                             <div
                                 v-for="(tagItem, tagIndex) in behandArr"
                                 :key="tagIndex"
-                                class="num-list"
+                                class="member-list"
                             >
                                 <el-avatar
                                     class="progress-avatar"
@@ -115,17 +127,17 @@
                                 {{ tagItem.full_name }}
                             </div>
                         </div>
-                        <b v-show="behandArr.length" class="num-box"
+                        <b ref="num-box" class="num-box"
                             >+{{ behandArr.length }}</b
                         >
                     </el-tooltip>
                 </div>
                 <div
+                    v-show="!frontArr.length"
                     class="detail default-text"
                     :class="{
-                        'validate-failed': validateFailed,
+                        'validate-failed': validateFailed
                     }"
-                    v-else
                 >
                     请选择(多人)
                 </div>
@@ -144,16 +156,16 @@ export default {
     props: {
         formItem: {
             type: Object,
-            default: () => {},
+            default: () => {}
         },
         formData: {
             type: Object,
-            default: () => {},
+            default: () => {}
         },
         validateOrder: {
             type: Number,
-            default: 0,
-        },
+            default: 0
+        }
     },
     data() {
         return {
@@ -168,6 +180,8 @@ export default {
             personList: [],
             peopleList: [],
             searchInput: "",
+            labelIndex: 0,
+            showNum: true
         };
     },
     computed: {
@@ -176,7 +190,7 @@ export default {
         },
         curProgress() {
             return this.$route.params.id;
-        },
+        }
     },
     watch: {
         formData: {
@@ -187,16 +201,20 @@ export default {
                     formData[this.formItem.field_key] &&
                     formData[this.formItem.field_key].length
                 ) {
-                    vModelArr = formData[this.formItem.field_key];
-
+                    vModelArr = _.cloneDeep(formData[this.formItem.field_key]);
                     formData[this.formItem.field_key].forEach((objItem) => {
                         selectArr.push(objItem.id);
                     });
                 }
                 this.selectArr = selectArr;
                 this.personList = vModelArr;
-                this.frontArr = this.getArrFront(vModelArr);
-                this.behandArr = this.getArrBehand(vModelArr);
+                this.frontArr = this.personList;
+                this.showNum = true;
+                this.$nextTick(() => {
+                    this.getTagInit();
+                });
+                // this.frontArr = this.getArrFront(vModelArr);
+                // this.behandArr = this.getArrBehand(vModelArr);
                 this.$emit(
                     "edit-form-item",
                     JSON.stringify(this.selectArr),
@@ -205,19 +223,52 @@ export default {
                 );
             },
             // immediate: true,
-            deep: true,
+            deep: true
         },
         validateOrder: {
             handler(order) {
                 this.doValidate();
-            },
+            }
         },
         searchInput: _.debounce(function () {
             this.getPeopleList();
-        }, 500),
+        }, 500)
     },
     mounted() {},
     methods: {
+        getShowLabel(labelIndex) {
+            this.labelIndex = labelIndex;
+            this.frontArr = this.getArrFront(this.personList);
+            this.behandArr = this.getArrBehand(this.personList);
+        },
+        getAllLabel() {
+            this.frontArr = this.personList;
+            this.behandArr = [];
+        },
+        getTagInit() {
+            const listCon = this.$refs.listCon;
+            if (listCon) {
+                const labels = listCon.querySelectorAll(".tag-item");
+                let labelIndex = 0; // 渲染到第几个
+                const listConBottom = listCon.getBoundingClientRect().bottom; // 容器底部距视口顶部距离
+                this.showNum = true;
+                this.$nextTick(() => {
+                    for (let i = 0; i < labels.length; i++) {
+                        const _top = labels[i].getBoundingClientRect().top;
+                        if (_top >= listConBottom) {
+                            // 如果有标签顶部距离超过容器底部则表示超出容器隐藏
+                            this.showNum = true;
+                            labelIndex = i;
+                            this.getShowLabel(labelIndex);
+                            break;
+                        } else {
+                            this.getAllLabel();
+                            this.showNum = false;
+                        }
+                    }
+                });
+            }
+        },
         doValidate() {
             if (this.formItem.required === "yes" && !this.selectArr.length) {
                 this.validateFailed = true;
@@ -233,7 +284,7 @@ export default {
                 ex: this.selectArr.join(","),
                 key: this.searchInput,
                 page_size: 50,
-                page: 1,
+                page: 1
             };
             api.getPeopleList(params).then((res) => {
                 if (res && res.resultCode === 200 && res.data) {
@@ -269,12 +320,12 @@ export default {
         },
         getArrFront(arr) {
             let deepClone = _.cloneDeep(arr);
-            let front = deepClone.splice(0, 1);
+            let front = deepClone.splice(0, this.labelIndex);
             return front;
         },
         getArrBehand(arr) {
             let deepClone = _.cloneDeep(arr);
-            let behand = deepClone.splice(1);
+            let behand = deepClone.splice(this.labelIndex);
             return behand;
         },
         getAvatar(src) {
@@ -286,13 +337,13 @@ export default {
         getAvatarStack(src, index) {
             return {
                 position: "relative",
-                top: "-2px",
+                top: "-2px"
             };
         },
         getPopoverTagListAvatar() {
             return {
                 position: "relative",
-                top: "-7px",
+                top: "-7px"
             };
         },
         removeTagItem(people) {
@@ -306,6 +357,11 @@ export default {
             });
             this.getPeopleList();
             this.doValidate();
+            this.frontArr = this.personList;
+            this.showNum = true;
+            this.$nextTick(() => {
+                this.getTagInit();
+            });
         },
         confirmPeople(people) {
             // 列表选择
@@ -317,9 +373,14 @@ export default {
                     _.find(this.peopleList, { id: people.id })
                 );
             }
-            this.frontArr = this.getArrFront(this.personList);
-            this.behandArr = this.getArrBehand(this.personList);
+            // this.frontArr = this.getArrFront(this.personList);
+            // this.behandArr = this.getArrBehand(this.personList);
             this.doValidate();
+            this.frontArr = this.personList;
+            this.showNum = true;
+            this.$nextTick(() => {
+                this.getTagInit();
+            });
         },
         removeHadSelect() {
             this.selectArr.forEach((id) => {
@@ -327,22 +388,43 @@ export default {
                     _.remove(this.showList, { id: id });
                 }
             });
-            this.frontArr = this.getArrFront(this.personList);
-            this.behandArr = this.getArrBehand(this.personList);
-        },
-    },
+            // this.frontArr = this.getArrFront(this.personList);
+            // this.behandArr = this.getArrBehand(this.personList);
+            this.frontArr = this.personList;
+            this.showNum = true;
+            this.$nextTick(() => {
+                this.getTagInit();
+            });
+        }
+    }
 };
 </script>
 
 <style lang="scss" scoped>
 @import "../style.scss";
+.column-block {
+    .detail {
+        display: flex;
+        padding: 0 10px;
+        white-space: wrap;
+        .tag-list {
+            display: inline-block;
+            height: 32px;
+            &.show-num {
+            }
+            .tag-item {
+                display: inline-block;
+                margin-right: 8px;
+                max-width: 148px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+        }
+    }
+}
 .default-text {
     color: #c0c4cc;
-}
-
-.tag-item {
-    display: inline-block;
-    margin-right: 8px;
 }
 
 .num-box {
@@ -356,8 +438,9 @@ export default {
     background-color: #f8f8f8;
     text-align: center;
     position: relative;
-    top: -2px;
+    top: 4px;
     vertical-align: middle;
+    font-weight: 400;
     font-size: 12px;
     color: #2f384c;
 }
@@ -392,6 +475,7 @@ export default {
 .had-select-tag {
     padding: 4px;
 }
+
 .el-tag__close.el-icon-close.tag-delete {
     width: 12px;
     height: 12px;
@@ -407,5 +491,14 @@ export default {
 }
 .num-list {
     margin: 4px 0;
+}
+.member-list {
+    margin: 6px 0;
+    &:first-child {
+        margin-top: 0;
+    }
+    &:last-child {
+        margin-bottom: 0;
+    }
 }
 </style>

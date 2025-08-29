@@ -32,10 +32,10 @@
                 是一款高度灵活的项目管理平台，通过多维自定义配置（如流程、权限、视图、报表），支持企业快速搭建适配不同业务场景的数字化工作流，涵盖研发管理、客户成功、项目协作等领域，助力团队实现跨部门高效协同与流程标准化
             </p>
             <div class="title">登录</div>
-            <div class="test-account-block">
-                <div class="account">测试账号：demo</div>
-                <div class="password">测试密码：Demo@123</div>
-            </div>
+<!--            <div class="test-account-block">-->
+<!--                <div class="account">测试账号：demo</div>-->
+<!--                <div class="password">测试密码：Demo@123</div>-->
+<!--            </div>-->
             <el-form
                 class="basic-ui"
                 ref="logonForm"

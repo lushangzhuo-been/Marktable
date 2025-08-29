@@ -31,7 +31,7 @@
                     <!-- 遍历personList -->
                     <div
                         class="popover-tag-item"
-                        v-for="(tagItem, tagIndex) in frontArr"
+                        v-for="(tagItem, tagIndex) in personList"
                         :key="tagIndex"
                     >
                         <el-avatar
@@ -71,28 +71,75 @@
                     </div>
                 </div>
             </div>
-            <div
-                slot="reference"
-                class="detail"
-                :class="{
-                    'validate-failed': validateFailed,
-                }"
-            >
-                <div v-if="frontArr.length">
+            <div slot="reference">
+                <div
+                    v-show="frontArr.length"
+                    class="detail mem-list-content"
+                    :class="{
+                        'validate-failed': validateFailed
+                    }"
+                >
                     <div
-                        v-for="(tagItem, tagIndex) in frontArr"
-                        :key="tagIndex"
+                        ref="listCon"
+                        class="tag-list"
+                        :class="{ 'show-num': showNum }"
                     >
-                        <el-avatar
-                            class="progress-avatar"
-                            icon="el-icon-user-solid"
-                            size="small"
-                            :src="getAvatar(tagItem.avatar)"
-                        ></el-avatar>
-                        {{ tagItem.full_name }}
+                        <div
+                            class="tag-item"
+                            v-for="(tagItem, tagIndex) in frontArr"
+                            :key="tagIndex"
+                        >
+                            <el-avatar
+                                class="progress-avatar"
+                                icon="el-icon-user-solid"
+                                size="small"
+                                :src="getAvatar(tagItem.avatar)"
+                                :style="
+                                    getAvatarStack(tagItem.avatar, tagIndex)
+                                "
+                            ></el-avatar>
+                            {{ tagItem.full_name }}
+                        </div>
                     </div>
+                    <!-- 数字气泡 -->
+                    <el-tooltip
+                        v-show="showNum"
+                        class="item"
+                        effect="dark"
+                        placement="top"
+                    >
+                        <div slot="content">
+                            <div
+                                v-for="(tagItem, tagIndex) in behandArr"
+                                :key="tagIndex"
+                                class="member-list"
+                            >
+                                <el-avatar
+                                    class="progress-avatar"
+                                    icon="el-icon-user-solid"
+                                    size="small"
+                                    :src="getAvatar(tagItem.avatar)"
+                                    :style="
+                                        getAvatarStack(tagItem.avatar, tagIndex)
+                                    "
+                                ></el-avatar>
+                                {{ tagItem.full_name }}
+                            </div>
+                        </div>
+                        <b ref="num-box" class="num-box"
+                            >+{{ behandArr.length }}</b
+                        >
+                    </el-tooltip>
                 </div>
-                <div class="default-text" v-else>请选择</div>
+                <div
+                    v-show="!frontArr.length"
+                    class="detail default-text"
+                    :class="{
+                        'validate-failed': validateFailed
+                    }"
+                >
+                    请选择
+                </div>
                 <b class="triangle"></b>
             </div>
         </el-popover>
@@ -108,16 +155,16 @@ export default {
     props: {
         formItem: {
             type: Object,
-            default: () => {},
+            default: () => {}
         },
         formData: {
             type: Object,
-            default: () => {},
+            default: () => {}
         },
         validateOrder: {
             type: Number,
-            default: 0,
-        },
+            default: 0
+        }
     },
     data() {
         return {
@@ -129,6 +176,10 @@ export default {
             searchInput: "",
             personOption: [],
             personList: [],
+            frontArr: [],
+            behandArr: [],
+            labelIndex: 0,
+            showNum: true
         };
     },
     computed: {
@@ -137,7 +188,7 @@ export default {
         },
         curProgress() {
             return this.$route.params.id;
-        },
+        }
     },
     watch: {
         formData: {
@@ -159,7 +210,11 @@ export default {
                     }
                 }
                 this.selectArr = selectArr;
-                this.frontArr = this.getArrFront(this.personList);
+                // this.frontArr = this.getArrFront(this.personList);
+                this.frontArr = this.personList;
+                this.$nextTick(() => {
+                    this.getTagInit();
+                });
                 if (this.selectArr.length) {
                     this.$emit(
                         "edit-form-item",
@@ -177,29 +232,68 @@ export default {
                 }
             },
             immediate: true,
-            deep: true,
+            deep: true
         },
         validateOrder: {
             handler(order) {
                 this.doValidate();
-            },
+            }
         },
         searchInput: _.debounce(function () {
             this.getPeopleList();
-        }, 500),
+        }, 500)
     },
     mounted() {},
     methods: {
+        getShowLabel(labelIndex) {
+            this.labelIndex = labelIndex;
+            this.frontArr = this.getArrFront(this.personList);
+            this.behandArr = this.getArrBehand(this.personList);
+        },
+        getAllLabel() {
+            this.frontArr = this.personList;
+            this.behandArr = [];
+        },
+        getTagInit() {
+            const listCon = this.$refs.listCon;
+            if (listCon) {
+                const labels = listCon.querySelectorAll(".tag-item");
+                let labelIndex = 0; // 渲染到第几个
+                const listConBottom = listCon.getBoundingClientRect().bottom; // 容器底部距视口顶部距离
+                this.showNum = true;
+                this.$nextTick(() => {
+                    for (let i = 0; i < labels.length; i++) {
+                        const _top = labels[i].getBoundingClientRect().top;
+                        if (_top >= listConBottom) {
+                            // 如果有标签顶部距离超过容器底部则表示超出容器隐藏
+                            this.showNum = true;
+                            labelIndex = i;
+                            this.getShowLabel(labelIndex);
+                            break;
+                        } else {
+                            this.getAllLabel();
+                            this.showNum = false;
+                        }
+                    }
+                });
+            }
+        },
         getAvatar(src) {
             if (src) {
                 return `${imgHost}${src}`;
             }
             return require(`@/assets/image/common/default_avatar_big.png`);
         },
+        getAvatarStack() {
+            return {
+                position: "relative",
+                top: "-2px"
+            };
+        },
         getPopoverTagListAvatar() {
             return {
                 position: "relative",
-                top: "-7px",
+                top: "-6px"
             };
         },
         popoverShow() {
@@ -220,7 +314,7 @@ export default {
                 ex: this.selectArr.join(","),
                 key: this.searchInput,
                 page_size: 50,
-                page: 1,
+                page: 1
             };
             api.getPeopleList(params).then((res) => {
                 if (res && res.resultCode === 200 && res.data) {
@@ -240,8 +334,11 @@ export default {
                 return persion.id === people.id;
             });
             this.getPeopleList();
-            this.personList = [];
-            this.frontArr = this.getArrFront(this.personList);
+            // this.personList = [];
+            this.frontArr = this.personList;
+            this.$nextTick(() => {
+                this.getTagInit();
+            });
             this.$emit(
                 "edit-form-item",
                 JSON.stringify(this.selectArr),
@@ -255,7 +352,10 @@ export default {
             this.removeHadSelect();
             this.getPeopleList();
             this.personList = [people];
-            this.frontArr = this.getArrFront(this.personList);
+            this.frontArr = this.personList;
+            this.$nextTick(() => {
+                this.getTagInit();
+            });
             this.$emit(
                 "edit-form-item",
                 JSON.stringify(this.selectArr),
@@ -269,16 +369,24 @@ export default {
                     _.remove(this.showList, { id: id });
                 }
             });
+            this.frontArr = this.personList;
+            this.$nextTick(() => {
+                this.getTagInit();
+            });
         },
         afterLeave() {
             this.isEditing = false;
             this.doValidate();
         },
-
         getArrFront(arr) {
             let deepClone = _.cloneDeep(arr);
-            let front = deepClone.splice(0, 1);
+            let front = deepClone.splice(0, this.labelIndex);
             return front;
+        },
+        getArrBehand(arr) {
+            let deepClone = _.cloneDeep(arr);
+            let behand = deepClone.splice(this.labelIndex);
+            return behand;
         },
         doValidate() {
             if (this.formItem.required === "yes" && !this.selectArr.length) {
@@ -288,71 +396,54 @@ export default {
                 this.validateFailed = false;
                 this.formItem.validateFailed = false;
             }
-        },
-    },
+        }
+    }
 };
 </script>
 
 <style lang="scss" scoped>
 @import "../style.scss";
+.column-block {
+    .detail {
+        display: flex;
+        padding: 0 10px;
+        white-space: wrap;
+        .tag-list {
+            display: inline-block;
+            height: 32px;
+            &.show-num {
+            }
+            .tag-item {
+                display: inline-block;
+                margin-right: 8px;
+                max-width: 148px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+        }
+    }
+}
+.num-box {
+    box-sizing: border-box;
+    display: inline-block;
+    min-width: 22px;
+    height: 22px;
+    line-height: 22px;
+    border-radius: 11px;
+    padding: 0 2px;
+    background-color: #f8f8f8;
+    text-align: center;
+    position: relative;
+    top: 4px;
+    vertical-align: middle;
+    font-weight: 400;
+    font-size: 12px;
+    color: #2f384c;
+}
 .default-text {
     color: #c0c4cc;
 }
-// .column-block {
-//     box-sizing: border-box;
-//     height: 32px;
-//     line-height: 32px;
-//     border: 1px solid rgba(0, 0, 0, 0);
-//     padding: 0;
-//     border-radius: 4px;
-//     .detail {
-//         height: 32px;
-//         border: 1px solid #dcdfe6;
-//         padding: 0 10px;
-//         border-radius: 4px;
-//         box-sizing: border-box;
-//     }
-//     &:hover {
-//         .triangle {
-//             transform: rotate(0deg);
-//             transition-duration: 0.3s;
-//             position: absolute;
-//             right: 3px;
-//             top: 8px;
-//             display: inline-block;
-//             width: 16px;
-//             height: 16px;
-//             background-size: 100% 100%;
-//             background-image: url("~@/assets/image/common/triangle-down.png");
-//         }
-//     }
-//     &.isEditing {
-//         .detail {
-//             border: 1px solid var(--PRIMARY_COLOR);
-//         }
-//         .triangle {
-//             transform: rotate(180deg);
-//             transition-duration: 0.3s;
-//             position: absolute;
-//             right: 3px;
-//             top: 8px;
-//             display: inline-block;
-//             width: 16px;
-//             height: 16px;
-//             background-size: 100% 100%;
-//             background-image: url("~@/assets/image/common/triangle-down-active.png");
-//         }
-//     }
-//     .validate-desc {
-//         color: #f56c6c;
-//         font-size: 12px;
-//         height: 12px;
-//         line-height: 12px;
-//         position: absolute;
-//         bottom: -16px;
-//     }
-// }
-
 .avatar-box {
     display: inline-block;
     min-width: 24px;
@@ -403,6 +494,15 @@ export default {
     vertical-align: super;
     &:hover {
         background-color: #82889e;
+    }
+}
+.member-list {
+    margin: 6px 0;
+    &:first-child {
+        margin-top: 0;
+    }
+    &:last-child {
+        margin-bottom: 0;
     }
 }
 </style>

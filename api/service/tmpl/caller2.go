@@ -32,6 +32,30 @@ func (s *Caller) GetFields(tmplId int) ([]model.FieldModel, error) {
 		fieldsRes = append(fieldsRes, field)
 	}
 
+	// 字段排序
+	var coordinate model.ScreenCoordinateModel
+	global.GVA_DB.Where("tmpl_id=? and module=?", tmplId, enum.ScreenCoordinateModuleField).First(&coordinate)
+	if coordinate.Id != 0 {
+		coordinateSlice := strings.Split(coordinate.Coordinate, ",")
+		var dataMap = make(map[string]model.FieldModel)
+		for _, vo := range fieldsRes {
+			dataMap[vo.FieldKey] = vo
+		}
+
+		var sort []model.FieldModel
+		for _, key := range coordinateSlice {
+			if data, ok := dataMap[key]; ok {
+				sort = append(sort, data)
+				delete(dataMap, key)
+			}
+		}
+
+		for _, vo := range dataMap {
+			sort = append(sort, vo)
+		}
+		return sort, nil
+	}
+
 	return fieldsRes, nil
 }
 

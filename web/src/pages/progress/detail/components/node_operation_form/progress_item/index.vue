@@ -32,7 +32,7 @@ export default {
     watch: {
         formData: {
             handler(formData) {
-                this.slider = formData[this.formItem.field_key];
+                this.slider = formData[this.formItem.field_key] || 0;
             },
             immediate: true
         }
@@ -54,7 +54,6 @@ export default {
 <style lang="scss" scoped>
 .column-block {
     box-sizing: border-box;
-    height: 32px;
     line-height: 32px;
     border: 1px solid rgba(0, 0, 0, 0);
     padding: 0;
@@ -63,8 +62,6 @@ export default {
         font-size: 12px;
         height: 12px;
         line-height: 12px;
-        position: absolute;
-        bottom: -16px;
     }
 }
 ::v-deep .progress-input.el-input {
