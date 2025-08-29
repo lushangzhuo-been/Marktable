@@ -237,7 +237,7 @@ export default {
         height: 100%;
         box-sizing: border-box;
         background-color: #f5f6f8;
-        overflow-y: auto;
+        // overflow-y: auto;
         padding-top: 10px;
         text-align: center;
         .item-btn {
