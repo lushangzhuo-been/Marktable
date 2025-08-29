@@ -21,8 +21,6 @@ mongo:
   mongoUrl: "mongodb://root:example@mongodb:27017/mark3?authSource=admin"
   mongoDataBase: "mark3"
 
-
-
 redis:
   redisDbName: 0 # redisDb名称
   redisHost: "redis" # redisDb所在服务器IP
