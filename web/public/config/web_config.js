@@ -1,6 +1,6 @@
 window.WEBCONFIG = {
     NODE_ENV: "out",
-    VUE_APP_MARKTABLE_SERVER_PATH: "http://localhost:8075/",
-    VUE_APP_DASHBOARD_SERVER_PATH: "http://localhost:8075/",
+    VUE_APP_MARKTABLE_SERVER_PATH: "http://localhost:8070/",
+    VUE_APP_DASHBOARD_SERVER_PATH: "http://localhost:8070/",
     VUE_APP_DOWNLOAD_FILE_SERVER_PATH: "http://localhost:8081/"
 }

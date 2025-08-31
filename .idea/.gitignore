@@ -9,3 +9,4 @@
 
 /api/config
 /web/*.env.*
+/web/public/

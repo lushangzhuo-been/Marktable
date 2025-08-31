@@ -15,7 +15,7 @@ FROM alpine:latest
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 # 安装LibreOffice和必要依赖
-RUN apk update && apk add --no-cache \
+RUN apk update && apk add \
     libreoffice \
     libreoffice-writer \
     openjdk17-jre \

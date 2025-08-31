@@ -15,7 +15,7 @@ COPY package*.json ./
 # 安装依赖（严格锁定版本）
 RUN npm ci
 COPY . .
-RUN npm run build           # 执行构建命令
+RUN npm run build          # 执行构建命令
 
 # 阶段2：运行
 FROM nginx:alpine
