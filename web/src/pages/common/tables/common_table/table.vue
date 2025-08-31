@@ -6,11 +6,12 @@
             style="width: 100%"
             :row-key="rowKey"
         >
-            <div v-for="(item, index) in col" :key="index">
+            <template v-for="(item, index) in col">
                 <interactive-column
                     v-if="item.type === 'interactive'"
                     :name="item.prop"
                     :column="item"
+                    :key="index"
                     @interactive="interactive"
                 ></interactive-column>
                 <slot
@@ -21,9 +22,10 @@
                 </slot>
                 <default-column
                     v-if="!item.type"
+                    :key="index"
                     :column="item"
                 ></default-column>
-            </div>
+            </template>
         </el-table>
     </div>
 </template>
@@ -51,7 +53,17 @@ export default {
         }
     },
     data() {
-        return {};
+        return {
+            tableKey: new Date().getTime()
+        };
+    },
+    watch: {
+        col: {
+            handler() {
+                this.tableKey = new Date().getTime();
+            },
+            immediate: true
+        }
     },
     methods: {
         interactive(row, col) {
