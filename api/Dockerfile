@@ -21,7 +21,7 @@ RUN apk update && apk add --no-cache \
     openjdk17-jre \
     ttf-dejavu \
     ttf-liberation \
-    font-wqy-zenhei \
+    font-noto-cjk \
     bash \
     curl \
     && rm -rf /var/cache/apk/*
