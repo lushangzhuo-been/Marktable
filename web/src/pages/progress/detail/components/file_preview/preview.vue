@@ -225,6 +225,8 @@ export default {
     watch: {
         curPreviewFile: {
             handler(obj) {
+                this.showMessage = "暂无数据";
+                this.message = "加载中";
                 this.imgShow = false;
                 this.loading = true;
                 if (obj && Object.keys(obj).length) {

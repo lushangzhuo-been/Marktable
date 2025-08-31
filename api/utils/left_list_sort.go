@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"cmp"
 	"encoding/json"
 	"strconv"
 	"strings"
@@ -16,27 +15,24 @@ func arbitrarilyInsertElement(slice []string, num string, index int) []string {
 	return slice
 }
 
-//go版本大于1.21的情况，可以使用泛型参数
-
-// 切片去重  泛型参数 利用map的key不能重复的特性 2次for循环
-func Unique[T cmp.Ordered](ss []T) []T {
+// 切片去重 - 兼容 Go 1.20 及以下版本
+func Unique[T comparable](ss []T) []T {
 	size := len(ss)
 	if size == 0 {
 		return []T{}
 	}
-	// 这个地方利用了map数据的key不能重复的特性,将切片的值当做key放入map中,达到去重的目的
-	m1 := make(map[T]T)
-	var newSS []T
-	for i := 0; i < size; i++ {
-		_, ok := m1[ss[i]]
-		if ok {
-			continue
-		} else {
-			m1[ss[i]] = ss[i]
-			newSS = append(newSS, ss[i])
+
+	// 利用 map 的 key 不能重复的特性
+	seen := make(map[T]bool)
+	var result []T
+
+	for _, item := range ss {
+		if !seen[item] {
+			seen[item] = true
+			result = append(result, item)
 		}
 	}
-	return newSS
+	return result
 }
 
 func DeleteSlice(s []string, elem string) []string {
