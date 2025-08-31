@@ -195,14 +195,6 @@ export default {
                 });
             },
             deep: true
-        },
-        data: {
-            handler() {
-                this.$nextTick(() => {
-                    this.refreshTableKey();
-                });
-            },
-            deep: true
         }
     },
     data() {

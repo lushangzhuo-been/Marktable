@@ -56,18 +56,14 @@
                     />
                     删除
                 </div>
-                <!-- rowObj[`operation_${scope.row._id}`] && rowObj[`operation_${scope.row._id}`] -->
                 <b
                     slot="reference"
                     :class="{
                         'more-icon': true,
-                        actived: scope.row.isActived,
-                        hover: scope.row.isHover
+                        actived: scope.row.isActived
                     }"
                     width="18px"
                     height="18px"
-                    @mouseenter="mouseEnter(scope.row)"
-                    @mouseleave="mouseLeave(scope.row)"
                 >
                 </b>
             </el-popover>
@@ -89,7 +85,8 @@ export default {
     data() {
         return {
             rowObj: {},
-            hasDeleteAuth: false
+            hasDeleteAuth: false,
+            isActived: false
         };
     },
     computed: {
@@ -104,8 +101,11 @@ export default {
     mounted() {},
     methods: {
         poppoverShow(row) {
-            // this.$set(this.rowObj[`operation_${row._id}`], 'isActived', true)
+            this.$set(row, "isActived", true);
             this.fetAuthDelete(row);
+        },
+        poppoverHide(row) {
+            this.$set(row, "isActived", false);
         },
         fetAuthDelete(row) {
             // 获取进展权限
@@ -121,18 +121,9 @@ export default {
                 } else {
                     this.hasDeleteAuth = false;
                 }
-                this.$set(row, "isActived", true);
             });
         },
-        poppoverHide(row) {
-            this.$set(row, "isActived", false);
-        },
-        mouseEnter(row) {
-            this.$set(row, "isHover", true);
-        },
-        mouseLeave(row) {
-            this.$set(row, "isHover", false);
-        },
+
         // 复制连接
         copyItemLink(row) {
             let jumpSite = window.location.origin;
@@ -186,8 +177,10 @@ export default {
     vertical-align: middle;
     background-size: 100% 100%;
     background-image: url(@/assets/image/common/operation_more_default.png);
-    &.actived,
-    &.hover {
+    &.actived {
+        background-image: url(@/assets/image/common/operation_more_active.png);
+    }
+    &:hover {
         background-image: url(@/assets/image/common/operation_more_active.png);
     }
 }
