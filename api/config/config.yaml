@@ -1,6 +1,6 @@
 server:
   host: "0.0.0.0" # 服务器IP
-  port: "8075" # 项目端口
+  port: "8080" # 项目端口
 
 url:
   logo: "http://127.0.0.1/logo.png" # 项目图标

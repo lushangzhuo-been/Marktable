@@ -9,7 +9,7 @@ services:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=mydb
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/docker_mysql
     ports:
       - "3307:3306"
     restart: unless-stopped
@@ -47,7 +47,7 @@ services:
       - "5673:5672"   # AMQP协议端口
       - "15673:15672" # 管理界面端口
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_data:/var/lib/docker_rabbitmq
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
