@@ -110,16 +110,10 @@ export default {
         .el-dialog__body {
             padding: 0 32px;
         }
-        .el-dialog__footer {
-            padding: 0 32px 32px;
-        }
         .el-dialog__headerbtn {
             top: 24px;
             right: 32px;
         }
-        // .el-icon-close:before {
-        //     content: url('~@/assets/image/common/close.png');
-        // }
         .el-form-item {
             margin-bottom: 24px;
         }
