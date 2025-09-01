@@ -48,13 +48,16 @@
                     </tip-one>
                 </div>
                 <!-- </tip-one> -->
-                <el-tabs class="basic-ui" v-model="tabName">
+                <el-tabs
+                    class="basic-ui"
+                    v-model="tabName"
+                    @tab-click="handerClickTab()"
+                >
                     <el-tab-pane
                         v-for="(item, index) in btnsList"
                         :key="index"
                         :label="item.label"
                         :name="item.key"
-                        @click="handerClickTab(item)"
                     ></el-tab-pane>
                 </el-tabs>
             </div>
@@ -377,7 +380,13 @@ export default {
     },
 
     methods: {
-        handerClickTab(item) {},
+        handerClickTab(item) {
+            this.$nextTick(() => {
+                if (this.tabName === "转换界面") {
+                    this.rowDrop();
+                }
+            });
+        },
         rgbToRgba(color, opacity) {
             return rgbToRgba(color, opacity);
         },

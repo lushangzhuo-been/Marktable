@@ -29,6 +29,7 @@
                 :curFileItem="curFileItem"
                 :detailId="detailId"
                 :curPreviewFile="curPreviewFile"
+                :isClickClose="isClickClose"
             ></preview>
             <!-- 操作模块 -->
             <switch-version
@@ -128,6 +129,7 @@ export default {
     },
     data() {
         return {
+            isClickClose: false,
             dialogVisible: false, //弹窗显示与否
             versionSelected: false, // 版本操作展开与否
             curFileItem: {}, // 当前打开得文件
@@ -149,6 +151,7 @@ export default {
         },
         // 打开预览弹窗
         show(item, detailId, fileAuth) {
+            this.isClickClose = false;
             this.detailId = detailId;
             this.fileAuth = fileAuth;
             this.curFileItem = _.cloneDeep(item);
@@ -157,6 +160,7 @@ export default {
         },
         // 关闭预览弹窗
         closeDialog() {
+            this.isClickClose = true;
             this.curFileItem = {};
             this.dialogVisible = false;
             this.versionSelected = false;

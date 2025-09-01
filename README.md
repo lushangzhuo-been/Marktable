@@ -110,16 +110,16 @@ marktable 是一款高度灵活的项目管理平台，通过多维自定义配�
 **3. 部署步骤**:
 - 3.1 执行命令构建服务
   ```
-  docker-compose build
+  docker compose build
   ```
 - 3.2 启动服务
   ```
-    docker-compose up -d
+    docker compose up -d
   ```
 
 - 3.3 验证部署
   ```
-  docker-compose ps
+  docker compose ps
   ```
 # 社区与支持
 我们欢迎您为 marktable 做出贡献，以帮助改善 marktable。包括：提交代码、问题、新想法，或分享您基于 marktable 创建的有趣且有用的 AI 应用程序。同时，我们也欢迎您在不同的活动、会议和社交媒体上分享 marktable。
