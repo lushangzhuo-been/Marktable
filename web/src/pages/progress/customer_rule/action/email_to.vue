@@ -483,10 +483,8 @@ export default {
                 this.$nextTick(() => {
                     for (let i = 0; i < labels.length; i++) {
                         const _top = labels[i].getBoundingClientRect().top;
-                        console.log("_top", _top);
                         if (_top >= listConBottom) {
                             // 如果有标签顶部距离超过容器底部则表示超出容器隐藏
-                            console.log("_top---", _top);
                             this.showNum = true;
                             labelIndex = i;
                             this.getShowLabel(labelIndex);
@@ -500,11 +498,9 @@ export default {
             }
         },
         getShowLabel(labelIndex) {
-            console.log("labelIndex", labelIndex);
             this.labelIndex = labelIndex;
             this.frontArr = this.getArrFront(this.integratedArr);
             this.behandArr = this.getArrBehand(this.integratedArr);
-            console.log("labelIndex", labelIndex);
         },
         getAllLabel() {
             this.frontArr = this.integratedArr;
