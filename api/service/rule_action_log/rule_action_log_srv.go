@@ -48,22 +48,21 @@ func CheckRule(userid int, wsId int, tmplId int, issueId string, oldData bson.M,
 				if err != nil {
 					continue
 				}
-				// todo 非任意值判断
-				//var doUpdateRule = false
-				//if rule.OldValue != "" && rule.OldValue != "任意值" {
-				//	doUpdateRule = CheckFieldUpdateRule(rule.FieldKey, rule.OldValue, oldData, fieldsMap)
-				//	fmt.Println(fmt.Sprintf("old结果: %s", doUpdateRule))
-				//	if !doUpdateRule {
-				//		continue
-				//	}
-				//}
-				//if rule.NewValue != "" && rule.NewValue != "任意值" {
-				//	doUpdateRule = CheckFieldUpdateRule(rule.FieldKey, rule.NewValue, document, fieldsMap)
-				//	fmt.Println(fmt.Sprintf("new结果: %s", doUpdateRule))
-				//	if !doUpdateRule {
-				//		continue
-				//	}
-				//}
+				// 非任意值判断
+				var doUpdateRule = false
+				if rule.OldValue != "" && rule.OldValue != "任意值" {
+					doUpdateRule = CheckFieldUpdateRule(rule.FieldKey, rule.OldValue, oldData, fieldsMap)
+					if !doUpdateRule {
+						continue
+					}
+				}
+				if rule.NewValue != "" && rule.NewValue != "任意值" {
+					doUpdateRule = CheckFieldUpdateRule(rule.FieldKey, rule.NewValue, document, fieldsMap)
+					if !doUpdateRule {
+						continue
+					}
+				}
+
 				AddRuleActionLog(rule, issueId, document)
 			} else {
 				continue
@@ -476,25 +475,46 @@ func CheckFieldUpdateRule(fieldKey string, compareValue string, document bson.M,
 	} else {
 		// 自动化规则适配-
 		if field.Mode == enumTmpl.FieldSelectCom || field.Mode == enumTmpl.FieldMultiSelectCom ||
-			field.Mode == enumTmpl.FieldPersonCom || field.Mode == enumTmpl.FieldRelatedCom {
+			field.Mode == enumTmpl.FieldRelatedCom {
 			compareValueList := strings.Split(compareValue, ",")
-			fmt.Println(compareValueList)
-			// 比较两个list
-			if selectValues, ok := document[fieldKey].([]interface{}); ok {
-				for _, s := range selectValues {
-					vStr := fmt.Sprintf("%d", s)
+			selectValues := document[fieldKey]
+			if selectValues == nil {
+				return false
+			}
+			selectList := selectValues.(primitive.A)
+
+			for _, s := range selectList {
+				vStr, okr := s.(string)
+				if okr && !common.InArray(vStr, compareValueList) {
+					return false
+				}
+			}
+			return true
+		} else if field.Mode == enumTmpl.FieldPersonCom {
+			compareValueList := strings.Split(compareValue, ",")
+			fieldUsers := document[field.FieldKey]
+			if fieldUsers == nil {
+				return false
+			}
+			val := reflect.ValueOf(fieldUsers)
+			for i := 0; i < val.Len(); i++ {
+				v := val.Index(i)
+				vInt32, ok := v.Interface().(int32)
+				if ok {
+					vStr := fmt.Sprintf("%d", vInt32)
 					if !common.InArray(vStr, compareValueList) {
 						return false
 					}
 				}
-				return true
 			}
+			return true
 		} else if field.Mode == enumTmpl.FieldStatusCom {
 			statusLists := strings.Split(compareValue, ",")
 			// 判断 documentData[fieldKey] 是否在 数组中
-			if statusId, ok := document[fieldKey].(int); ok {
-				statusStr := fmt.Sprintf("%d", statusId)
-				if common.InArray(statusStr, statusLists) {
+			numValue, ok := document[fieldKey].(int32)
+			if ok {
+				var newStr = fmt.Sprintf("%d", numValue)
+				if common.InArray(newStr, statusLists) {
 					return true
 				}
 			}

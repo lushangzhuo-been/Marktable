@@ -30,6 +30,7 @@ func NewRouter() *gin.Engine {
 	userApi := new(user.UserApi)
 	r.POST("/user/register", userApi.Register)
 	r.POST("/user/login", userApi.Login)
+	r.POST("/user/refresh/token", middleware.CheckRefreshToken(), userApi.GetNewToken)
 	r.POST("/user/register/email/code", userApi.RegisterEmailCode)
 	r.POST("/user/register/v2", userApi.RegisterV2)
 	r.POST("/user/reset_pwd/email/code", userApi.ResetPwdEmailCode)
