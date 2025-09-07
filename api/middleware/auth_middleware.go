@@ -27,3 +27,23 @@ func AuthMiddleware() gin.HandlerFunc {
 		ctx.Next()
 	}
 }
+
+func CheckRefreshToken() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token := ctx.GetHeader("refresh_token")
+		if token == "" {
+			ctl.UnLogin(nil, ctx)
+			ctx.Abort()
+			return
+		}
+		claims, err := jwt.ParseToken(token)
+		if err != nil {
+			global.GVA_LOG.Error(err.Error())
+			ctl.UnLogin(nil, ctx)
+			ctx.Abort()
+			return
+		}
+		ctx.Set("userid", claims.Userid)
+		ctx.Next()
+	}
+}
