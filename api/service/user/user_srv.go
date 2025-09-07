@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"io"
 	"mark3/global"
 	"mark3/pkg/common"
@@ -252,16 +253,48 @@ func (s *UserSrv) Login(req types.LoginReq) (resp interface{}, err error) {
 		global.GVA_LOG.Error(err.Error())
 		return nil, errors.New("登录失败")
 	}
-
+	// 生成访问令牌
 	token, err := jwt.GenerateToken(user.Id)
+	if err != nil {
+		global.GVA_LOG.Error(err.Error())
+		return nil, errors.New("登录失败")
+	}
+	// 生成刷新令牌
+	refreshToken, err := jwt.GenerateRefreshToken(user.Id)
 	if err != nil {
 		global.GVA_LOG.Error(err.Error())
 		return nil, errors.New("登录失败")
 	}
 
 	resp = types.LoginResp{
-		User:  user,
-		Token: token,
+		User:         user,
+		Token:        token,
+		RefreshToken: refreshToken,
+	}
+
+	return
+}
+
+func (s *UserSrv) GetNewToken(ctx *gin.Context) (resp interface{}, err error) {
+	userid, _ := ctx.Get("userid")
+	refreshToken := ctx.GetHeader("refresh_token")
+	var user model.UserModel
+	if err = global.GVA_DB.Where("id=?", userid.(int)).Find(&user).Error; err != nil {
+		global.GVA_LOG.Error(err.Error())
+		return nil, errors.New("无效的令牌")
+	}
+
+	// 生成访问令牌
+	token, err := jwt.GenerateToken(user.Id)
+	if err != nil {
+		global.GVA_LOG.Error(err.Error())
+		return nil, errors.New("刷新令牌失败")
+	}
+
+	resp = types.LoginResp{
+		User:         user,
+		Token:        token,
+		RefreshToken: refreshToken,
 	}
 
 	return

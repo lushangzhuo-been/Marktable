@@ -43,6 +43,16 @@ func (a *UserApi) Login(ctx *gin.Context) {
 	ctl.OkWithData(resp, ctx)
 }
 
+func (a *UserApi) GetNewToken(ctx *gin.Context) {
+	l := new(srv.UserSrv)
+	resp, err := l.GetNewToken(ctx)
+	if err != nil {
+		ctl.FailWithMessage(err.Error(), ctx)
+		return
+	}
+	ctl.OkWithData(resp, ctx)
+}
+
 func (a *UserApi) Info(ctx *gin.Context) {
 	userid, _ := ctx.Get("userid")
 	l := new(srv.UserSrv)

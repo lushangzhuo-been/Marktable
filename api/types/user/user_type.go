@@ -16,8 +16,9 @@ type LoginReq struct {
 }
 
 type LoginResp struct {
-	User  user.UserModel `json:"user"`
-	Token string         `json:"token"`
+	User         user.UserModel `json:"user"`
+	Token        string         `json:"token"`
+	RefreshToken string         `json:"refresh_token"`
 }
 
 type UpdateReq struct {
