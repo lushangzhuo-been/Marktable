@@ -143,34 +143,8 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.add-progress-dialog {
-    .el-dialog {
-        border-radius: 4px;
-        .el-dialog__header {
-            padding: 24px 32px;
-            font-size: 16px;
-            color: #2f384c;
-        }
-        .el-dialog__body {
-            padding: 0 32px;
-        }
-        .el-dialog__footer {
-            padding: 0 32px 32px;
-        }
-        .el-dialog__headerbtn {
-            top: 24px;
-            right: 32px;
-        }
-        // .el-icon-close:before {
-        //     content: url('~@/assets/image/common/close.png');
-        // }
-        .el-form-item {
-            margin-bottom: 24px;
-        }
-        .el-dialog__footer {
-            padding: 12px 32px 16px;
-        }
-    }
+<style lang="scss" scoped>
+.el-form.basic-ui {
+    margin: 6px 0;
 }
 </style>

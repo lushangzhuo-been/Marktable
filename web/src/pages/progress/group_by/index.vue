@@ -133,7 +133,7 @@ export default {
                 }
                 // 回显filterDown 内容
             },
-            immediate: true,
+            // immediate: true,
             deep: true
         },
         curProgress: {

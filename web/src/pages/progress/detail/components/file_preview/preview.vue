@@ -158,6 +158,10 @@ export default {
         detailId: {
             type: String,
             default: ""
+        },
+        isClickClose: {
+            type: Boolean,
+            default: false
         }
     },
     components: {
@@ -169,6 +173,7 @@ export default {
     },
     data() {
         return {
+            status: "",
             showMessage: "暂无数据",
             message: "加载中",
             imgShow: false,
@@ -253,6 +258,9 @@ export default {
     },
     methods: {
         getFile() {
+            if (this.isClickClose) {
+                return;
+            } // true说明点击了关闭按钮，不再执行下面操作
             let params = {
                 ws_id: this.curSpace.id,
                 tmpl_id: this.curProgress,
@@ -267,11 +275,15 @@ export default {
                     res.data &&
                     Object.keys(res.data).length
                 ) {
-                    let status = res.data.transformed_status;
-                    if (status === "succeed" || status === "no-transform") {
+                    this.status = res.data.transformed_status;
+
+                    if (
+                        this.status === "succeed" ||
+                        this.status === "no-transform"
+                    ) {
                         // 成功 或者不需要转义直接预览
                         this.preview();
-                    } else if (status === "transforming") {
+                    } else if (this.status === "transforming") {
                         this.message = "文件正在转化中，请稍等...";
                         setTimeout(() => {
                             this.getFile();
