@@ -5,7 +5,10 @@
             <div
                 :id="`comment-input-data${id}`"
                 class="input-border"
-                :class="{ 'pointer-focus': focus, disabled: !hasProgressAuth }"
+                :class="{
+                    'pointer-focus': focus || isShowBox,
+                    disabled: !hasProgressAuth
+                }"
                 :contenteditable="hasProgressAuth ? 'plaintext-only' : 'false'"
                 :data-placeholder="placeholder"
                 @input="handleInput"
@@ -864,7 +867,7 @@ export default {
     //     height: 98px;
     // }
     &.pointer-focus {
-        height: 98px;
+        min-height: 98px;
         border: 1px solid #1890ff;
     }
     &.disabled {
