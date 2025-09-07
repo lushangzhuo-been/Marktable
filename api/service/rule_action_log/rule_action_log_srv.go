@@ -45,17 +45,25 @@ func CheckRule(userid int, wsId int, tmplId int, issueId string, oldData bson.M,
 		for _, rule := range ruleList {
 			if _, ok := changeData[rule.FieldKey]; ok {
 				document, err := GetOneDocument(rule, issueId)
-				// todo 非任意值判断
-				//if rule.OldValue != "" && rule.OldValue != "任意值" {
-				//	CheckFieldUpdateRule(rule.FieldKey, rule.OldValue, oldData, fieldsMap)
-				//}
-				//if rule.NewValue != "" && rule.NewValue != "任意值" {
-				//	CheckFieldUpdateRule(rule.FieldKey, rule.NewValue, document, fieldsMap)
-				//}
-
 				if err != nil {
 					continue
 				}
+				// todo 非任意值判断
+				//var doUpdateRule = false
+				//if rule.OldValue != "" && rule.OldValue != "任意值" {
+				//	doUpdateRule = CheckFieldUpdateRule(rule.FieldKey, rule.OldValue, oldData, fieldsMap)
+				//	fmt.Println(fmt.Sprintf("old结果: %s", doUpdateRule))
+				//	if !doUpdateRule {
+				//		continue
+				//	}
+				//}
+				//if rule.NewValue != "" && rule.NewValue != "任意值" {
+				//	doUpdateRule = CheckFieldUpdateRule(rule.FieldKey, rule.NewValue, document, fieldsMap)
+				//	fmt.Println(fmt.Sprintf("new结果: %s", doUpdateRule))
+				//	if !doUpdateRule {
+				//		continue
+				//	}
+				//}
 				AddRuleActionLog(rule, issueId, document)
 			} else {
 				continue

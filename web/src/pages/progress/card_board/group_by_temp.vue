@@ -189,7 +189,7 @@ export default {
                     this.checkCurEnumStillEfect();
                 }
             },
-            immediate: true,
+            // immediate: true,
             deep: true
         }
     },

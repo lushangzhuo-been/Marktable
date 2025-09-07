@@ -328,16 +328,17 @@ export default {
             cardFilterDown: "", // 卡片xy轴入参信息， 用来从viewinfo接口取回显信息回显用
             groupByFieldInfo: {}, //分组字段信息
             groupByList: [],
-            groupByFieldEnumInfo: {} // 分组枚举值详情信息
+            groupByFieldEnumInfo: {}, // 分组枚举值详情信息
+            curProgress: ""
         };
     },
     computed: {
         curSpace() {
             return this.$store.state.curSpace || {};
         },
-        curProgress() {
-            return this.$route.params.id;
-        },
+        // curProgress() {
+        //     return this.$route.params.id;
+        // },
         progressTree() {
             return this.$store.state.progressTree;
         },
@@ -375,6 +376,7 @@ export default {
     created() {},
     methods: {
         fetchAuthView() {
+            this.curProgress = this.$route.params.id;
             let params = {
                 ws_id: this.curSpace.id,
                 tmpl_id: this.curProgress,
@@ -506,6 +508,7 @@ export default {
             }
         },
         getDescConfig() {
+            if (this.noProgressAuth) return;
             // ProgressDesc DescContent
             let el = document.getElementById("DescContent");
             const childNodesLength = el.childNodes.length;
@@ -723,6 +726,7 @@ export default {
             }
         },
         getListData: _.debounce(function () {
+            if (this.noProgressAuth) return;
             let filterDown = {
                 x_axis: "", // 状态
                 x_value: "",
@@ -929,9 +933,11 @@ export default {
                                 cardRes.resultCode === 200 &&
                                 this.currentTab == tab.id
                             ) {
-                                this.groupByOption = cardRes.data || [];
+                                this.groupByOption = _.cloneDeep(
+                                    cardRes.data || []
+                                );
                             } else {
-                                this.groupByOption = [];
+                                this.groupByOption = _.cloneDeep([]);
                             }
                             if (tab.mode === "list") {
                                 this.getColConfig(paramsColumn);
@@ -1027,6 +1033,7 @@ export default {
         },
         // 更新过滤
         updateViewFilter() {
+            if (this.noProgressAuth) return;
             // 更新视图
             let params = {
                 ws_id: this.curSpace.id,
@@ -1044,6 +1051,7 @@ export default {
         },
         // 更新排序
         updateSortOrder() {
+            if (this.noProgressAuth) return;
             let params = {
                 ws_id: this.curSpace.id,
                 tmpl_id: this.curProgress,
@@ -1145,6 +1153,7 @@ export default {
             }
         },
         getAddProgressConfig() {
+            if (this.noProgressAuth) return;
             let params = {
                 ws_id: this.curSpace.id,
                 tmpl_id: this.curProgress,
