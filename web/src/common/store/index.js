@@ -76,6 +76,10 @@ const store = new Vuex.Store({
             state.token = token;
             localStorage.setItem("token", token);
         },
+        setRefreshToken(state, token) {
+            state.refreshToken = token;
+            localStorage.setItem("refresh_token", token);
+        },
         setCurSpace(state, curSpace) {
             localStorage.setItem("space", JSON.stringify(curSpace));
             state.curSpace = _.cloneDeep(curSpace);
@@ -137,8 +141,10 @@ const store = new Vuex.Store({
                         ) {
                             let userData = res.data.user || {};
                             let token = res.data.token || "";
+                            let refreshToken = res.data.refresh_token || "";
                             if (token) {
                                 context.commit("setToken", token);
+                                context.commit("setRefreshToken", refreshToken);
                             }
                             if (userData && Object.keys(userData).length) {
                                 context.commit("setUserInfo", userData);

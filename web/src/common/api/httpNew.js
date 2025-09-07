@@ -19,7 +19,7 @@ let request = axios.create({
         process.env.NODE_ENV === "out"
             ? window.WEBCONFIG.VUE_APP_DASHBOARD_SERVER_PATH
             : process.env.VUE_APP_DASHBOARD_SERVER_PATH,
-    timeout: 30 * 1000,
+    timeout: 30 * 1000
     // responseType: 'json',
 });
 request.interceptors.request.use(
@@ -30,8 +30,7 @@ request.interceptors.request.use(
         if (!config.headers || !config.headers["Content-Type"]) {
             // config.headers["Content-Type"] =
             //     "application/x-www-form-urlencoded";
-            config.headers["Content-Type"] =
-                "application/json";
+            config.headers["Content-Type"] = "application/json";
         }
 
         let token = localStorage.getItem("token");
@@ -52,8 +51,9 @@ request.interceptors.request.use(
 );
 
 request.interceptors.response.use(
-    (response) => {
+    async (response) => {
         let data = response.data;
+        let errorRequest = response.config;
         if (data && data instanceof Blob) {
             let blob = new Blob([data], { type: "application/octet-stream" });
             let name = response.headers["filename"];
@@ -64,26 +64,30 @@ request.interceptors.response.use(
             a.href = url;
             a.click();
             window.URL.revokeObjectURL(url);
+            return response.data;
         } else if (data) {
-            if (data.resultCode !== 200) {
-                if (data.resultCode !== 401 && data.resultCode !== 403) {
-                    messageOnce.error({
-                        message: response.data.message,
-                        duration: 2000,
-                        showClose: true,
+            if (data.resultCode === 401) {
+                let refreshResult = await refreshToken(errorRequest);
+                return refreshResult;
+            } else if (data.resultCode === 200) {
+                return response.data;
+            } else if (data.resultCode === 403) {
+                setTimeout(() => {
+                    JumpDialogBox.install({
+                        code: data.resultCode,
+                        msg: response.data.message
                     });
-                } else {
-                    setTimeout(() => {
-                        JumpDialogBox.install({
-                            code: data.resultCode,
-                            msg: response.data.message,
-                        });
-                    }, 0);
-                    store.commit("clearToken"); // 取消请求
-                }
+                }, 0);
+                return response.data;
+            } else {
+                messageOnce.error({
+                    message: response.data.message,
+                    duration: 2000,
+                    showClose: true
+                });
+                return response.data;
             }
         }
-        return response.data;
     },
     (error) => {
         /***** 接收到异常响应的处理开始 *****/
@@ -145,12 +149,48 @@ request.interceptors.response.use(
                 message: error.message,
                 type: "error",
                 duration: 1000,
-                showClose: true,
+                showClose: true
             });
         }
         return Promise.resolve(error.response);
     }
 );
+let refreshToken = async function (errorRequest) {
+    let config = {
+        headers: {
+            refresh_token: localStorage.getItem("refresh_token")
+        },
+        baseURL:
+            process.env.NODE_ENV === "out"
+                ? window.WEBCONFIG.VUE_APP_MARKTABLE_SERVER_PATH
+                : "" // 本地开发不需要
+    };
+    let apiResult = await axios
+        .post("/user/refresh/token", {}, config)
+        .then(async (res) => {
+            if (res.data.resultCode === 200) {
+                // 存储新的token
+                localStorage.setItem("token", res.data.data.token);
+                errorRequest._retry = true;
+                errorRequest.headers.token = res.data.data.token;
+                let refreshRes = await axios(errorRequest).then((reApires) => {
+                    return reApires.data;
+                });
+                return refreshRes;
+            } else {
+                // 跳登录
+                setTimeout(() => {
+                    JumpDialogBox.install({
+                        code: res?.data?.resultCode || "",
+                        msg: res.data || ""
+                    });
+                }, 0);
+                store.commit("clearToken");
+                return res.data || {};
+            }
+        });
+    return apiResult;
+};
 let previewRequest = axios.create({
     // 基础配置
     // baseURL: process.env.VUE_APP_MARKTABLE_SERVER_PATH || '/ws',
@@ -158,7 +198,7 @@ let previewRequest = axios.create({
         process.env.NODE_ENV === "out"
             ? window.WEBCONFIG.VUE_APP_MARKTABLE_SERVER_PATH
             : process.env.VUE_APP_MARKTABLE_SERVER_PATH,
-    timeout: 30 * 1000,
+    timeout: 30 * 1000
     // responseType: 'json',
 });
 previewRequest.interceptors.request.use(
@@ -255,7 +295,7 @@ previewRequest.interceptors.response.use(
                 message: error.message,
                 type: "error",
                 duration: 1000,
-                showClose: true,
+                showClose: true
             });
         }
         return Promise.resolve(error.response);
@@ -270,7 +310,7 @@ const http = {
     get(url, params) {
         const config = {
             method: "get",
-            url: url,
+            url: url
         };
         if (params) config.params = params;
         return request(config);
@@ -278,7 +318,7 @@ const http = {
     post(url, params) {
         const config = {
             method: "post",
-            url: url,
+            url: url
         };
         if (params) config.data = JSON.stringify(params);
         return request(config);
@@ -286,7 +326,7 @@ const http = {
     put(url, params) {
         const config = {
             method: "put",
-            url: url,
+            url: url
         };
         if (params) config.params = params;
         return request(config);
@@ -294,29 +334,29 @@ const http = {
     delete(url, params) {
         const config = {
             method: "delete",
-            url: url,
+            url: url
         };
         if (params) config.params = params;
         return request(config);
     },
     uplodFile(url, params, uploadChange) {
         const headers = {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "multipart/form-data"
         };
         const config = {
             method: "post",
             url: url,
-            headers,
+            headers
         };
         if (params) config.data = params;
-        if (uploadChange) config.onUploadProgress = uploadChange
+        if (uploadChange) config.onUploadProgress = uploadChange;
         return request(config);
     },
     downloadFile(url, params) {
         const config = {
             method: "get",
             url: url,
-            responseType: "blob",
+            responseType: "blob"
         };
         if (params) config.params = params;
         return request(config);
@@ -326,11 +366,11 @@ const http = {
         const config = {
             method: "get",
             url: url,
-            responseType: "blob",
+            responseType: "blob"
         };
         if (params) config.params = params;
         return previewRequest(config);
-    },
+    }
 };
 
 export default http;
